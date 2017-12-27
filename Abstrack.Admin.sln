@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstrack.Admin", "Abstrack.Admin\Abstrack.Admin.csproj", "{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstrack.Data", "Abstrack.Data\Abstrack.Data.csproj", "{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
