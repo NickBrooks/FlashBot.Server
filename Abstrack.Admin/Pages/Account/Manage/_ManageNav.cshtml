@@ -4,6 +4,7 @@
 }
 
 <ul class="nav nav-pills nav-stacked">
+    <li class="@ManageNavPages.TracksNavClass(ViewContext)"><a asp-page="./Tracks">Tracks</a></li>
     <li class="@ManageNavPages.IndexNavClass(ViewContext)"><a asp-page="./Index">Profile</a></li>
     <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)"><a asp-page="./ChangePassword">Password</a></li>
     @if (hasExternalLogins)
