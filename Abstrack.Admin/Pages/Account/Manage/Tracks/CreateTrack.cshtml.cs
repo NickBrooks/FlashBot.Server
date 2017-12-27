@@ -1,5 +1,4 @@
 ﻿using Abstrack.Admin.Data;
-using Abstrack.Data.Entities;
 using Abstrack.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using Abstrack.Data.Entities;
+﻿using Abstrack.Entities;
 using System.Threading.Tasks;
 
 namespace Abstrack.Data.Repositories

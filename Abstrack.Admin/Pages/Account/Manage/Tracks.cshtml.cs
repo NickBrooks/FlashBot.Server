@@ -1,6 +1,6 @@
 using Abstrack.Admin.Data;
-using Abstrack.Data.Entities;
 using Abstrack.Data.Repositories;
+using Abstrack.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

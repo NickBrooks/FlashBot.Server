@@ -1,6 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 
-namespace Abstrack.Data.Entities
+namespace Abstrack.Entities
 {
     public class RequestKey : TableEntity
     {

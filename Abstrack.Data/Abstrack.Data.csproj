@@ -10,4 +10,8 @@
     <PackageReference Include="WindowsAzure.Storage" Version="8.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Abstrack.Entities\Abstrack.Entities.csproj" />
+  </ItemGroup>
+
 </Project>

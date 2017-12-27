@@ -1,9 +1,7 @@
-﻿using Abstrack.Data.Engine;
+﻿using Abstrack.Entities.Engine;
 using System;
-using System.Security.Cryptography;
-using System.Text;
 
-namespace Abstrack.Data.Entities
+namespace Abstrack.Entities
 {
     public class Track
     {
