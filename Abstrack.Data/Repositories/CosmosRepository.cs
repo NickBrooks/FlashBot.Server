@@ -11,8 +11,8 @@ namespace Abstrack.Data.Repositories
 {
     public class CosmosRepository<T> where T : class
     {
-        private static readonly string Endpoint = Environment.GetEnvironmentVariable("DocumentDbEndPoint");
-        private static readonly string AuthKey = Environment.GetEnvironmentVariable("DocumentDbAuthKey");
+        private static readonly string Endpoint = Environment.GetEnvironmentVariable("COSMOSDB_ENDPOINT");
+        private static readonly string AuthKey = Environment.GetEnvironmentVariable("COSMOSDB_AUTHKEY");
         private static readonly string Database = "AbstrackCosmosDb";
         private static readonly string Collection = "Abstrack";
         private static DocumentClient client = new DocumentClient(new Uri(Endpoint), AuthKey, new ConnectionPolicy { EnableEndpointDiscovery = false });

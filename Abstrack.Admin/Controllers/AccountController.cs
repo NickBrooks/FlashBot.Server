@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Abstrack.Admin.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Abstrack.Admin.Data;
+using System.Threading.Tasks;
 
 namespace Abstrack.Admin.Controllers
 {
