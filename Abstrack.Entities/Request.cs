@@ -10,6 +10,7 @@ namespace Abstrack.Entities
         public DateTime date_created { get; set; }
         public List<string> tags { get; set; }
         public string title { get; set; }
+        public string summary { get; set; }
         public string body { get; set; }
         public Uri url { get; set; }
 

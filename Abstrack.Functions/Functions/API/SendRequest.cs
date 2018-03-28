@@ -19,17 +19,27 @@ namespace Abstrack.Functions.Functions.API
         {
             try
             {
-                // auth
+                // get request key to do checks
                 IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var requestKey = await TableStorageRepository.ValidateRequestKey(authValues.FirstOrDefault());
+                var requestKey = await TableStorageRepository.GetRequestKey(authValues.FirstOrDefault());
+
+                // authorized
                 if (requestKey == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
+                // check rate limit
+                if (DateTime.UtcNow < requestKey.last_requested.AddMilliseconds(1000)) return req.CreateResponse(HttpStatusCode.Forbidden);
+
+                // create the request
                 Request request = await req.Content.ReadAsAsync<Request>();
                 request.track_id = requestKey.track_id;
                 var newRequest = await RequestRepository.CreateAsync(request);
 
                 // if didn't create return bad response
                 if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);
+
+                // update the requestKey
+                requestKey.last_requested = DateTime.UtcNow;
+                TableStorageRepository.UpdateRequestKey(requestKey);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
                 response.Headers.Add("Location", newRequest.track_id);

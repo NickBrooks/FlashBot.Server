@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstrack.Admin", "Abstrack.Admin\Abstrack.Admin.csproj", "{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstrack.Data", "Abstrack.Data\Abstrack.Data.csproj", "{7162BCA1-8B13-4FB2-90CC-703AC4C6C9B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstrack.Functions", "Abstrack.Functions\Abstrack.Functions.csproj", "{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstrack.Functions", "Abstrack.Functions\Abstrack.Functions.csproj", "{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstrack.Entities", "Abstrack.Entities\Abstrack.Entities.csproj", "{E3062B17-8A88-4DD3-B728-964EE30F7AF6}"
 EndProject

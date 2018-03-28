@@ -20,7 +20,7 @@ namespace Abstrack.Data.Repositories
             Track createdTrack = await (dynamic)CosmosRepository<Track>.CreateItemAsync(newTrack);
 
             // add request key
-            RequestKey requestKey = new RequestKey(createdTrack.id, createdTrack.request_key);
+            RequestKey requestKey = new RequestKey(createdTrack.request_key, createdTrack.id, createdTrack.owner_id);
             TableStorageRepository.AddRequestKey(requestKey);
 
             return createdTrack;
