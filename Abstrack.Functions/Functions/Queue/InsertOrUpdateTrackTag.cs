@@ -16,7 +16,7 @@ namespace Abstrack.Functions.Functions.Queue
             // check if they exist, if not add
             foreach (var tag in trackTagsQueueItem.tags)
             {
-                TableStorageRepository.InsertOrReplaceTrackTag(new TrackTag(trackTagsQueueItem.trackId, tag));
+                TableStorageRepository.InsertOrIncrementTrackTag(new TrackTag(trackTagsQueueItem.trackId, tag));
             }
 
             log.Info($"C# Queue trigger function processed: {queueItem}");
