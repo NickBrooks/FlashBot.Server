@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Abstrack.Entities.Engine
+namespace Abstrack.Data.Engine
 {
     public class Tools
     {

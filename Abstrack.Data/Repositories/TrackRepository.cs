@@ -1,29 +1,23 @@
-﻿using Abstrack.Entities;
+﻿using Abstrack.Data.Models;
 using System.Threading.Tasks;
 
 namespace Abstrack.Data.Repositories
 {
     public class TrackRepository
     {
-        public static async Task<Track> CreateTrack(string ownerId, string name, string description)
+        public static async Task<Track> CreateTrack(string ownerId, string name, string description, bool isPrivate = false)
         {
             if (ownerId == null || name == null) return null;
 
-            Track newTrack = new Track()
+            Track newTrack = new Track(ownerId)
             {
-                owner_id = ownerId,
-                name = name,
-                description = description
+                Name = name,
+                Description = description,
+                Is_Private = isPrivate
             };
 
             // create the track
-            Track createdTrack = await (dynamic)CosmosRepository<Track>.CreateItemAsync(newTrack);
-
-            // add request key
-            RequestKey requestKey = new RequestKey(createdTrack.request_key, createdTrack.id, createdTrack.owner_id);
-            TableStorageRepository.AddRequestKey(requestKey);
-
-            return createdTrack;
+            return await TableStorageRepository.CreateTrack(newTrack);
         }
     }
 }

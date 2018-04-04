@@ -4,17 +4,17 @@
     ViewData["Title"] = "Tracks";
 }
 
-<h3 class="mb-3">@ViewData["Title"]</h3>
+<h3 class="mb-3">@ViewData["Title"] <small class="text-warning">(2 of 10)</small></h3>
 <div class="row">
     <div class="col-12">
         @foreach (var track in Model.Tracks)
         {
             <div class="card mb-3">
-                <h4 class="card-header">@track.name</h4>
+                <h5 class="card-header">@track.name <small><i class="fas fa-user-secret text-muted"></i></small></h5>
                 <div class="card-body">
                     <p class="card-text">@track.description</p>
                     <div class="input-group">
-                        <span class="input-group-addon" id="basic-addon3">Request key</span>
+                        <span class="input-group-addon" id="basic-addon3"><i class="fas fa-key text-muted"></i></span>
                         <input value="@track.request_key" class="form-control" autocomplete="off" disabled />
                     </div>
                 </div>

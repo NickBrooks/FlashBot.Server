@@ -23,7 +23,4 @@
   <ItemGroup>
     <Folder Include="Functions\API\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Abstrack.Entities\Abstrack.Entities.csproj" />
-  </ItemGroup>
 </Project>

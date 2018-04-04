@@ -52,10 +52,8 @@ namespace Abstrack.Admin.Pages.Account.Manage.Tracks
 
             // create track
             var createdTrack = await TrackRepository.CreateTrack(user.Id, Input.Name, Input.Description);
-
-
-            _logger.LogInformation($"Track with ID '{createdTrack.id}' has been created by '{user.Id}'.");
-            return RedirectToPage($"./{createdTrack.id}");
+            _logger.LogInformation($"Track with ID '{createdTrack.Id}' has been created by '{user.Id}'.");
+            return RedirectToPage($"./{createdTrack.Id}");
         }
     }
 }
