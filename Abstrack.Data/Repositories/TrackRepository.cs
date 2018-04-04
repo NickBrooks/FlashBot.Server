@@ -1,4 +1,5 @@
 ﻿using Abstrack.Data.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Abstrack.Data.Repositories
@@ -18,6 +19,39 @@ namespace Abstrack.Data.Repositories
 
             // create the track
             return await TableStorageRepository.CreateTrack(newTrack);
+        }
+
+        /// <summary>
+        /// Get tracks by ownerId.
+        /// </summary>
+        /// <param name="ownerId"></param>
+        /// <returns>List of tracks.</returns>
+        public static async Task<List<Track>> GetTracks(string ownerId)
+        {
+            return await TableStorageRepository.GetTracks(ownerId);
+        }
+
+        public static async Task<Track> GetTrack(string trackId)
+        {
+            var track = await TableStorageRepository.GetTrack(trackId);
+
+            if (track == null)
+                return null;
+
+            return track;
+        }
+
+        public static async Task<Track> GetVerifiedTrack(string trackId, string userId)
+        {
+            var track = await TableStorageRepository.GetTrack(trackId);
+
+            if (track == null)
+                return null;
+
+            if (track.PartitionKey != userId)
+                return null;
+
+            return track;
         }
     }
 }

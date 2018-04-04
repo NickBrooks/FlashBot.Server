@@ -1,0 +1,15 @@
+﻿@page "{id}"
+@model Abstrack.Admin.Pages.Tracks.DetailsModel
+@{
+    ViewData["Title"] = "Track time";
+}
+
+@if (Model.Track == null)
+{
+    <h2>Oops - error loading track.</h2>
+}
+else
+{
+    <h2>@Model.Track.Name</h2>
+    <p>@Model.Track.Description</p>
+}

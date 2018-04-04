@@ -1,4 +1,5 @@
 ﻿using Abstrack.Admin.Data;
+using Abstrack.Admin.Pages.Account.Manage;
 using Abstrack.Data.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-namespace Abstrack.Admin.Pages.Account.Manage.Tracks
+namespace Abstrack.Admin.Pages.Tracks
 {
     public class CreateTrackModel : PageModel
     {
@@ -30,11 +31,17 @@ namespace Abstrack.Admin.Pages.Account.Manage.Tracks
         {
             [Required]
             [DataType(DataType.Text)]
+            [MaxLength(80)]
             [Display(Name = "Track Name")]
             public string Name { get; set; }
 
             [Display(Name = "Track Description")]
+            [DataType(DataType.Text)]
+            [MaxLength(140)]
             public string Description { get; set; }
+
+            [Display(Name = "Private")]
+            public bool IsPrivate { get; set; }
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -51,9 +58,9 @@ namespace Abstrack.Admin.Pages.Account.Manage.Tracks
             }
 
             // create track
-            var createdTrack = await TrackRepository.CreateTrack(user.Id, Input.Name, Input.Description);
-            _logger.LogInformation($"Track with ID '{createdTrack.Id}' has been created by '{user.Id}'.");
-            return RedirectToPage($"./{createdTrack.Id}");
+            var createdTrack = await TrackRepository.CreateTrack(user.Id, Input.Name, Input.Description, Input.IsPrivate);
+            _logger.LogInformation($"Track with ID '{createdTrack.RowKey}' has been created by '{user.Id}'.");
+            return RedirectToPage("./Index");
         }
     }
 }

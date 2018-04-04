@@ -1,23 +1,22 @@
-using Abstrack.Admin.Data;
+﻿using Abstrack.Admin.Data;
+using Abstrack.Admin.Pages.Account.Manage;
+using Abstrack.Data.Models;
 using Abstrack.Data.Repositories;
-using Abstrack.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace Abstrack.Admin.Pages.Account.Manage
+namespace Abstrack.Admin.Pages.Tracks
 {
-    public class TracksModel : PageModel
+    public class DetailsModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EnableAuthenticatorModel> _logger;
 
-        public TracksModel(
+        public DetailsModel(
             UserManager<ApplicationUser> userManager,
             ILogger<EnableAuthenticatorModel> logger)
         {
@@ -25,9 +24,9 @@ namespace Abstrack.Admin.Pages.Account.Manage
             _logger = logger;
         }
 
-        public List<Track> Tracks { get; set; }
+        public Track Track { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -35,8 +34,7 @@ namespace Abstrack.Admin.Pages.Account.Manage
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var result = await CosmosRepository<Track>.GetItemsAsync(t => t.owner_id == user.Id);
-            Tracks = result.ToList();
+            Track = await TrackRepository.GetVerifiedTrack(id, user.Id);
 
             return Page();
         }

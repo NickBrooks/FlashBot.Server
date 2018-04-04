@@ -19,7 +19,7 @@ namespace Abstrack.Data.Repositories
         /// </summary>
         /// <param name="track"></param>
         /// <returns>Returns the inserted track.</returns>
-        public static async Task<Track> CreateTrack(Track track)
+        internal static async Task<Track> CreateTrack(Track track)
         {
             try
             {
@@ -29,8 +29,11 @@ namespace Abstrack.Data.Repositories
 
                 // insert the track
                 TableOperation op = TableOperation.Insert(track);
-                var result = await (dynamic)table.ExecuteAsync(op);
-                return result;
+                var result = await table.ExecuteAsync(op);
+                if (result == null)
+                    return null;
+
+                return track;
             }
             catch
             {
@@ -43,7 +46,7 @@ namespace Abstrack.Data.Repositories
         /// </summary>
         /// <param name="trackId"></param>
         /// <returns>Returns the inserted track.</returns>
-        public static async Task<Track> GetTrack(string trackId)
+        internal static async Task<Track> GetTrack(string trackId)
         {
             try
             {
@@ -71,7 +74,7 @@ namespace Abstrack.Data.Repositories
         /// </summary>
         /// <param name="ownerId"></param>
         /// <returns>List of tracks by ownerId.</returns>
-        public static async Task<List<Track>> GetTracks(string ownerId)
+        internal static async Task<List<Track>> GetTracks(string ownerId)
         {
             try
             {

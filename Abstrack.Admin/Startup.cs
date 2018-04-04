@@ -55,6 +55,7 @@ namespace Abstrack.Admin
                 .AddRazorPagesOptions(options =>
                 {
                     options.Conventions.AuthorizeFolder("/Account/Manage");
+                    options.Conventions.AuthorizeFolder("/Tracks");
                     options.Conventions.AuthorizePage("/Account/Logout");
                 });
 
