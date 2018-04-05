@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Abstrack.Admin.Pages.Tracks
 {
-    public class DetailsModel : PageModel
+    public class DeleteModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EnableAuthenticatorModel> _logger;
 
-        public DetailsModel(
+        public DeleteModel(
             UserManager<ApplicationUser> userManager,
             ILogger<EnableAuthenticatorModel> logger)
         {
@@ -25,6 +25,8 @@ namespace Abstrack.Admin.Pages.Tracks
         }
 
         public Track Track { get; set; }
+        public ApplicationUser CurrentUser { get; set; }
+        public ExtendedUser ExtendedUser { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
@@ -34,9 +36,29 @@ namespace Abstrack.Admin.Pages.Tracks
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            CurrentUser = user;
             Track = await TrackRepository.GetVerifiedTrack(id, user.Id);
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostAsync(string id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            Track = await TrackRepository.GetVerifiedTrack(id, user.Id);
+
+            // cant find or no permission to delete
+            if (Track == null)
+                return RedirectToPage("./Index");
+
+            TrackRepository.DeleteTrack(Track.RowKey);
+            _logger.LogInformation($"Track with ID '{Track.RowKey}' has been deleted by '{user.Id}'.");
+            return RedirectToPage("./Index");
         }
     }
 }

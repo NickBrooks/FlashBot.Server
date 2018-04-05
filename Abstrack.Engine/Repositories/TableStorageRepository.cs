@@ -266,17 +266,17 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
-        internal static void AddMessageToQueue(string queueName, string messageBody)
+        internal static async void AddMessageToQueue(string queueName, string messageBody)
         {
             // Retrieve a reference to a queue.
             CloudQueue queue = queueClient.GetQueueReference(queueName);
 
             // Create the queue if it doesn't already exist.
-            queue.CreateIfNotExists();
+            await queue.CreateIfNotExistsAsync();
 
             // Create a message and add it to the queue.
             CloudQueueMessage message = new CloudQueueMessage(messageBody);
-            queue.AddMessage(message);
+            await queue.AddMessageAsync(message);
         }
     }
 }

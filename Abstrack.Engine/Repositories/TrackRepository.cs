@@ -10,6 +10,22 @@ namespace Abstrack.Engine.Repositories
         {
             if (ownerId == null || name == null) return null;
 
+            var extendedUser = await ExtendedUserRepository.GetExtendedUser(ownerId);
+
+            // check private maxed out
+            if (isPrivate)
+            {
+                if (extendedUser.Private_Tracks >= extendedUser.Private_Tracks_Max)
+                    return null;
+            }
+
+            // check public maxed out
+            if (!isPrivate)
+            {
+                if (extendedUser.Public_Tracks >= extendedUser.Public_Tracks_Max)
+                    return null;
+            }
+
             Track track = new Track(ownerId)
             {
                 Name = name,
@@ -72,8 +88,12 @@ namespace Abstrack.Engine.Repositories
             return track;
         }
 
-        public static void DeleteTrack(string trackId)
+        public static async void DeleteTrack(string trackId)
         {
+            // decrement the count
+            var track = await GetTrack(trackId);
+            ExtendedUserRepository.DecrementTrackCount(track.PartitionKey, track.Is_Private);
+
             // send a message to track 
             TableStorageRepository.AddMessageToQueue("deleterequestsfromtrack", trackId);
 

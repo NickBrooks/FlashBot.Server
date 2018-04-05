@@ -54,14 +54,21 @@ namespace Abstrack.Engine.Repositories
             return results;
         }
 
-        public static IEnumerable<T> GetItemsAsyncSQL(string queryString)
+        public static async Task<List<T>> GetItemsSqlAsync(string queryString)
         {
-            IQueryable<T> results = client.CreateDocumentQuery<T>(
+            IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
                 queryString,
-                new FeedOptions { MaxItemCount = -1 });
+                new FeedOptions { MaxItemCount = -1 })
+                .AsDocumentQuery();
 
-            return results;
+            List<T> results = new List<T>();
+            while (query.HasMoreResults)
+            {
+                results.AddRange(await query.ExecuteNextAsync<T>());
+            }
+
+            return results.ToList();
         }
 
         public static async Task<Document> CreateItemAsync(T item)

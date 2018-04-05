@@ -16,8 +16,7 @@
       }
     },
     "Abstrack.Admin": {
-      "commandName": "Project",
-      "launchBrowser": true,
+      "commandName": "IISExpress",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -3,7 +3,6 @@ using Markdig;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Abstrack.Engine.Repositories
 {
@@ -24,11 +23,9 @@ namespace Abstrack.Engine.Repositories
             return await (dynamic)CosmosRepository<Request>.CreateItemAsync(request);
         }
 
-        public static List<string> GetListOfRequestIdsInTrack(string trackId)
+        public static async Task<List<Request>> GetListOfRequestIdsInTrack(string trackId)
         {
-            List<string> idList = CosmosRepository<string>.GetItemsAsyncSQL($"SELECT r.Id FROM r WHERE r.Track_Id = '{trackId}'").ToList();
-
-            return idList;
+            return await CosmosRepository<Request>.GetItemsSqlAsync($"SELECT r.Id FROM r WHERE r.Track_Id = '{trackId}'");
         }
 
         public static async void DeleteRequest(string requestId)
