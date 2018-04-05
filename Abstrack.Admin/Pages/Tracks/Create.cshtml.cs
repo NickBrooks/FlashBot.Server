@@ -1,5 +1,6 @@
 ﻿using Abstrack.Admin.Data;
 using Abstrack.Admin.Pages.Account.Manage;
+using Abstrack.Engine.Models;
 using Abstrack.Engine.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,10 @@ namespace Abstrack.Admin.Pages.Tracks
         [BindProperty]
         public InputModel Input { get; set; }
 
+        public ApplicationUser CurrentUser { get; set; }
+        public ExtendedUser ExtendedUser { get; set; }
+        public int PrivateTracksLeft { get; set; }
+
         public class InputModel
         {
             [Required]
@@ -42,6 +47,21 @@ namespace Abstrack.Admin.Pages.Tracks
 
             [Display(Name = "Private")]
             public bool IsPrivate { get; set; }
+        }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            CurrentUser = user;
+            ExtendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
+            PrivateTracksLeft = ExtendedUser.Private_Tracks_Max - ExtendedUser.Private_Tracks;
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()

@@ -26,6 +26,8 @@ namespace Abstrack.Admin.Pages.Tracks
         }
 
         public List<Track> Tracks { get; set; }
+        public ApplicationUser CurrentUser { get; set; }
+        public ExtendedUser ExtendedUser { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -35,7 +37,15 @@ namespace Abstrack.Admin.Pages.Tracks
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            CurrentUser = user;
             Tracks = await TrackRepository.GetTracks(user.Id);
+
+            ExtendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
+
+            if (ExtendedUser == null)
+            {
+                ExtendedUser = await ExtendedUserRepository.CreateExtendedUser(new ExtendedUser(user.Id));
+            }
 
             return Page();
         }

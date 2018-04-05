@@ -16,6 +16,7 @@ namespace Abstrack.Engine.Repositories
         private static CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
+        private static readonly string ExtendedUsersTable = "extendedusers";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -169,6 +170,73 @@ namespace Abstrack.Engine.Repositories
             // Execute the retrieve operation.
             TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
             return (TrackTag)retrievedResult.Result;
+        }
+
+        internal static async Task<ExtendedUser> CreateExtendedUser(ExtendedUser extendedUser)
+        {
+            try
+            {
+                // reference users table
+                CloudTable table = tableClient.GetTableReference(ExtendedUsersTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the user
+                TableOperation op = TableOperation.Insert(extendedUser);
+                var result = await table.ExecuteAsync(op);
+                if (result == null)
+                    return null;
+
+                return extendedUser;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<ExtendedUser> GetExtendedUser(string userId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(ExtendedUsersTable);
+
+                // query tracks
+                TableQuery<ExtendedUser> rangeQuery = new TableQuery<ExtendedUser>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId));
+
+                TableContinuationToken token = null;
+
+                TableQuerySegment<ExtendedUser> tableQueryResult =
+                    await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
+
+                return tableQueryResult.FirstOrDefault();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<ExtendedUser> UpdateExtendedUser(ExtendedUser user)
+        {
+            try
+            {
+                // reference users table
+                CloudTable table = tableClient.GetTableReference(ExtendedUsersTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the user
+                TableOperation op = TableOperation.Replace(user);
+                var result = await table.ExecuteAsync(op);
+                if (result == null)
+                    return null;
+
+                return user;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         internal static void AddMessageToQueue(string queueName, string messageBody)

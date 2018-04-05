@@ -55,7 +55,11 @@ namespace Abstrack.Admin.Data.Migrations
 
                     b.Property<int>("Private_Tracks");
 
+                    b.Property<int>("Private_Tracks_Max");
+
                     b.Property<int>("Public_Tracks");
+
+                    b.Property<int>("Public_Tracks_Max");
 
                     b.Property<int>("Rate_Per_Track");
 
