@@ -1,4 +1,4 @@
-﻿using Abstrack.Data.Models;
+﻿using Abstrack.Engine.Models;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Abstrack.Data.Repositories
+namespace Abstrack.Engine.Repositories
 {
     public class TableStorageRepository
     {
         public static CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("TABLESTORAGE_CONNECTION"));
         public static CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-        public static readonly string TrackTable = "tracks";
+        public static readonly string TracksTable = "tracks";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -24,7 +24,7 @@ namespace Abstrack.Data.Repositories
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(TrackTable);
+                CloudTable table = tableClient.GetTableReference(TracksTable);
                 await table.CreateIfNotExistsAsync();
 
                 // insert the track
@@ -51,7 +51,7 @@ namespace Abstrack.Data.Repositories
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(TrackTable);
+                CloudTable table = tableClient.GetTableReference(TracksTable);
 
                 // query tracks
                 TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
@@ -79,7 +79,7 @@ namespace Abstrack.Data.Repositories
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(TrackTable);
+                CloudTable table = tableClient.GetTableReference(TracksTable);
 
                 // query tracks
                 TableQuery<Track> query = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, ownerId));

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Abstrack.Data.Repositories
+namespace Abstrack.Engine.Repositories
 {
     public class CosmosRepository<T> where T : class
     {

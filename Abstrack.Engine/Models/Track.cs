@@ -2,7 +2,7 @@
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 
-namespace Abstrack.Data.Models
+namespace Abstrack.Engine.Models
 {
     public class Track : TableEntity
     {

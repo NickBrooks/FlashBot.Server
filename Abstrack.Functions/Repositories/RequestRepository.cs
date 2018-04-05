@@ -1,4 +1,5 @@
-﻿using Abstrack.Entities;
+﻿using Abstrack.Data.Engine;
+using Abstrack.Engine.Models;
 using Markdig;
 using Newtonsoft.Json;
 using System;
@@ -11,14 +12,14 @@ namespace Abstrack.Functions.Repositories
         public static async Task<Request> CreateAsync(Request request)
         {
             if (request == null) return null;
-            if (request.body == null) return null;
-            if (request.tags.Count > 12) return null;
+            if (request.Body == null) return null;
+            if (request.Tags.Count > 12) return null;
 
-            request.title = request.title.Length > 80 ? request.title.Substring(0, 80) : request.title;
-            request.body = request.body.Length > 5000 ? request.body.Substring(0, 5000) : request.body;
-            request.summary = GenerateSummary(request.body);
-            request.tags = Entities.Engine.Tools.ValidateTags(request.tags);
-            request.date_created = DateTime.UtcNow;
+            request.Title = request.Title.Length > 80 ? request.Title.Substring(0, 80) : request.Title;
+            request.Body = request.Body.Length > 5000 ? request.Body.Substring(0, 5000) : request.Body;
+            request.Summary = GenerateSummary(request.Body);
+            request.Tags = Tools.ValidateTags(request.Tags);
+            request.Date_Created = DateTime.UtcNow;
 
             // add tags to queue
             AddToTrackTagsQueue(request);
@@ -30,8 +31,8 @@ namespace Abstrack.Functions.Repositories
         {
             var trackTagsQueueItem = new TrackTagsQueueItem()
             {
-                trackId = request.track_id,
-                tags = request.tags
+                Track_Id = request.Track_Id,
+                Tags = request.Tags
             };
 
             TableStorageRepository.AddMessageToQueue("process-tracktags", JsonConvert.SerializeObject(trackTagsQueueItem));

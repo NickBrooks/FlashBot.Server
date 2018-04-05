@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Abstrack.Data.Models
+namespace Abstrack.Engine.Models
 {
     public class Request
     {

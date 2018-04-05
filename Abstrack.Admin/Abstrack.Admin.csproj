@@ -14,6 +14,6 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Abstrack.Data\Abstrack.Data.csproj" />
+    <ProjectReference Include="..\Abstrack.Engine\Abstrack.Engine.csproj" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-using Abstrack.Entities;
+using Abstrack.Engine.Models;
 using Abstrack.Functions.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -21,28 +21,24 @@ namespace Abstrack.Functions.Functions.API
             {
                 // get request key to do checks
                 IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var requestKey = await TableStorageRepository.GetRequestKey(authValues.FirstOrDefault());
+                var track = await TableStorageRepository.GetTrackByRequestKey(authValues.FirstOrDefault());
 
                 // authorized
-                if (requestKey == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                if (track == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // check rate limit
-                if (DateTime.UtcNow < requestKey.last_requested.AddMilliseconds(1000)) return req.CreateResponse(HttpStatusCode.Forbidden);
+                if (track.Rate_Limit_Exceeded) return req.CreateResponse(HttpStatusCode.Forbidden);
 
                 // create the request
                 Request request = await req.Content.ReadAsAsync<Request>();
-                request.track_id = requestKey.track_id;
+                request.Track_Id = track.RowKey;
                 var newRequest = await RequestRepository.CreateAsync(request);
 
                 // if didn't create return bad response
                 if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);
 
-                // update the requestKey
-                requestKey.last_requested = DateTime.UtcNow;
-                TableStorageRepository.UpdateRequestKey(requestKey);
-
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.track_id);
+                response.Headers.Add("Location", newRequest.Track_Id);
                 return response;
             }
             catch (Exception e)

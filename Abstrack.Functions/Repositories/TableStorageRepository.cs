@@ -1,8 +1,9 @@
-﻿using Abstrack.Entities;
+﻿using Abstrack.Engine.Models;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Abstrack.Functions.Repositories
@@ -13,29 +14,29 @@ namespace Abstrack.Functions.Repositories
         public static CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
         public static CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
         private static readonly string TrackTagsTable = "tracktags";
-        private static readonly string RequestKeysTable = "requestkeys";
+        private static readonly string TracksTable = "tracks";
 
-        public static async Task<RequestKey> GetRequestKey(string requestKey)
+        public static async Task<Track> GetTrackByRequestKey(string requestKey)
         {
-            // get the table
-            CloudTable table = tableClient.GetTableReference(RequestKeysTable);
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TracksTable);
 
-            // Create a retrieve operation that takes a customer entity.
-            TableOperation retrieveOperation = TableOperation.Retrieve<RequestKey>("track_request_key", requestKey);
+                // query tracks
+                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("Request_Key", QueryComparisons.Equal, requestKey));
 
-            // Execute the retrieve operation.
-            TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
-            return (RequestKey)retrievedResult.Result;
-        }
+                TableContinuationToken token = null;
 
-        public static async void UpdateRequestKey(RequestKey requestKey)
-        {
-            // get the table
-            CloudTable table = tableClient.GetTableReference(RequestKeysTable);
+                TableQuerySegment<Track> tableQueryResult =
+                    await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
 
-            // update
-            TableOperation updateOperation = TableOperation.Replace(requestKey);
-            await table.ExecuteAsync(updateOperation);
+                return tableQueryResult.FirstOrDefault();
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public static async void InsertOrIncrementTrackTag(TrackTag trackTag)
@@ -48,14 +49,14 @@ namespace Abstrack.Functions.Repositories
             if (exists != null)
             {
                 // update
-                exists.count++;
+                exists.Count++;
                 TableOperation replace = TableOperation.Replace(exists);
                 await table.ExecuteAsync(replace);
             }
             else
             {
                 // insert
-                trackTag.count = 1;
+                trackTag.Count = 1;
                 TableOperation insertOrReplace = TableOperation.InsertOrReplace(trackTag);
                 await table.ExecuteAsync(insertOrReplace);
             }
