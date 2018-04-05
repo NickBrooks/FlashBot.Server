@@ -5,17 +5,17 @@ namespace Abstrack.Engine.Models
 {
     public class Request
     {
-        public string Id { get; set; }
-        public string Track_Id { get; set; }
-        public DateTime Date_Created { get; set; }
-        public List<string> Tags { get; set; }
-        public string Title { get; set; }
-        public string Summary { get; set; }
-        public string Body { get; set; }
+        public string id { get; set; }
+        public string track_id { get; set; }
+        public DateTime date_created { get; set; }
+        public List<string> tags { get; set; }
+        public string title { get; set; }
+        public string summary { get; set; }
+        public string body { get; set; }
 
         public Request()
         {
-            Date_Created = DateTime.UtcNow;
+            date_created = DateTime.UtcNow;
         }
     }
 }

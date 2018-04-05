@@ -14,7 +14,7 @@ namespace Abstrack.Functions.Functions.Queue
 
             foreach (var request in listOfRequestsToDelete)
             {
-                RequestRepository.DeleteRequest(request.Id);
+                RequestRepository.DeleteRequest(request.id);
             }
 
             log.Info($"C# Queue trigger function deleted: {trackId}");

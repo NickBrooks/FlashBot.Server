@@ -31,14 +31,14 @@ namespace Abstrack.Functions.Functions.API
 
                 // create the request
                 Request request = await req.Content.ReadAsAsync<Request>();
-                request.Track_Id = track.RowKey;
+                request.track_id = track.RowKey;
                 var newRequest = await RequestRepository.InsertRequest(request);
 
                 // if didn't create return bad response
                 if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.Track_Id);
+                response.Headers.Add("Location", newRequest.track_id);
                 return response;
             }
             catch (Exception e)

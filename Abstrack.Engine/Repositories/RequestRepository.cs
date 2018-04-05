@@ -11,21 +11,21 @@ namespace Abstrack.Engine.Repositories
         public static async Task<Request> InsertRequest(Request request)
         {
             if (request == null) return null;
-            if (request.Body == null) return null;
-            if (request.Tags.Count > 12) return null;
+            if (request.body == null) return null;
+            if (request.tags.Count > 12) return null;
 
-            request.Title = request.Title.Length > 80 ? request.Title.Substring(0, 80) : request.Title;
-            request.Body = request.Body.Length > 5000 ? request.Body.Substring(0, 5000) : request.Body;
-            request.Summary = GenerateSummary(request.Body);
-            request.Tags = Tools.ValidateTags(request.Tags);
-            request.Date_Created = DateTime.UtcNow;
+            request.title = request.title.Length > 80 ? request.title.Substring(0, 80) : request.title;
+            request.body = request.body.Length > 5000 ? request.body.Substring(0, 5000) : request.body;
+            request.summary = GenerateSummary(request.body);
+            request.tags = Tools.ValidateTags(request.tags);
+            request.date_created = DateTime.UtcNow;
 
             return await (dynamic)CosmosRepository<Request>.CreateItemAsync(request);
         }
 
         public static async Task<List<Request>> GetListOfRequestIdsInTrack(string trackId)
         {
-            return await CosmosRepository<Request>.GetItemsSqlAsync($"SELECT r.Id FROM r WHERE r.Track_Id = '{trackId}'");
+            return await CosmosRepository<Request>.GetItemsSqlAsync($"SELECT r.id FROM r WHERE r.track_id = '{trackId}'");
         }
 
         public static async void DeleteRequest(string requestId)
