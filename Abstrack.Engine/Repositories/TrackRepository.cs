@@ -45,6 +45,11 @@ namespace Abstrack.Engine.Repositories
             return newTrack;
         }
 
+        public static List<Track> GetRateLimitedTracks()
+        {
+            return TableStorageRepository.GetRateLimitedTracks();
+        }
+
         public static void UpdateTrack(Track track)
         {
             TableStorageRepository.UpdateTrack(track);
@@ -83,14 +88,14 @@ namespace Abstrack.Engine.Repositories
             return track;
         }
 
-        public static async Task<Track> GetTrackByRequestKey(string requestKey)
+        public static async Task<Track> GetTrackByRequestKey(string requestKey, bool rateLimited = true)
         {
             var track = await TableStorageRepository.GetTrackByRequestKey(requestKey);
 
             if (track == null)
                 return null;
 
-            if (track.Rate_Limit_Exceeded)
+            if (track.Rate_Limit_Exceeded && rateLimited)
                 return null;
 
             return track;

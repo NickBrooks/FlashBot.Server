@@ -25,7 +25,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
 
                 // get request key to do checks
                 IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var track = await TrackRepository.GetTrackByRequestKey(authValues.FirstOrDefault());
+                var track = await TrackRepository.GetTrackByRequestKey(authValues.FirstOrDefault(), false);
 
                 // authorized
                 if (track == null) return req.CreateResponse(HttpStatusCode.Unauthorized);

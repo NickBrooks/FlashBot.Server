@@ -50,6 +50,11 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
+        internal static List<Track> GetRateLimitedTracks()
+        {
+            return QueryEntities<Track>(t => t.Rate_Limit_Exceeded == true, TracksTable);
+        }
+
         internal static async void UpdateTrack(Track track)
         {
             try
