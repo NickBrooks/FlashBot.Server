@@ -30,7 +30,9 @@ namespace Abstrack.Engine.Repositories
             {
                 Name = name,
                 Description = description,
-                Is_Private = isPrivate
+                Is_Private = isPrivate,
+                Rate_Limit = extendedUser.Rate_Per_Track,
+                Max_Requests = extendedUser.Max_Track_Storage
             };
 
             // create the track
@@ -95,7 +97,7 @@ namespace Abstrack.Engine.Repositories
             ExtendedUserRepository.DecrementTrackCount(track.PartitionKey, track.Is_Private);
 
             // send a message to track 
-            TableStorageRepository.AddMessageToQueue("deleterequestsfromtrack", trackId);
+            TableStorageRepository.AddMessageToQueue("delete-requests-from-track", trackId);
 
             // then delete track
             TableStorageRepository.DeleteTrack(trackId);

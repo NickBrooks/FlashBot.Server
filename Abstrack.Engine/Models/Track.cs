@@ -12,6 +12,7 @@ namespace Abstrack.Engine.Models
         public string Description { get; set; }
         public int Rate_Limit { get; set; }
         public bool Rate_Limit_Exceeded { get; set; }
+        public int Max_Requests { get; set; }
 
         public Track(string partitionKey)
         {

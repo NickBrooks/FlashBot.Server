@@ -8,7 +8,7 @@ namespace Abstrack.Functions.Functions.Queue
     public static class DeleteRequestsFromTrack
     {
         [FunctionName("DeleteRequestsFromTrack")]
-        public static async void Run([QueueTrigger("deleterequestsfromtrack", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
+        public static async void Run([QueueTrigger("delete-requests-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
         {
             var listOfRequestsToDelete = await RequestRepository.GetListOfRequestIdsInTrack(trackId);
 

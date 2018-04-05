@@ -1,5 +1,6 @@
 ﻿using Abstrack.Engine.Models;
 using Markdig;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,7 +21,13 @@ namespace Abstrack.Engine.Repositories
             request.tags = Tools.ValidateTags(request.tags);
             request.date_created = DateTime.UtcNow;
 
-            return await (dynamic)CosmosRepository<Request>.CreateItemAsync(request);
+            var result = await (dynamic)CosmosRepository<Request>.CreateItemAsync(request);
+            request.id = result.id;
+
+            // add to queue for further processing
+            TableStorageRepository.AddMessageToQueue("process-new-request", JsonConvert.SerializeObject(request));
+
+            return result;
         }
 
         public static async Task<List<Request>> GetListOfRequestIdsInTrack(string trackId)

@@ -12,11 +12,13 @@ namespace Abstrack.Engine.Repositories
     public class TableStorageRepository
     {
         private static CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("TABLESTORAGE_CONNECTION"));
+
         private static CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
         private static CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
+        private static readonly string RequestMetaTable = "requestmeta";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -164,26 +166,32 @@ namespace Abstrack.Engine.Repositories
 
         internal static async void InsertOrIncrementTrackTag(TrackTag trackTag)
         {
-            // get the table
-            CloudTable table = tableClient.GetTableReference(TrackTagsTable);
-
-            var exists = await GetTrackTag(trackTag.PartitionKey, trackTag.RowKey);
-
-            if (exists != null)
+            try
             {
-                // update
-                exists.Count++;
-                TableOperation replace = TableOperation.Replace(exists);
-                await table.ExecuteAsync(replace);
-            }
-            else
-            {
-                // insert
-                trackTag.Count = 1;
-                TableOperation insertOrReplace = TableOperation.InsertOrReplace(trackTag);
-                await table.ExecuteAsync(insertOrReplace);
-            }
+                // get the table
+                CloudTable table = tableClient.GetTableReference(TrackTagsTable);
 
+                var exists = await GetTrackTag(trackTag.PartitionKey, trackTag.RowKey);
+
+                if (exists != null)
+                {
+                    // update
+                    exists.Count++;
+                    TableOperation op = TableOperation.Merge(exists);
+                    await table.ExecuteAsync(op);
+                }
+                else
+                {
+                    // insert
+                    trackTag.Count = 1;
+                    TableOperation op = TableOperation.InsertOrReplace(trackTag);
+                    await table.ExecuteAsync(op);
+                }
+            }
+            catch (StorageException e)
+            {
+                throw;
+            }
         }
 
         internal static async Task<TrackTag> GetTrackTag(string trackId, string tag)
@@ -259,6 +267,24 @@ namespace Abstrack.Engine.Repositories
                     return null;
 
                 return user;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async void InsertRequestMeta(RequestMeta requestMeta)
+        {
+            try
+            {
+                // reference users table
+                CloudTable table = tableClient.GetTableReference(RequestMetaTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the user
+                TableOperation op = TableOperation.Insert(requestMeta);
+                await table.ExecuteAsync(op);
             }
             catch
             {

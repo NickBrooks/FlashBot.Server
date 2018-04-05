@@ -31,7 +31,7 @@ namespace Abstrack.Engine
             if (hashtag.Contains(" ")) return false;
 
             //check hashtag isn't empty or too long
-            if (hashtag.Length < 1 || hashtag.Length > 40) return false;
+            if (hashtag.Length < 1 || hashtag.Length > 32) return false;
 
             //check hashtag is alphanumeric only
             if (!Regex.IsMatch(hashtag, @"^[a-zA-Z0-9]+$")) return false;
