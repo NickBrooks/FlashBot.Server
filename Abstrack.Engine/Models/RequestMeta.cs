@@ -1,5 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Threading.Tasks;
 
 namespace Abstrack.Engine.Models
 {

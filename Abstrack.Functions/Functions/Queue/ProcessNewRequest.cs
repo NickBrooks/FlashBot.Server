@@ -3,13 +3,14 @@ using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
+using System;
 
 namespace Abstrack.Functions.Functions.Queue
 {
     public static class ProcessNewRequest
     {
         [FunctionName("ProcessNewRequest")]
-        public static void Run([QueueTrigger("process-new-request", Connection = "AzureWebJobsStorage")]string queueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-new-request", Connection = "AzureWebJobsStorage")]string queueItem, TraceWriter log)
         {
             Request request = JsonConvert.DeserializeObject<Request>(queueItem);
 
@@ -25,7 +26,19 @@ namespace Abstrack.Functions.Functions.Queue
                 Date_Created = request.date_created
             });
 
-            // do rate limit
+            // check rate limit
+            Random rnd = new Random();
+            if (rnd.Next(1, 8) == 3)
+            {
+                var track = await TrackRepository.GetTrack(request.track_id);
+                int requestsLastHour = RequestMetaRepository.GetRequestsLastHourAsync(request.track_id);
+
+                if (requestsLastHour > track.Rate_Limit)
+                {
+                    track.Rate_Limit_Exceeded = true;
+                    TrackRepository.UpdateTrack(track);
+                }
+            }
 
             log.Info($"Post processing completed for request: {request.id}");
         }

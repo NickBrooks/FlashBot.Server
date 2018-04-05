@@ -1,4 +1,5 @@
 ﻿using Abstrack.Engine.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -42,6 +43,11 @@ namespace Abstrack.Engine.Repositories
             ExtendedUserRepository.IncrementTrackCount(ownerId, isPrivate);
 
             return newTrack;
+        }
+
+        public static void UpdateTrack(Track track)
+        {
+            TableStorageRepository.UpdateTrack(track);
         }
 
         /// <summary>

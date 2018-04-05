@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Abstrack.Engine.Repositories
@@ -44,6 +45,22 @@ namespace Abstrack.Engine.Repositories
                 return track;
             }
             catch
+            {
+                throw;
+            }
+        }
+
+        internal static async void UpdateTrack(Track track)
+        {
+            try
+            {
+                // get the table
+                CloudTable table = tableClient.GetTableReference(TracksTable);
+
+                TableOperation op = TableOperation.InsertOrReplace(track);
+                await table.ExecuteAsync(op);
+            }
+            catch (StorageException e)
             {
                 throw;
             }
@@ -418,6 +435,18 @@ namespace Abstrack.Engine.Repositories
             // Create a message and add it to the queue.
             CloudQueueMessage message = new CloudQueueMessage(messageBody);
             await queue.AddMessageAsync(message);
+        }
+
+        // https://goo.gl/gyaX67
+        internal static List<T> QueryEntities<T>(Expression<Func<T, bool>> criteria, string tableName) where T : ITableEntity, new()
+        {
+            // reference table
+            CloudTable table = tableClient.GetTableReference(tableName);
+
+            // table, in this case, is my `CloudTable` instance
+            List<T> results = table.CreateQuery<T>().Where(criteria).ToList();
+
+            return results;
         }
     }
 }

@@ -26,5 +26,10 @@ namespace Abstrack.Engine.Repositories
         {
             return await TableStorageRepository.GetRequestMeta(requestId);
         }
+
+        public static int GetRequestsLastHourAsync(string track_id)
+        {
+            return TableStorageRepository.QueryEntities<RequestMeta>(t => t.PartitionKey == track_id && t.Date_Created > DateTime.UtcNow.AddHours(-1), "requestmeta").Count; ;
+        }
     }
 }
