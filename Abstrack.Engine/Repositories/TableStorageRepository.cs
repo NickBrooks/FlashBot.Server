@@ -74,6 +74,33 @@ namespace Abstrack.Engine.Repositories
         }
 
         /// <summary>
+        /// Delete the track.
+        /// </summary>
+        /// <param name="trackId"></param>
+        internal static async void DeleteTrack(string trackId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TracksTable);
+
+                // query tracks
+                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
+
+                TableContinuationToken token = null;
+
+                TableQuerySegment<Track> tableQueryResult = await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
+
+                TableOperation op = TableOperation.Delete(tableQueryResult.FirstOrDefault());
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get tracks by ownerId.
         /// </summary>
         /// <param name="ownerId"></param>

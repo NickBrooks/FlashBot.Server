@@ -16,7 +16,7 @@
         <input asp-for="Input.Description" class="form-control" autocomplete="off" />
         <span asp-validation-for="Input.Description" class="text-danger"></span>
     </div>
-    @if (Model.ExtendedUser.Private_Tracks_Max > 0)
+    @if (Model.ExtendedUser.Private_Tracks_Max > 0 || Model.ExtendedUser.Private_Tracks >= Model.ExtendedUser.Private_Tracks_Max)
     {<div class="form-group">
             <div class="form-check">
                 <input asp-for="Input.IsPrivate" class="form-check-input" autocomplete="off" />

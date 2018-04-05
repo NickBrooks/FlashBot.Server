@@ -32,7 +32,7 @@ namespace Abstrack.Functions.Functions.API
                 // create the request
                 Request request = await req.Content.ReadAsAsync<Request>();
                 request.Track_Id = track.RowKey;
-                var newRequest = await RequestRepository.CreateAsync(request);
+                var newRequest = await RequestRepository.InsertRequest(request);
 
                 // if didn't create return bad response
                 if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);

@@ -1,13 +1,15 @@
 ﻿using Abstrack.Engine.Models;
 using Markdig;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Abstrack.Engine.Repositories
 {
     public class RequestRepository
     {
-        public static async Task<Request> CreateAsync(Request request)
+        public static async Task<Request> InsertRequest(Request request)
         {
             if (request == null) return null;
             if (request.Body == null) return null;
@@ -20,6 +22,18 @@ namespace Abstrack.Engine.Repositories
             request.Date_Created = DateTime.UtcNow;
 
             return await (dynamic)CosmosRepository<Request>.CreateItemAsync(request);
+        }
+
+        public static List<string> GetListOfRequestIdsInTrack(string trackId)
+        {
+            List<string> idList = CosmosRepository<string>.GetItemsAsyncSQL($"SELECT r.Id FROM r WHERE r.Track_Id = '{trackId}'").ToList();
+
+            return idList;
+        }
+
+        public static async void DeleteRequest(string requestId)
+        {
+            await CosmosRepository<Request>.DeleteItemAsync(requestId);
         }
 
         private static string GenerateSummary(string body)

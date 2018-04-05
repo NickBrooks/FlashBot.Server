@@ -23,5 +23,29 @@ namespace Abstrack.Engine.Repositories
         {
             return await TableStorageRepository.UpdateExtendedUser(user);
         }
+
+        public static async void IncrementTrackCount(string userId, bool isPrivate)
+        {
+            var extendedUser = await GetExtendedUser(userId);
+
+            if (isPrivate)
+                extendedUser.Private_Tracks++;
+            else
+                extendedUser.Public_Tracks++;
+
+            await UpdateExtendedUser(extendedUser);
+        }
+
+        public static async void DecrementTrackCount(string userId, bool isPrivate)
+        {
+            var extendedUser = await GetExtendedUser(userId);
+
+            if (isPrivate)
+                extendedUser.Private_Tracks--;
+            else
+                extendedUser.Public_Tracks--;
+
+            await UpdateExtendedUser(extendedUser);
+        }
     }
 }

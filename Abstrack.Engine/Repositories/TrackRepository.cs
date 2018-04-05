@@ -10,7 +10,7 @@ namespace Abstrack.Engine.Repositories
         {
             if (ownerId == null || name == null) return null;
 
-            Track newTrack = new Track(ownerId)
+            Track track = new Track(ownerId)
             {
                 Name = name,
                 Description = description,
@@ -18,7 +18,12 @@ namespace Abstrack.Engine.Repositories
             };
 
             // create the track
-            return await TableStorageRepository.CreateTrack(newTrack);
+            var newTrack = await TableStorageRepository.CreateTrack(track);
+
+            // increment user's track count
+            ExtendedUserRepository.IncrementTrackCount(ownerId, isPrivate);
+
+            return newTrack;
         }
 
         /// <summary>
@@ -65,6 +70,15 @@ namespace Abstrack.Engine.Repositories
                 return null;
 
             return track;
+        }
+
+        public static void DeleteTrack(string trackId)
+        {
+            // send a message to track 
+            TableStorageRepository.AddMessageToQueue("deleterequestsfromtrack", trackId);
+
+            // then delete track
+            TableStorageRepository.DeleteTrack(trackId);
         }
     }
 }

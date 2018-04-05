@@ -54,6 +54,16 @@ namespace Abstrack.Engine.Repositories
             return results;
         }
 
+        public static IEnumerable<T> GetItemsAsyncSQL(string queryString)
+        {
+            IQueryable<T> results = client.CreateDocumentQuery<T>(
+                UriFactory.CreateDocumentCollectionUri(Database, Collection),
+                queryString,
+                new FeedOptions { MaxItemCount = -1 });
+
+            return results;
+        }
+
         public static async Task<Document> CreateItemAsync(T item)
         {
             return await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(Database, Collection), item);
