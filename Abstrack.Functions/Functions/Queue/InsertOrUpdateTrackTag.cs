@@ -1,5 +1,5 @@
 using Abstrack.Engine.Models;
-using Abstrack.Functions.Repositories;
+using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
@@ -16,7 +16,7 @@ namespace Abstrack.Functions.Functions.Queue
             // check if they exist, if not add
             foreach (var tag in trackTagsQueueItem.Tags)
             {
-                TableStorageRepository.InsertOrIncrementTrackTag(new TrackTag(trackTagsQueueItem.Track_Id, tag));
+                TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(trackTagsQueueItem.Track_Id, tag));
             }
 
             log.Info($"C# Queue trigger function processed: {queueItem}");

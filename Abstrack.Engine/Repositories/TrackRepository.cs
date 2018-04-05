@@ -53,5 +53,18 @@ namespace Abstrack.Engine.Repositories
 
             return track;
         }
+
+        public static async Task<Track> GetTrackByRequestKey(string requestKey)
+        {
+            var track = await TableStorageRepository.GetTrackByRequestKey(requestKey);
+
+            if (track == null)
+                return null;
+
+            if (track.Rate_Limit_Exceeded)
+                return null;
+
+            return track;
+        }
     }
 }

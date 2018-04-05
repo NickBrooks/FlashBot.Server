@@ -1,5 +1,4 @@
-﻿using Abstrack.Data.Engine;
-using Microsoft.WindowsAzure.Storage.Table;
+﻿using Microsoft.WindowsAzure.Storage.Table;
 using System;
 
 namespace Abstrack.Engine.Models

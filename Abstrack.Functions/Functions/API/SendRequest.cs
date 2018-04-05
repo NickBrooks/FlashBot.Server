@@ -1,5 +1,5 @@
 using Abstrack.Engine.Models;
-using Abstrack.Functions.Repositories;
+using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
@@ -21,7 +21,7 @@ namespace Abstrack.Functions.Functions.API
             {
                 // get request key to do checks
                 IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var track = await TableStorageRepository.GetTrackByRequestKey(authValues.FirstOrDefault());
+                var track = await TrackRepository.GetTrackByRequestKey(authValues.FirstOrDefault());
 
                 // authorized
                 if (track == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
