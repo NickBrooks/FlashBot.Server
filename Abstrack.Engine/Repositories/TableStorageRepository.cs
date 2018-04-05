@@ -14,7 +14,9 @@ namespace Abstrack.Engine.Repositories
         private static CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("TABLESTORAGE_CONNECTION"));
 
         private static CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+
         private static CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
@@ -194,6 +196,35 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
+        internal static async Task<List<TrackTag>> GetTrackTags(string trackId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+
+                // query tracks
+                TableQuery<TrackTag> query = new TableQuery<TrackTag>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
+
+                List<TrackTag> trackTags = new List<TrackTag>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                    token = queryResponse.ContinuationToken;
+                    trackTags.AddRange(queryResponse.Results);
+                }
+                while (token != null);
+
+                return trackTags.OrderByDescending(t => t.Count).ToList();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         internal static async Task<TrackTag> GetTrackTag(string trackId, string tag)
         {
             // get the table
@@ -205,6 +236,22 @@ namespace Abstrack.Engine.Repositories
             // Execute the retrieve operation.
             TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
             return (TrackTag)retrievedResult.Result;
+        }
+
+        internal static async void DeleteTrackTag(TrackTag trackTag)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+
+                TableOperation op = TableOperation.Delete(trackTag);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         internal static async Task<ExtendedUser> CreateExtendedUser(ExtendedUser extendedUser)
@@ -284,6 +331,74 @@ namespace Abstrack.Engine.Repositories
 
                 // insert the user
                 TableOperation op = TableOperation.Insert(requestMeta);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<RequestMeta> GetRequestMeta(string requestId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(RequestMetaTable);
+
+                // query tracks
+                TableQuery<RequestMeta> rangeQuery = new TableQuery<RequestMeta>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, requestId));
+
+                TableContinuationToken token = null;
+
+                TableQuerySegment<RequestMeta> tableQueryResult =
+                    await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
+
+                return tableQueryResult.FirstOrDefault();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<List<RequestMeta>> GetListOfRequestMetaInTrack(string trackId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(RequestMetaTable);
+
+                // query tracks
+                TableQuery<RequestMeta> query = new TableQuery<RequestMeta>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
+
+                List<RequestMeta> requestMetaList = new List<RequestMeta>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                    token = queryResponse.ContinuationToken;
+                    requestMetaList.AddRange(queryResponse.Results);
+                }
+                while (token != null);
+
+                return requestMetaList.ToList();
+            }
+            catch
+            {
+                throw;
+            };
+        }
+
+        internal static async void DeleteRequestMeta(RequestMeta requestMeta)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(RequestMetaTable);
+
+                TableOperation op = TableOperation.Delete(requestMeta);
                 await table.ExecuteAsync(op);
             }
             catch

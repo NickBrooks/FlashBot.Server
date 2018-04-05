@@ -20,9 +20,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Functions\API\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Abstrack.Engine\Abstrack.Engine.csproj" />
   </ItemGroup>
 </Project>

@@ -10,11 +10,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Abstrack.Functions.Functions.API
+namespace Abstrack.Functions.Functions.API.RequestControllers
 {
-    public static class SendRequest
+    public static class PostRequest
     {
-        [FunctionName("SendRequest")]
+        [FunctionName("PostRequest")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "request")]HttpRequestMessage req, TraceWriter log)
         {
             try
@@ -38,7 +38,7 @@ namespace Abstrack.Functions.Functions.API
                 if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.track_id);
+                response.Headers.Add("Location", newRequest.id);
                 return response;
             }
             catch (Exception e)

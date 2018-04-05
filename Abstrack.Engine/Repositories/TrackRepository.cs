@@ -96,8 +96,10 @@ namespace Abstrack.Engine.Repositories
             var track = await GetTrack(trackId);
             ExtendedUserRepository.DecrementTrackCount(track.PartitionKey, track.Is_Private);
 
-            // send a message to track 
+            // send messages to queue
             TableStorageRepository.AddMessageToQueue("delete-requests-from-track", trackId);
+            TableStorageRepository.AddMessageToQueue("delete-tracktags-from-track", trackId);
+            TableStorageRepository.AddMessageToQueue("delete-requestmeta-from-track", trackId);
 
             // then delete track
             TableStorageRepository.DeleteTrack(trackId);

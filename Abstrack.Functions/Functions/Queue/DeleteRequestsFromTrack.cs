@@ -1,4 +1,3 @@
-using System;
 using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
@@ -17,7 +16,7 @@ namespace Abstrack.Functions.Functions.Queue
                 RequestRepository.DeleteRequest(request.id);
             }
 
-            log.Info($"C# Queue trigger function deleted: {trackId}");
+            log.Info($"C# Queue trigger function deleted requests: {trackId}");
         }
     }
 }
