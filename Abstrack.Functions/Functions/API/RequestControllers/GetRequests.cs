@@ -19,6 +19,9 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
         {
             try
             {
+                // check for continuation token
+                var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
+
                 // get query object from query params
                 RequestQuery query = Tools.GetQueryFromQueryParams(req.GetQueryNameValuePairs());
                 if (query == null)
@@ -32,14 +35,14 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 // public request so return it
                 if (!track.Is_Private)
                 {
-                    var result = await RequestRepository.GetRequests(query.sql);
+                    RequestReturnObject result = await RequestRepository.GetRequests(query, continuationToken == null ? null : continuationToken);
                     return req.CreateResponse(HttpStatusCode.OK, result);
                 }
                 // private request
                 else
                 {
                     // get request key to do checks
-                    var requestKey = Tools.GetRequestKeyFromHeaders(req.Headers);
+                    var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
                     if (requestKey == null)
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -49,7 +52,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                         if (track.Request_Key != requestKey)
                             return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                        var result = await RequestRepository.GetRequests(query.sql);
+                        RequestReturnObject result = await RequestRepository.GetRequests(query, continuationToken == null ? null : continuationToken);
                         return req.CreateResponse(HttpStatusCode.OK, result);
                     }
 

@@ -22,6 +22,7 @@ namespace Abstrack.Engine.Repositories
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string RequestMetaTable = "requestmeta";
+        private static readonly string ContinuationTokenTable = "continuationtokens";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -421,6 +422,53 @@ namespace Abstrack.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(RequestMetaTable);
 
                 TableOperation op = TableOperation.Delete(requestMeta);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async void InsertContinuationToken(ContinuationToken token)
+        {
+            try
+            {
+                // reference users table
+                CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the user
+                TableOperation op = TableOperation.Insert(token);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<ContinuationToken> GetContinuationToken(string trackId, string rowKey)
+        {
+            // get the table
+            CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
+
+            // Create a retrieve operation that takes a customer entity.
+            TableOperation retrieveOperation = TableOperation.Retrieve<ContinuationToken>(trackId, rowKey);
+
+            // Execute the retrieve operation.
+            TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
+            return (ContinuationToken)retrievedResult.Result;
+        }
+
+        internal static async void DeleteContinuationToken(ContinuationToken token)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
+
+                TableOperation op = TableOperation.Delete(token);
                 await table.ExecuteAsync(op);
             }
             catch

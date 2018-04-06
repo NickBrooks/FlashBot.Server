@@ -18,7 +18,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
         {
             try
             {
-                var requestKey = Tools.GetRequestKeyFromHeaders(req.Headers);
+                var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
                 if (requestKey == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 

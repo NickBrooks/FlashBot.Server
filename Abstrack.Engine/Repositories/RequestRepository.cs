@@ -36,13 +36,32 @@ namespace Abstrack.Engine.Repositories
             return await CosmosRepository<Request>.GetItemByIdAsync(requestId);
         }
 
-        public static async Task<RequestReturnObject> GetRequests(string queryString, string continuationToken = null)
+        public static async Task<RequestReturnObject> GetRequests(RequestQuery query, string continuationToken = null)
         {
-            var result = await CosmosRepository<RequestDTO>.GetItemsSqlWithPagingAsync(queryString, 30, continuationToken);
+            ContinuationToken token = null;
+
+            if (continuationToken != null)
+                token = await ContinuationTokenRepository.GetContinuationToken(query.trackId, continuationToken);
+
+            var result = await CosmosRepository<RequestDTO>.GetItemsSqlWithPagingAsync(query.sql, 30, token?.Continuation_Token == null ? null : token.Continuation_Token);
+
+            // generate continuationToken
+            string newToken = null;
+            if (!string.IsNullOrEmpty(result.continuationToken))
+            {
+                newToken = Tools.CreateSHA256(result.continuationToken + DateTime.UtcNow.ToString());
+                ContinuationTokenRepository.InsertContinuationToken(new ContinuationToken(query.trackId, newToken)
+                {
+                    Continuation_Token = result.continuationToken,
+                });
+            }
+
+            if (token != null)
+                ContinuationTokenRepository.DeleteContinuationToken(token);
 
             return new RequestReturnObject()
             {
-                continuationToken = result.continuationToken,
+                continuation_token = newToken,
                 count = result.results.Count(),
                 data = result.results
             };

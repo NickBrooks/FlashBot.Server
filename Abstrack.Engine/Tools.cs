@@ -87,6 +87,8 @@ namespace Abstrack.Engine
                 sqlString += $" and ARRAY_CONTAINS(r.tags, \"{tag}\")";
             }
 
+            sqlString += " ORDER BY r.date_created DESC";
+
             return sqlString;
         }
 
@@ -106,9 +108,9 @@ namespace Abstrack.Engine
             return validatedHashtags.Take(16).ToList();
         }
 
-        public static string GetRequestKeyFromHeaders(HttpRequestHeaders headers)
+        public static string GetHeaderValue(HttpRequestHeaders headers, string value)
         {
-            var header = headers.Where(t => t.Key == "X-Request-Key").FirstOrDefault();
+            var header = headers.Where(t => t.Key == value).FirstOrDefault();
 
             if (header.Value == null)
                 return null;

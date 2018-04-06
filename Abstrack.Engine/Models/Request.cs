@@ -30,7 +30,7 @@ namespace Abstrack.Engine.Models
 
     public class RequestReturnObject
     {
-        public string continuationToken { get; set; }
+        public string continuation_token { get; set; }
         public int count { get; internal set; }
         public List<RequestDTO> data { get; set; }
     }

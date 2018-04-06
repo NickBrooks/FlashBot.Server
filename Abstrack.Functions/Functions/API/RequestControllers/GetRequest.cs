@@ -37,7 +37,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     return req.CreateResponse(HttpStatusCode.OK, request);
 
                 // get request key to do checks
-                var requestKey = Tools.GetRequestKeyFromHeaders(req.Headers);
+                var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
                 if (requestKey == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
