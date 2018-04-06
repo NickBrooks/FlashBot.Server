@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Abstrack.Engine.Models
@@ -18,5 +17,21 @@ namespace Abstrack.Engine.Models
         {
             date_created = DateTime.UtcNow;
         }
+    }
+
+    public class RequestDTO
+    {
+        public string id { get; set; }
+        public DateTime date_created { get; set; }
+        public List<string> tags { get; set; }
+        public string title { get; set; }
+        public string summary { get; set; }
+    }
+
+    public class RequestReturnObject
+    {
+        public string continuationToken { get; set; }
+        public int count { get; internal set; }
+        public List<RequestDTO> data { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Markdig;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Abstrack.Engine.Repositories
@@ -28,6 +29,23 @@ namespace Abstrack.Engine.Repositories
             TableStorageRepository.AddMessageToQueue("process-new-request", JsonConvert.SerializeObject(request));
 
             return result;
+        }
+
+        public static async Task<Request> GetRequest(string requestId)
+        {
+            return await CosmosRepository<Request>.GetItemByIdAsync(requestId);
+        }
+
+        public static async Task<RequestReturnObject> GetRequests(string queryString, string continuationToken = null)
+        {
+            var result = await CosmosRepository<RequestDTO>.GetItemsSqlWithPagingAsync(queryString, 30, continuationToken);
+
+            return new RequestReturnObject()
+            {
+                continuationToken = result.continuationToken,
+                count = result.results.Count(),
+                data = result.results
+            };
         }
 
         public static async Task<List<Request>> GetListOfRequestIdsInTrack(string trackId)

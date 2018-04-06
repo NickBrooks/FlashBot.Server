@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Documents;
+﻿using Abstrack.Engine.Models;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using System;
@@ -17,7 +18,7 @@ namespace Abstrack.Engine.Repositories
         private static readonly string Collection = "Abstrack";
         private static DocumentClient client = new DocumentClient(new Uri(Endpoint), AuthKey, new ConnectionPolicy { EnableEndpointDiscovery = false });
 
-        public static async Task<T> GetItemByIdAsync(string id)
+        internal static async Task<T> GetItemByIdAsync(string id)
         {
             try
             {
@@ -37,7 +38,7 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
-        public static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
+        internal static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
@@ -54,12 +55,12 @@ namespace Abstrack.Engine.Repositories
             return results;
         }
 
-        public static async Task<List<T>> GetItemsSqlAsync(string queryString)
+        internal static async Task<List<T>> GetItemsSqlAsync(string queryString, int maxItemCount = 100)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
                 queryString,
-                new FeedOptions { MaxItemCount = -1 })
+                new FeedOptions { MaxItemCount = maxItemCount })
                 .AsDocumentQuery();
 
             List<T> results = new List<T>();
@@ -71,12 +72,29 @@ namespace Abstrack.Engine.Repositories
             return results.ToList();
         }
 
-        public static async Task<Document> CreateItemAsync(T item)
+        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 100, string requestContinuation = null)
+        {
+            IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
+                UriFactory.CreateDocumentCollectionUri(Database, Collection),
+                queryString,
+                new FeedOptions { MaxItemCount = maxItemCount, RequestContinuation = requestContinuation })
+                .AsDocumentQuery();
+
+            var results = await query.ExecuteNextAsync<T>();
+
+            return new CosmosQueryPagingResults<T>()
+            {
+                results = results.ToList(),
+                continuationToken = results.ResponseContinuation
+            };
+        }
+
+        internal static async Task<Document> CreateItemAsync(T item)
         {
             return await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(Database, Collection), item);
         }
 
-        public static async Task<Document> UpsertItemAsync(string id, T item)
+        internal static async Task<Document> UpsertItemAsync(string id, T item)
         {
             if (await GetItemByIdAsync(id) == null)
             {
@@ -88,17 +106,17 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
-        public static async Task<Document> UpdateItemAsync(string id, T item)
+        internal static async Task<Document> UpdateItemAsync(string id, T item)
         {
             return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id), item);
         }
 
-        public static async Task DeleteItemAsync(string id)
+        internal static async Task DeleteItemAsync(string id)
         {
             await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id));
         }
 
-        public static void Initialize()
+        internal static void Initialize()
         {
             client = new DocumentClient(new Uri(Endpoint), AuthKey, new ConnectionPolicy { EnableEndpointDiscovery = false });
             CreateDatabaseIfNotExistsAsync().Wait();

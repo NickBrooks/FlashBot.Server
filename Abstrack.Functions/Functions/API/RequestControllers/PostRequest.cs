@@ -1,11 +1,10 @@
+using Abstrack.Engine;
 using Abstrack.Engine.Models;
 using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,15 +18,18 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
         {
             try
             {
-                // get request key to do checks
-                IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var track = await TrackRepository.GetTrackByRequestKey(authValues.FirstOrDefault());
+                var requestKey = Tools.GetRequestKeyFromHeaders(req.Headers);
+                if (requestKey == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // authorized
-                if (track == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                // get track
+                Track track = await TrackRepository.GetTrackByRequestKey(requestKey);
+                if (track == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // check rate limit
-                if (track.Rate_Limit_Exceeded) return req.CreateResponse(HttpStatusCode.Forbidden);
+                if (track.Rate_Limit_Exceeded)
+                    return req.CreateResponse(HttpStatusCode.Forbidden);
 
                 // create the request
                 Request request = await req.Content.ReadAsAsync<Request>();
@@ -35,10 +37,11 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 var newRequest = await RequestRepository.InsertRequest(request);
 
                 // if didn't create return bad response
-                if (newRequest == null) return req.CreateResponse(HttpStatusCode.BadRequest);
+                if (newRequest == null)
+                    return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.id);
+                response.Headers.Add("Location", newRequest.track_id);
                 return response;
             }
             catch (Exception e)

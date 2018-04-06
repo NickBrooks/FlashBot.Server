@@ -1,14 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+using Abstrack.Engine;
 using Abstrack.Engine.Models;
 using Abstrack.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Abstrack.Functions.Functions.API.RequestControllers
 {
@@ -20,15 +19,18 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
             try
             {
                 // check request key provided
-                bool isValid = Guid.TryParse(requestId, out Guid guidResult);
-                if (!isValid) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                if (!Tools.IsValidGuid(requestId))
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get request key to do checks
-                IEnumerable<string> authValues = req.Headers.GetValues("X-Request-Key");
-                var track = await TrackRepository.GetTrackByRequestKey(authValues.FirstOrDefault(), false);
+                var requestKey = Tools.GetRequestKeyFromHeaders(req.Headers);
+                if (requestKey == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // authorized
-                if (track == null) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                // get track
+                Track track = await TrackRepository.GetTrackByRequestKey(requestKey);
+                if (track == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get requestmeta
                 RequestMeta requestMeta = await RequestMetaRepository.GetRequestMeta(requestId);

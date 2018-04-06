@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Abstrack.Engine.Models;
 
 namespace Abstrack.Engine
 {
@@ -39,6 +42,54 @@ namespace Abstrack.Engine
             return true;
         }
 
+        public static bool IsValidGuid(string guid)
+        {
+            return Guid.TryParse(guid, out Guid o);
+        }
+
+        public static RequestQuery GetQueryFromQueryParams(IEnumerable<KeyValuePair<string, string>> queryParams)
+        {
+            // parse query params
+            string trackId = queryParams
+                .FirstOrDefault(q => string.Compare(q.Key, "trackId", true) == 0)
+                .Value;
+
+            // check invalid trackId
+            if (!IsValidGuid(trackId))
+                return null;
+
+            string keywordString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "keywords", true) == 0).Value;
+            List<string> keywords = string.IsNullOrEmpty(keywordString) ? new List<string>() : keywordString.Split(',').Take(10).ToList();
+
+            string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
+            List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(10).ToList());
+
+            return new RequestQuery()
+            {
+                trackId = trackId,
+                keywords = keywords,
+                tags = tags,
+                sql = GenerateSQLQueryString(trackId, keywords, tags)
+            };
+        }
+
+        private static string GenerateSQLQueryString(string trackId, List<string> keywords, List<string> tags)
+        {
+            var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary FROM r WHERE r.track_id = '{trackId}'";
+
+            foreach (var keyword in keywords)
+            {
+                sqlString += $" and CONTAINS(LOWER(r.body), LOWER(\"{keyword}\"))";
+            }
+
+            foreach (var tag in tags)
+            {
+                sqlString += $" and ARRAY_CONTAINS(r.tags, \"{tag}\")";
+            }
+
+            return sqlString;
+        }
+
         public static List<string> ValidateTags(List<string> hashtags)
         {
             var validatedHashtags = new List<string>();
@@ -52,7 +103,22 @@ namespace Abstrack.Engine
                 validatedHashtags.Add(hashtag);
             }
 
-            return validatedHashtags;
+            return validatedHashtags.Take(16).ToList();
+        }
+
+        public static string GetRequestKeyFromHeaders(HttpRequestHeaders headers)
+        {
+            var header = headers.Where(t => t.Key == "X-Request-Key").FirstOrDefault();
+
+            if (header.Value == null)
+                return null;
+
+            var key = header.Value.ToList()[0];
+
+            if (key == null || (key.Length != 64 && key.Length != 128))
+                return null;
+
+            return key;
         }
     }
 }

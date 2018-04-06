@@ -72,6 +72,7 @@
     <Compile Include="Models\ExtendedUser.cs" />
     <Compile Include="Models\Request.cs" />
     <Compile Include="Models\RequestMeta.cs" />
+    <Compile Include="Models\RequestQuery.cs" />
     <Compile Include="Models\TrackTag.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
