@@ -49,7 +49,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     // validate using track key
                     if (requestKey.Length == 64)
                     {
-                        if (track.request_key != requestKey)
+                        if (track.track_key != requestKey)
                             return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                         RequestReturnObject result = await RequestRepository.GetRequests(query, continuationToken == null ? null : continuationToken);

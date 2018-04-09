@@ -44,7 +44,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 // validate using track key
                 if (requestKey.Length == 64)
                 {
-                    if (track.request_key != requestKey || track.RowKey != request.track_id)
+                    if (track.track_key != requestKey || track.RowKey != request.track_id)
                         return req.CreateResponse(HttpStatusCode.NotFound);
 
                     return req.CreateResponse(HttpStatusCode.OK, request);

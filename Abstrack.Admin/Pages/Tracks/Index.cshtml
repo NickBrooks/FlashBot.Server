@@ -35,8 +35,13 @@
                     <div class="card-body">
                         <p class="card-text">@track.description</p>
                         <div class="input-group">
-                            <span class="input-group-addon" id="basic-addon3"><i class="fas fa-key text-muted"></i></span>
-                            <input value="@track.request_key" class="form-control" autocomplete="off" disabled />
+                            <span class="input-group-addon" id="basic-addon3"><i class="fas fa-key text-muted mr-2"></i> Track key</span>
+                            <input value="@track.track_key" class="form-control form-control-sm" autocomplete="off" disabled />
+                        </div>
+                        <br />
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon3"><i class="fab fa-expeditedssl text-muted mr-2"></i> Track secret</span>
+                            <input value="@track.track_secret" class="form-control form-control-sm" autocomplete="off" disabled />
                         </div>
                         <div class="input-group">
                             <a class="btn btn-danger btn-sm mt-3" asp-page="./Delete" asp-route-id="@track.RowKey"><i class="fas fa-trash-alt"></i> Delete track</a>

@@ -76,7 +76,7 @@ namespace Abstrack.Engine.Repositories
             string newToken = null;
             if (!string.IsNullOrEmpty(result.continuationToken))
             {
-                newToken = Tools.CreateSHA256(result.continuationToken + DateTime.UtcNow.ToString());
+                newToken = AuthRepository.GenerateSHA256(result.continuationToken, DateTime.UtcNow.ToString());
                 ContinuationTokenRepository.InsertContinuationToken(new ContinuationToken(query.trackId, newToken)
                 {
                     Continuation_Token = result.continuationToken,

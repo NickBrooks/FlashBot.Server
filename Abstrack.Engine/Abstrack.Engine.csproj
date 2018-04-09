@@ -76,6 +76,7 @@
     <Compile Include="Models\TrackTag.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\AuthRepository.cs" />
     <Compile Include="Repositories\ContinuationTokenRepository.cs" />
     <Compile Include="Repositories\CosmosRepository.cs" />
     <Compile Include="Repositories\ExtendedUserRepository.cs" />
