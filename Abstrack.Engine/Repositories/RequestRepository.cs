@@ -16,9 +16,9 @@ namespace Abstrack.Engine.Repositories
             if (request.body == null) return null;
             if (request.tags.Count > 12) return null;
 
-            request.title = request.title.Length > 80 ? request.title.Substring(0, 80) : request.title;
+            request.title = request.title.Length > 140 ? request.title.Substring(0, 140) : request.title;
             request.body = request.body.Length > 5000 ? request.body.Substring(0, 5000) : request.body;
-            request.summary = GenerateSummary(request.body);
+            request.summary = string.IsNullOrEmpty(request.summary) ? GenerateSummary(request.body) : request.body.Substring(0, 5000);
             request.tags = Tools.ValidateTags(request.tags);
             request.date_created = DateTime.UtcNow;
 
@@ -43,7 +43,7 @@ namespace Abstrack.Engine.Repositories
             if (continuationToken != null)
                 token = await ContinuationTokenRepository.GetContinuationToken(query.trackId, continuationToken);
 
-            var result = await CosmosRepository<RequestDTO>.GetItemsSqlWithPagingAsync(query.sql, 30, token?.Continuation_Token == null ? null : token.Continuation_Token);
+            var result = await CosmosRepository<RequestDTO>.GetItemsSqlWithPagingAsync(query.sql, 50, token?.Continuation_Token == null ? null : token.Continuation_Token);
 
             // generate continuationToken
             string newToken = null;

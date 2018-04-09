@@ -72,7 +72,7 @@ namespace Abstrack.Engine.Repositories
             return results.ToList();
         }
 
-        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 100, string requestContinuation = null)
+        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 50, string requestContinuation = null)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),

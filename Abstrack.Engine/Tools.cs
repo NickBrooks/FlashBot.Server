@@ -87,7 +87,7 @@ namespace Abstrack.Engine
                 sqlString += $" and ARRAY_CONTAINS(r.tags, \"{tag}\")";
             }
 
-            sqlString += " ORDER BY r.date_created DESC";
+            sqlString += " ORDER BY r._ts DESC";
 
             return sqlString;
         }
