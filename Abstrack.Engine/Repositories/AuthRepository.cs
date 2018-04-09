@@ -12,38 +12,31 @@ namespace Abstrack.Engine.Repositories
 
         public static bool ValidateSHA256(string objectId, string objectKey, string sha256)
         {
-            byte[] SHA256Result;
+            byte[] bytes = Encoding.UTF8.GetBytes(objectId + objectKey + appSecret);
+            SHA256Managed sha256HashString = new SHA256Managed();
+            byte[] hash = sha256HashString.ComputeHash(bytes);
 
-            var input = objectId + objectKey + appSecret;
+            var result = ByteArrayToHexString(hash);
 
-            StringBuilder stringBuilder = new StringBuilder();
-            using (HMACSHA256 shaM = new HMACSHA256())
-            {
-                SHA256Result = shaM.ComputeHash(Encoding.UTF8.GetBytes(input));
-            }
-
-            foreach (byte b in SHA256Result)
-                stringBuilder.AppendFormat("{0:x2}", b);
-
-            return sha256 == stringBuilder.ToString() ? true : false;
+            return sha256 == result ? true : false;
         }
 
         internal static string GenerateSHA256(string objectId, string objectKey)
         {
-            byte[] SHA256Result;
+            byte[] bytes = Encoding.UTF8.GetBytes(objectId + objectKey + appSecret);
+            SHA256Managed sha256HashString = new SHA256Managed();
+            byte[] hash = sha256HashString.ComputeHash(bytes);
 
-            var input = objectId + objectKey + appSecret;
+            return ByteArrayToHexString(hash);
+        }
 
-            StringBuilder stringBuilder = new StringBuilder();
-            using (HMACSHA256 shaM = new HMACSHA256())
-            {
-                SHA256Result = shaM.ComputeHash(Encoding.UTF8.GetBytes(input));
-            }
+        private static string ByteArrayToHexString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
 
-            foreach (byte b in SHA256Result)
-                stringBuilder.AppendFormat("{0:x2}", b);
-
-            return stringBuilder.ToString();
+            return hex.ToString();
         }
 
         internal static string GenerateRandomString(int length)

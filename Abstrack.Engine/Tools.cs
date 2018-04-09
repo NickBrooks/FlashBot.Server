@@ -90,9 +90,6 @@ namespace Abstrack.Engine
 
             var key = header.Value.ToList()[0];
 
-            if (key == null || (key.Length != 64 && key.Length != 128))
-                return null;
-
             return key;
         }
 

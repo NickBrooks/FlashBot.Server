@@ -14,16 +14,18 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
     public static class PostRequest
     {
         [FunctionName("PostRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "request")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "track/{trackId}/request")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
             try
             {
-                var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
-                if (requestKey == null)
+                // validate authKey
+                var trackKey = Tools.GetHeaderValue(req.Headers, "X-Track-Key");
+                var trackSecret = Tools.GetHeaderValue(req.Headers, "X-Track-Secret");
+                if (!AuthRepository.ValidateSHA256(trackId, trackKey, trackSecret))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get track
-                Track track = await TrackRepository.GetTrackByRequestKey(requestKey);
+                Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
