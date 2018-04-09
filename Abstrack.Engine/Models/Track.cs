@@ -1,9 +1,18 @@
 ﻿using Abstrack.Engine.Repositories;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
 
 namespace Abstrack.Engine.Models
 {
+    public class TrackDTO
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public List<TrackTagDTO> tags { get; set; }
+    }
+
     public class Track : TableEntity
     {
         public DateTime date_created { get; set; }

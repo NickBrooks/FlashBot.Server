@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,30 +18,38 @@ namespace Abstrack.Functions.Functions.API.TagControllers
         [FunctionName("GetTags")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/tags")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
-            // check valid trackId provided
-            if (!Tools.IsValidGuid(trackId))
-                return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-            // get the track
-            Track track = await TrackRepository.GetTrack(trackId);
-            if (track == null)
-                return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-            // public request so return it
-            if (!track.is_private)
+            try
             {
-                List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                return req.CreateResponse(HttpStatusCode.OK, result);
-            }
-            // private request
-            else
-            {
-                // validate authKey
-                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                // check valid trackId provided
+                if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                return req.CreateResponse(HttpStatusCode.OK, result);
+                // get the track
+                Track track = await TrackRepository.GetTrack(trackId);
+                if (track == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                // public request so return it
+                if (!track.is_private)
+                {
+                    List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
+                    return req.CreateResponse(HttpStatusCode.OK, result);
+                }
+                // private request
+                else
+                {
+                    // validate authKey
+                    if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                    List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
+                    return req.CreateResponse(HttpStatusCode.OK, result);
+                }
+            }
+            catch (Exception e)
+            {
+                log.Info(e.Message);
+                return req.CreateResponse(HttpStatusCode.Unauthorized);
             }
         }
     }
