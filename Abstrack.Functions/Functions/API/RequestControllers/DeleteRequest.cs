@@ -14,29 +14,23 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
     public static class DeleteRequest
     {
         [FunctionName("DeleteRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "request/{requestId}")]HttpRequestMessage req, string requestId, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "track/{trackId}/request/{requestId}")]HttpRequestMessage req, string trackId, string requestId, TraceWriter log)
         {
             try
             {
-                // check request key provided
-                if (!Tools.IsValidGuid(requestId))
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-                // get request key to do checks
-                var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
-                if (requestKey == null)
+                // validate authKey
+                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get track
-                Track track = await TrackRepository.GetTrackByRequestKey(requestKey);
+                Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // get requestmeta
-                RequestTableStorage request = await RequestTableStorageRepository.GetRequest(track.RowKey, requestId);
-
-                // authorized
-                if (request == null || track.RowKey != request.PartitionKey) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                // get request
+                RequestTableStorage request = await RequestTableStorageRepository.GetRequest(trackId, requestId);
+                if (request == null || track.RowKey != request.PartitionKey)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // delete the request
                 RequestTableStorageRepository.DeleteRequest(request);

@@ -13,7 +13,10 @@
     </div>
 </div>
 <small class="text-muted"><strong>Public:</strong> (@Model.ExtendedUser.Public_Tracks of @Model.ExtendedUser.Public_Tracks_Max)</small><br />
-<small class="text-muted"><strong>Private:</strong> (@Model.ExtendedUser.Private_Tracks of @Model.ExtendedUser.Private_Tracks_Max)</small>
+<small class="text-muted">
+    <strong>Private:</strong> (@Model.ExtendedUser.Private_Tracks of @Model.ExtendedUser.Private_Tracks_Max) @if (Model.ExtendedUser.Private_Tracks >= Model.ExtendedUser.Private_Tracks_Max)
+    {<strong><a asp-page="../Subscription">Upgrade</a></strong>}
+</small>
 <hr />
 <div class="row">
     <div class="col-12">

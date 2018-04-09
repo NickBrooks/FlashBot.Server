@@ -26,17 +26,17 @@ namespace Abstrack.Engine.Models
 
     public class RequestTableStorage : TableEntity
     {
+        public DateTime date_created { get; set; }
         public string tags { get; set; }
         public string title { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
         public long _ts { get; set; }
 
-        public RequestTableStorage(string id, string trackId, DateTime timestamp)
+        public RequestTableStorage(string id, string trackId)
         {
             PartitionKey = trackId;
             RowKey = id;
-            Timestamp = timestamp;
         }
 
         public RequestTableStorage()

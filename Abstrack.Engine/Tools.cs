@@ -29,23 +29,13 @@ namespace Abstrack.Engine
             return Guid.TryParse(guid, out Guid o);
         }
 
-        public static RequestQuery GetQueryFromQueryParams(IEnumerable<KeyValuePair<string, string>> queryParams)
+        public static RequestQuery GetQueryFromQueryParams(string trackId, IEnumerable<KeyValuePair<string, string>> queryParams)
         {
-            // parse query params
-            string trackId = queryParams
-                .FirstOrDefault(q => string.Compare(q.Key, "trackId", true) == 0)
-                .Value;
-
-            // check invalid trackId
-            if (!IsValidGuid(trackId))
-                return null;
-
             string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
             List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(12).ToList());
 
             return new RequestQuery()
             {
-                trackId = trackId,
                 tags = tags,
                 sql = GenerateSQLQueryString(trackId, tags)
             };

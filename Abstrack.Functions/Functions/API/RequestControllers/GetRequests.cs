@@ -15,53 +15,40 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
     public static class GetRequests
     {
         [FunctionName("GetRequests")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "requests")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/requests")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
             try
             {
+                // check valid trackId provided
+                if (!Tools.IsValidGuid(trackId))
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+
                 // check for continuation token
                 var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
 
                 // get query object from query params
-                RequestQuery query = Tools.GetQueryFromQueryParams(req.GetQueryNameValuePairs());
-                if (query == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                RequestQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
                 // get the track
-                Track track = await TrackRepository.GetTrack(query.trackId);
+                Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // public request so return it
                 if (!track.is_private)
                 {
-                    RequestReturnObject result = await RequestRepository.GetRequests(query, continuationToken == null ? null : continuationToken);
+                    RequestReturnObject result = await RequestRepository.GetRequests(trackId, query, continuationToken == null ? null : continuationToken);
                     return req.CreateResponse(HttpStatusCode.OK, result);
                 }
                 // private request
                 else
                 {
-                    // get request key to do checks
-                    var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
-                    if (requestKey == null)
+                    // validate authKey
+                    if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                    // validate using track key
-                    if (requestKey.Length == 64)
-                    {
-                        if (track.track_key != requestKey)
-                            return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-                        RequestReturnObject result = await RequestRepository.GetRequests(query, continuationToken == null ? null : continuationToken);
-                        return req.CreateResponse(HttpStatusCode.OK, result);
-                    }
-
-                    if (requestKey.Length == 128)
-                    {
-                        // todo user requestKey
-                    }
-
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                    RequestReturnObject result = await RequestRepository.GetRequests(trackId, query, continuationToken == null ? null : continuationToken);
+                    return req.CreateResponse(HttpStatusCode.OK, result);
                 }
             }
             catch (Exception e)

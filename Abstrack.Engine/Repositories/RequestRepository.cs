@@ -41,12 +41,13 @@ namespace Abstrack.Engine.Repositories
                 return null;
 
             // table storage insertion
-            RequestTableStorage requestTableStorage = new RequestTableStorage(cosmosResult.id, requestDTO.track_id, now)
+            RequestTableStorage requestTableStorage = new RequestTableStorage(cosmosResult.id, requestDTO.track_id)
             {
                 summary = summary,
                 tags = string.Join(",", tags),
                 title = title,
                 body = body,
+                date_created = now,
                 _ts = cosmosResult._ts
             };
 
@@ -58,17 +59,31 @@ namespace Abstrack.Engine.Repositories
             return cosmosResult;
         }
 
-        public static async Task<RequestDTO> GetRequest(string requestId)
+        public static async Task<RequestDTO> GetRequest(string trackId, string requestId)
         {
-            return await CosmosRepository<RequestDTO>.GetItemByIdAsync(requestId);
+            var result = await RequestTableStorageRepository.GetRequest(trackId, requestId);
+
+            if (result == null)
+                return null;
+
+            return new RequestDTO()
+            {
+                id = requestId,
+                track_id = trackId,
+                date_created = result.date_created,
+                title = result.title,
+                body = result.body,
+                summary = result.summary,
+                tags = result.tags.Split(',').ToList()
+            };
         }
 
-        public static async Task<RequestReturnObject> GetRequests(RequestQuery query, string continuationToken = null)
+        public static async Task<RequestReturnObject> GetRequests(string trackId, RequestQuery query, string continuationToken = null)
         {
             ContinuationToken token = null;
 
             if (continuationToken != null)
-                token = await ContinuationTokenRepository.GetContinuationToken(query.trackId, continuationToken);
+                token = await ContinuationTokenRepository.GetContinuationToken(trackId, continuationToken);
 
             var result = await CosmosRepository<RequestQueryDTO>.GetItemsSqlWithPagingAsync(query.sql, 50, token?.Continuation_Token == null ? null : token.Continuation_Token);
 
@@ -77,7 +92,7 @@ namespace Abstrack.Engine.Repositories
             if (!string.IsNullOrEmpty(result.continuationToken))
             {
                 newToken = AuthRepository.GenerateSHA256(result.continuationToken, DateTime.UtcNow.ToString());
-                ContinuationTokenRepository.InsertContinuationToken(new ContinuationToken(query.trackId, newToken)
+                ContinuationTokenRepository.InsertContinuationToken(new ContinuationToken(trackId, newToken)
                 {
                     Continuation_Token = result.continuationToken,
                 });

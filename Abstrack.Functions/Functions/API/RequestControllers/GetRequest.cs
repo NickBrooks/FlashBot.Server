@@ -14,21 +14,21 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
     public static class GetRequest
     {
         [FunctionName("GetRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "request/{requestId}")]HttpRequestMessage req, string requestId, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/request/{requestId}")]HttpRequestMessage req, string trackId, string requestId, TraceWriter log)
         {
             try
             {
-                // check request Id provided
-                if (!Tools.IsValidGuid(requestId))
-                    return req.CreateResponse(HttpStatusCode.NotFound);
+                // check requestId and trackId provided
+                if (!Tools.IsValidGuid(requestId) || !Tools.IsValidGuid(trackId))
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get the request
-                RequestDTO request = await RequestRepository.GetRequest(requestId);
+                RequestDTO request = await RequestRepository.GetRequest(trackId, requestId);
                 if (request == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get the track
-                Track track = await TrackRepository.GetTrack(request.track_id);
+                Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -36,26 +36,11 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 if (!track.is_private)
                     return req.CreateResponse(HttpStatusCode.OK, request);
 
-                // get request key to do checks
-                var requestKey = Tools.GetHeaderValue(req.Headers, "X-Request-Key");
-                if (requestKey == null)
+                // validate authKey
+                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // validate using track key
-                if (requestKey.Length == 64)
-                {
-                    if (track.track_key != requestKey || track.RowKey != request.track_id)
-                        return req.CreateResponse(HttpStatusCode.NotFound);
-
-                    return req.CreateResponse(HttpStatusCode.OK, request);
-                }
-
-                if (requestKey.Length == 128)
-                {
-                    // todo user requestKey
-                }
-
-                return req.CreateResponse(HttpStatusCode.Unauthorized);
+                return req.CreateResponse(HttpStatusCode.OK, request);
             }
             catch (Exception e)
             {

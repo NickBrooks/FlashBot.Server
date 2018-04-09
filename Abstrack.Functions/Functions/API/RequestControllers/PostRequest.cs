@@ -19,9 +19,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
             try
             {
                 // validate authKey
-                var trackKey = Tools.GetHeaderValue(req.Headers, "X-Track-Key");
-                var trackSecret = Tools.GetHeaderValue(req.Headers, "X-Track-Secret");
-                if (!AuthRepository.ValidateSHA256(trackId, trackKey, trackSecret))
+                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get track
