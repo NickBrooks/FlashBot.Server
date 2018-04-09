@@ -9,7 +9,7 @@ namespace Abstrack.Functions.Functions.Queue
         [FunctionName("DeleteTrackTagsFromTrack")]
         public static async void Run([QueueTrigger("delete-tracktags-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
         {
-            var listOfTrackTagsToDelete = await TrackTagRepository.GetListOfTrackTagsInTrack(trackId);
+            var listOfTrackTagsToDelete = await TrackTagRepository.GetTagsByTrack(trackId);
 
             foreach (var trackTag in listOfTrackTagsToDelete)
             {

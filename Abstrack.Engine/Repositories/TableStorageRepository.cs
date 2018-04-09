@@ -201,14 +201,14 @@ namespace Abstrack.Engine.Repositories
                 if (exists != null)
                 {
                     // update
-                    exists.Count++;
+                    exists.count++;
                     TableOperation op = TableOperation.Merge(exists);
                     await table.ExecuteAsync(op);
                 }
                 else
                 {
                     // insert
-                    trackTag.Count = 1;
+                    trackTag.count = 1;
                     TableOperation op = TableOperation.InsertOrReplace(trackTag);
                     await table.ExecuteAsync(op);
                 }
@@ -219,7 +219,7 @@ namespace Abstrack.Engine.Repositories
             }
         }
 
-        internal static async Task<List<TrackTag>> GetTrackTags(string trackId)
+        internal static async Task<List<TrackTag>> GetTagsByTrack(string trackId)
         {
             try
             {
@@ -240,7 +240,7 @@ namespace Abstrack.Engine.Repositories
                 }
                 while (token != null);
 
-                return trackTags.OrderByDescending(t => t.Count).ToList();
+                return trackTags.OrderByDescending(t => t.count).ToList();
             }
             catch
             {

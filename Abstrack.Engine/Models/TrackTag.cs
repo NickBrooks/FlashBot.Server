@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Abstrack.Engine.Models
 {
+    public class TrackTagDTO
+    {
+        public string tag { get; set; }
+        public int count { get; set; }
+    }
+
     public class TrackTag : TableEntity
     {
         public TrackTag(string trackId, string tag)
@@ -13,7 +19,7 @@ namespace Abstrack.Engine.Models
 
         public TrackTag() { }
 
-        public int Count { get; set; }
+        public int count { get; set; }
     }
 
     // queue items
