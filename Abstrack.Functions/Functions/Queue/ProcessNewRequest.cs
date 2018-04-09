@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace Abstrack.Functions.Functions.Queue
 {
@@ -12,20 +13,20 @@ namespace Abstrack.Functions.Functions.Queue
         [FunctionName("ProcessNewRequest")]
         public static async void Run([QueueTrigger("process-new-request", Connection = "AzureWebJobsStorage")]string queueItem, TraceWriter log)
         {
-            RequestDTO request = JsonConvert.DeserializeObject<RequestDTO>(queueItem);
+            RequestTableStorage request = JsonConvert.DeserializeObject<RequestTableStorage>(queueItem);
 
             // add tags to tracktag list
-            foreach (var tag in request.tags)
+            foreach (var tag in request.tags.Split(',').ToList())
             {
-                TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(request.track_id, tag));
+                TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(request.PartitionKey, tag));
             }
 
             // check rate limit
             Random rnd = new Random();
             if (rnd.Next(1, 8) == 3)
             {
-                var track = await TrackRepository.GetTrack(request.track_id);
-                int requestsLastHour = RequestTableStorageRepository.GetRequestsLastHourAsync(request.track_id);
+                var track = await TrackRepository.GetTrack(request.PartitionKey);
+                int requestsLastHour = RequestTableStorageRepository.GetRequestsLastHourAsync(request.PartitionKey);
 
                 if (requestsLastHour > track.rate_limit)
                 {
@@ -34,7 +35,7 @@ namespace Abstrack.Functions.Functions.Queue
                 }
             }
 
-            log.Info($"Post processing completed for request: {request.id}");
+            log.Info($"Post processing completed for request: {request.RowKey}");
         }
     }
 }

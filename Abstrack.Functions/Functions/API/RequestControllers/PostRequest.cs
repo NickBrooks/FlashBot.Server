@@ -22,6 +22,12 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
+                // validate request
+                RequestDTO request = await req.Content.ReadAsAsync<RequestDTO>();
+                request = RequestRepository.ValidateRequest(request);
+                if (request == null)
+                    return req.CreateResponse(HttpStatusCode.BadRequest);
+
                 // get track
                 Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
@@ -31,17 +37,16 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 if (track.rate_limit_exceeded)
                     return req.CreateResponse(HttpStatusCode.Forbidden);
 
-                // create the request
-                RequestDTO request = await req.Content.ReadAsAsync<RequestDTO>();
-                request.track_id = track.RowKey;
-                var newRequest = await RequestRepository.InsertRequest(request);
+                // create the request                
+                request.track_id = trackId;
+                RequestDTO newRequest = await RequestRepository.InsertRequest(request);
 
                 // if didn't create return bad response
                 if (newRequest == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.track_id);
+                response.Headers.Add("Location", newRequest.id);
                 return response;
             }
             catch (Exception e)

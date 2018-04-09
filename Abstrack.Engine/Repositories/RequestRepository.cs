@@ -11,27 +11,13 @@ namespace Abstrack.Engine.Repositories
     {
         public static async Task<RequestDTO> InsertRequest(RequestDTO requestDTO)
         {
-            if (requestDTO == null) return null;
-            if (requestDTO.body == null) return null;
-            if (requestDTO.tags.Count > 12) return null;
-
-            // check for provided summary
-            if (!string.IsNullOrEmpty(requestDTO.summary))
-                requestDTO.summary = requestDTO.summary.Length > 140 ? requestDTO.summary.Substring(0, 140) : requestDTO.summary;
-
-            var title = requestDTO.title.Length > 80 ? requestDTO.title.Substring(0, 80) : requestDTO.title;
-            var body = requestDTO.body.Length > 5000 ? requestDTO.body.Substring(0, 5000) : requestDTO.body;
-            var summary = string.IsNullOrEmpty(requestDTO.summary) ? Tools.GenerateSummary(requestDTO.body) : requestDTO.summary;
-            var tags = Tools.ValidateTags(requestDTO.tags);
-            var now = DateTime.UtcNow;
-
             // cosmos insertion
             RequestCosmos requestCosmos = new RequestCosmos()
             {
-                date_created = now,
-                summary = summary,
-                tags = tags,
-                title = title,
+                date_created = requestDTO.date_created,
+                summary = requestDTO.summary,
+                tags = requestDTO.tags,
+                title = requestDTO.title,
                 track_id = requestDTO.track_id
             };
 
@@ -43,18 +29,18 @@ namespace Abstrack.Engine.Repositories
             // table storage insertion
             RequestTableStorage requestTableStorage = new RequestTableStorage(cosmosResult.id, requestDTO.track_id)
             {
-                summary = summary,
-                tags = string.Join(",", tags),
-                title = title,
-                body = body,
-                date_created = now,
+                summary = requestDTO.summary,
+                tags = string.Join(",", requestDTO.tags),
+                title = requestDTO.title,
+                body = requestDTO.body,
+                date_created = requestDTO.date_created,
                 _ts = cosmosResult._ts
             };
 
             await RequestTableStorageRepository.InsertRequest(requestTableStorage);
 
             // add to queue for further processing
-            TableStorageRepository.AddMessageToQueue("process-new-request", JsonConvert.SerializeObject(requestDTO));
+            TableStorageRepository.AddMessageToQueue("process-new-request", JsonConvert.SerializeObject(requestTableStorage));
 
             return cosmosResult;
         }
@@ -117,6 +103,25 @@ namespace Abstrack.Engine.Repositories
         public static async void DeleteRequest(string requestId)
         {
             await CosmosRepository<RequestDTO>.DeleteItemAsync(requestId);
+        }
+
+        public static RequestDTO ValidateRequest(RequestDTO requestDTO)
+        {
+            if (requestDTO == null) return null;
+            if (requestDTO.body == null) return null;
+            if (requestDTO.tags.Count > 12) return null;
+
+            // check for provided summary
+            if (!string.IsNullOrEmpty(requestDTO.summary))
+                requestDTO.summary = requestDTO.summary.Length > 140 ? requestDTO.summary.Substring(0, 140) : requestDTO.summary;
+
+            requestDTO.title = requestDTO.title.Length > 80 ? requestDTO.title.Substring(0, 80) : requestDTO.title;
+            requestDTO.body = requestDTO.body.Length > 10000 ? requestDTO.body.Substring(0, 10000) : requestDTO.body;
+            requestDTO.summary = string.IsNullOrEmpty(requestDTO.summary) ? Tools.GenerateSummary(requestDTO.body) : requestDTO.summary;
+            requestDTO.tags = Tools.ValidateTags(requestDTO.tags);
+            requestDTO.date_created = DateTime.UtcNow;
+
+            return requestDTO;
         }
     }
 }
