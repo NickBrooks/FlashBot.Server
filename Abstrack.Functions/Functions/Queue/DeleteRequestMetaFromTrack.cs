@@ -12,11 +12,11 @@ namespace Abstrack.Functions.Functions.Queue
         [FunctionName("DeleteRequestMetaFromTrack")]
         public static async void Run([QueueTrigger("delete-requestmeta-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
         {
-            List<RequestMeta> listOfRequestMetaToDelete = await RequestMetaRepository.GetListOfRequestMetaInTrackAsync(trackId);
+            List<RequestTableStorage> requestsToDelete = await RequestTableStorageRepository.GetRequestsInTrack(trackId);
 
-            foreach (var requestMeta in listOfRequestMetaToDelete)
+            foreach (var request in requestsToDelete)
             {
-                RequestMetaRepository.DeleteRequestMeta(requestMeta);
+                RequestTableStorageRepository.DeleteRequest(request);
             }
 
             log.Info($"C# Queue trigger function deleted track tags: {trackId}");

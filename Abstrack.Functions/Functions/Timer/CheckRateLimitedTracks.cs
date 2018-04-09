@@ -15,11 +15,11 @@ namespace Abstrack.Functions.Functions.Timer
             int count = 0;
             foreach (var track in tracks)
             {
-                int requestsLastHour = RequestMetaRepository.GetRequestsLastHourAsync(track.RowKey);
+                int requestsLastHour = RequestTableStorageRepository.GetRequestsLastHourAsync(track.RowKey);
 
-                if (requestsLastHour <= track.Rate_Limit)
+                if (requestsLastHour <= track.rate_limit)
                 {
-                    track.Rate_Limit_Exceeded = false;
+                    track.rate_limit_exceeded = false;
                     TrackRepository.UpdateTrack(track);
                     count++;
                 }

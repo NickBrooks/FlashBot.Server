@@ -28,11 +28,11 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // check rate limit
-                if (track.Rate_Limit_Exceeded)
+                if (track.rate_limit_exceeded)
                     return req.CreateResponse(HttpStatusCode.Forbidden);
 
                 // create the request
-                Request request = await req.Content.ReadAsAsync<Request>();
+                RequestDTO request = await req.Content.ReadAsAsync<RequestDTO>();
                 request.track_id = track.RowKey;
                 var newRequest = await RequestRepository.InsertRequest(request);
 

@@ -33,14 +33,14 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get requestmeta
-                RequestMeta requestMeta = await RequestMetaRepository.GetRequestMeta(requestId);
+                RequestTableStorage request = await RequestTableStorageRepository.GetRequest(track.RowKey, requestId);
 
                 // authorized
-                if (requestMeta == null || track.RowKey != requestMeta.PartitionKey) return req.CreateResponse(HttpStatusCode.Unauthorized);
+                if (request == null || track.RowKey != request.PartitionKey) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // delete the request
-                RequestMetaRepository.DeleteRequestMeta(requestMeta);
-                RequestRepository.DeleteRequest(requestMeta.RowKey);
+                RequestTableStorageRepository.DeleteRequest(request);
+                RequestRepository.DeleteRequest(request.RowKey);
 
                 // return response
                 return req.CreateResponse(HttpStatusCode.OK);

@@ -23,7 +23,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     return req.CreateResponse(HttpStatusCode.NotFound);
 
                 // get the request
-                Request request = await RequestRepository.GetRequest(requestId);
+                RequestDTO request = await RequestRepository.GetRequest(requestId);
                 if (request == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -33,7 +33,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // public request so return it
-                if (!track.Is_Private)
+                if (!track.is_private)
                     return req.CreateResponse(HttpStatusCode.OK, request);
 
                 // get request key to do checks
@@ -44,7 +44,7 @@ namespace Abstrack.Functions.Functions.API.RequestControllers
                 // validate using track key
                 if (requestKey.Length == 64)
                 {
-                    if (track.Request_Key != requestKey || track.RowKey != request.track_id)
+                    if (track.request_key != requestKey || track.RowKey != request.track_id)
                         return req.CreateResponse(HttpStatusCode.NotFound);
 
                     return req.CreateResponse(HttpStatusCode.OK, request);

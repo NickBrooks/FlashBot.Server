@@ -72,7 +72,6 @@
     <Compile Include="Models\ContinuationToken.cs" />
     <Compile Include="Models\ExtendedUser.cs" />
     <Compile Include="Models\Request.cs" />
-    <Compile Include="Models\RequestMeta.cs" />
     <Compile Include="Models\RequestQuery.cs" />
     <Compile Include="Models\TrackTag.cs" />
     <Compile Include="Models\Track.cs" />
@@ -80,7 +79,7 @@
     <Compile Include="Repositories\ContinuationTokenRepository.cs" />
     <Compile Include="Repositories\CosmosRepository.cs" />
     <Compile Include="Repositories\ExtendedUserRepository.cs" />
-    <Compile Include="Repositories\RequestMetaRepository.cs" />
+    <Compile Include="Repositories\RequestTableStorageRepository.cs" />
     <Compile Include="Repositories\RequestRepository.cs" />
     <Compile Include="Repositories\TableStorageRepository.cs" />
     <Compile Include="Repositories\TrackRepository.cs" />

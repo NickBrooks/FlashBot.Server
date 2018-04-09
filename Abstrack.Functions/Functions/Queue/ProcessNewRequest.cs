@@ -12,7 +12,7 @@ namespace Abstrack.Functions.Functions.Queue
         [FunctionName("ProcessNewRequest")]
         public static async void Run([QueueTrigger("process-new-request", Connection = "AzureWebJobsStorage")]string queueItem, TraceWriter log)
         {
-            Request request = JsonConvert.DeserializeObject<Request>(queueItem);
+            RequestDTO request = JsonConvert.DeserializeObject<RequestDTO>(queueItem);
 
             // add tags to tracktag list
             foreach (var tag in request.tags)
@@ -20,22 +20,16 @@ namespace Abstrack.Functions.Functions.Queue
                 TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(request.track_id, tag));
             }
 
-            // add request to table storage
-            RequestMetaRepository.InsertRequestMeta(new RequestMeta(request.track_id, request.id)
-            {
-                Date_Created = request.date_created
-            });
-
             // check rate limit
             Random rnd = new Random();
             if (rnd.Next(1, 8) == 3)
             {
                 var track = await TrackRepository.GetTrack(request.track_id);
-                int requestsLastHour = RequestMetaRepository.GetRequestsLastHourAsync(request.track_id);
+                int requestsLastHour = RequestTableStorageRepository.GetRequestsLastHourAsync(request.track_id);
 
-                if (requestsLastHour > track.Rate_Limit)
+                if (requestsLastHour > track.rate_limit)
                 {
-                    track.Rate_Limit_Exceeded = true;
+                    track.rate_limit_exceeded = true;
                     TrackRepository.UpdateTrack(track);
                 }
             }

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Abstrack.Engine.Models;
+using Markdig;
 
 namespace Abstrack.Engine
 {
@@ -58,29 +59,20 @@ namespace Abstrack.Engine
             if (!IsValidGuid(trackId))
                 return null;
 
-            string keywordString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "keywords", true) == 0).Value;
-            List<string> keywords = string.IsNullOrEmpty(keywordString) ? new List<string>() : keywordString.Split(',').Take(10).ToList();
-
             string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
-            List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(10).ToList());
+            List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(12).ToList());
 
             return new RequestQuery()
             {
                 trackId = trackId,
-                keywords = keywords,
                 tags = tags,
-                sql = GenerateSQLQueryString(trackId, keywords, tags)
+                sql = GenerateSQLQueryString(trackId, tags)
             };
         }
 
-        private static string GenerateSQLQueryString(string trackId, List<string> keywords, List<string> tags)
+        private static string GenerateSQLQueryString(string trackId, List<string> tags)
         {
             var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary FROM r WHERE r.track_id = '{trackId}'";
-
-            foreach (var keyword in keywords)
-            {
-                sqlString += $" and CONTAINS(LOWER(r.body), LOWER(\"{keyword}\"))";
-            }
 
             foreach (var tag in tags)
             {
@@ -105,7 +97,7 @@ namespace Abstrack.Engine
                 validatedHashtags.Add(hashtag);
             }
 
-            return validatedHashtags.Take(16).ToList();
+            return validatedHashtags.Take(12).ToList();
         }
 
         public static string GetHeaderValue(HttpRequestHeaders headers, string value)
@@ -121,6 +113,14 @@ namespace Abstrack.Engine
                 return null;
 
             return key;
+        }
+
+        public static string GenerateSummary(string body)
+        {
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var plainText = Markdown.ToPlainText(body, pipeline);
+
+            return plainText.Length > 140 ? plainText.Substring(0, 140) : plainText;
         }
     }
 }
