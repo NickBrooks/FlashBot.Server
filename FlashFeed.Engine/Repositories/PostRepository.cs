@@ -11,14 +11,13 @@ namespace FlashFeed.Engine.Repositories
     {
         public static async Task<Post> InsertPost(PostDTO postDTO)
         {
-            string id = Guid.NewGuid().ToString();
             DateTime now = DateTime.UtcNow;
             long countdown = Tools.GetCountdownFromDateTime(now);
+            string id = countdown.ToString() + Guid.NewGuid().ToString();
 
             Post post = new Post(id, postDTO.track_id)
             {
                 body = postDTO.body,
-                countdown = countdown,
                 url = postDTO.url,
                 summary = postDTO.summary,
                 date_created = now,
@@ -32,8 +31,18 @@ namespace FlashFeed.Engine.Repositories
             if (result == null)
                 return null;
 
-            // add to queue for further processing
-            TableStorageRepository.AddMessageToQueue("process-new-post", JsonConvert.SerializeObject(post));
+            // shit hack to remove body for queue processing
+            post.body = null;
+
+            // add to queues for further processing
+            TableStorageRepository.AddMessageToQueue("process-new-post-increment-track-tags", JsonConvert.SerializeObject(post));
+
+            // check rate limit
+            //Random rnd = new Random();
+            //if (rnd.Next(1, 8) == 3)
+            //{
+            TableStorageRepository.AddMessageToQueue("process-new-post-check-rate-limit", post.PartitionKey);
+            //}
 
             return post;
         }

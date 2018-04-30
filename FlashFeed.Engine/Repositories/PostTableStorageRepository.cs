@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FlashFeed.Engine.Models;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace FlashFeed.Engine.Repositories
 {
@@ -27,9 +28,9 @@ namespace FlashFeed.Engine.Repositories
             return await TableStorageRepository.GetPost(trackId, postId);
         }
 
-        public static int GetPostsLastHourAsync(string track_id)
+        public static int PostsLastHourCount(string trackId)
         {
-            return TableStorageRepository.QueryEntities<Post>(t => t.PartitionKey == track_id && t.Timestamp > DateTime.UtcNow.AddHours(-1), "posts").Count; ;
+            return TableStorageRepository.GetPostCountSince(trackId, 60);
         }
     }
 }

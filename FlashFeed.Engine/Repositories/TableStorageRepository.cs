@@ -416,6 +416,22 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
+        internal static int GetPostCountSince(string trackId, int minutes)
+        {
+            // reference track table
+            CloudTable table = tableClient.GetTableReference(PostsTable);
+
+            long epochTime = Tools.GetCountdownFromDateTime(DateTime.UtcNow.AddMinutes(minutes * -1));
+
+            TableQuery<Post> rangeQuery = new TableQuery<Post>().Where(
+                TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId),
+                    TableOperators.And,
+                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, epochTime.ToString()))).Select(new string[] { "RowKey" });
+
+            return table.ExecuteQuery(rangeQuery).Count();
+        }
+
         internal static async void DeletePost(Post postMeta)
         {
             try

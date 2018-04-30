@@ -15,7 +15,7 @@ namespace FlashFeed.Functions.Functions.Timer
             int count = 0;
             foreach (var track in tracks)
             {
-                int postsLastHour = PostTableStorageRepository.GetPostsLastHourAsync(track.RowKey);
+                int postsLastHour = PostTableStorageRepository.PostsLastHourCount(track.RowKey);
 
                 if (postsLastHour <= track.rate_limit)
                 {

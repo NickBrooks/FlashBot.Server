@@ -29,7 +29,6 @@ namespace FlashFeed.Engine.Models
     public class Post : TableEntity
     {
         public DateTime date_created { get; set; }
-        public long countdown { get; set; }
         public string type { get; set; }
         public string tags { get; set; }
         public string title { get; set; }
@@ -53,7 +52,6 @@ namespace FlashFeed.Engine.Models
         public string id { get; set; }
         public string track_id { get; set; }
         public DateTime date_created { get; set; }
-        public long countdown { get; set; }
         public string type { get; set; }
         public List<string> tags { get; set; }
         public string title { get; set; }

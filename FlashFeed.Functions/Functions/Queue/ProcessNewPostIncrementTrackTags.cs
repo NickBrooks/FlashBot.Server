@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace FlashFeed.Functions.Functions.Queue
 {
-    public static class ProcessNewPost
+    public static class ProcessNewPostIncrementTrackTags
     {
-        [FunctionName("ProcessNewPost")]
+        [FunctionName("ProcessNewPostIncrementTrackTags")]
         public static async void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
         {
             Post post = JsonConvert.DeserializeObject<Post>(queueItem);
@@ -24,21 +24,7 @@ namespace FlashFeed.Functions.Functions.Queue
                 TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(post.PartitionKey, tag));
             }
 
-            // check rate limit
-            Random rnd = new Random();
-            if (rnd.Next(1, 8) == 3)
-            {
-                var track = await TrackRepository.GetTrack(post.PartitionKey);
-                int postsLastHour = PostTableStorageRepository.GetPostsLastHourAsync(post.PartitionKey);
-
-                if (postsLastHour > track.rate_limit)
-                {
-                    track.rate_limit_exceeded = true;
-                    TrackRepository.UpdateTrack(track);
-                }
-            }
-
-            log.Info($"Post processing completed for post: {post.RowKey}");
+            log.Info($"Tags incremented for post: {post.RowKey}");
         }
     }
 }
