@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
             try
             {
                 // check postId and trackId provided
-                if (!Tools.IsValidGuid(postId) || !Tools.IsValidGuid(trackId))
+                if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get the track
@@ -46,8 +47,20 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                 if (post == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // TODO: Convert to postDTO
-                return req.CreateResponse(HttpStatusCode.OK, post);
+                // convert to post DTO
+                return req.CreateResponse(HttpStatusCode.OK, new PostDTO()
+                {
+                    body = post.body,
+                    date_created = post.date_created,
+                    id = post.RowKey,
+                    summary = post.summary,
+                    tags = post.tags.Split(',').ToList(),
+                    title = post.title,
+                    track_id = post.PartitionKey,
+                    track_name = post.track_name,
+                    type = post.type,
+                    url = post.url
+                });
             }
             catch (Exception e)
             {

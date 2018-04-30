@@ -52,7 +52,7 @@ namespace FlashFeed.Engine
 
         private static string GenerateSQLQueryString(string trackId, List<string> tags)
         {
-            var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary FROM r WHERE r.track_id = '{trackId}'";
+            var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary, r.track_id, r.track_name, r.url, r.type FROM r WHERE r.track_id = '{trackId}'";
 
             foreach (var tag in tags)
             {

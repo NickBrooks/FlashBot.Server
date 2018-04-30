@@ -8,6 +8,7 @@ namespace FlashFeed.Engine.Models
     {
         public string id { get; set; }
         public string track_id { get; set; }
+        public string track_name { get; set; }
         public DateTime date_created { get; set; }
         public List<string> tags { get; set; }
         public string type { get; set; }
@@ -20,15 +21,20 @@ namespace FlashFeed.Engine.Models
     public class PostQueryDTO
     {
         public string id { get; set; }
+        public string track_id { get; set; }
+        public string track_name { get; set; }
         public DateTime date_created { get; set; }
         public List<string> tags { get; set; }
+        public string type { get; set; }
         public string title { get; set; }
         public string summary { get; set; }
+        public string url { get; set; }
     }
 
     public class Post : TableEntity
     {
         public DateTime date_created { get; set; }
+        public string track_name { get; set; }
         public string type { get; set; }
         public string tags { get; set; }
         public string title { get; set; }
@@ -45,18 +51,6 @@ namespace FlashFeed.Engine.Models
         public Post()
         {
         }
-    }
-
-    public class PostCosmos
-    {
-        public string id { get; set; }
-        public string track_id { get; set; }
-        public DateTime date_created { get; set; }
-        public string type { get; set; }
-        public List<string> tags { get; set; }
-        public string title { get; set; }
-        public string summary { get; set; }
-        public string url { get; set; }
     }
 
     public class PostReturnObject

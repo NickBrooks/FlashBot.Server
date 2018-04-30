@@ -22,6 +22,7 @@ namespace FlashFeed.Engine.Repositories
                 url = postDTO.url,
                 summary = postDTO.summary,
                 date_created = now,
+                track_name = postDTO.track_name,
                 tags = string.Join(",", postDTO.tags),
                 title = postDTO.title,
                 type = postDTO.type
@@ -75,9 +76,9 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // cosmos stuff
-        public static async Task<PostCosmos> InsertPostToCosmos(PostCosmos post)
+        public static async Task<PostQueryDTO> InsertPostToCosmos(PostQueryDTO post)
         {
-            return await (dynamic)CosmosRepository<PostCosmos>.CreateItemAsync(post);
+            return await (dynamic)CosmosRepository<PostQueryDTO>.CreateItemAsync(post);
         }
 
         public static async Task<PostReturnObject> QueryPosts(string trackId, PostQuery query, string continuationToken = null)
@@ -87,7 +88,7 @@ namespace FlashFeed.Engine.Repositories
             if (continuationToken != null)
                 token = await ContinuationTokenRepository.GetContinuationToken(trackId, continuationToken);
 
-            var result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql, 50, token?.Continuation_Token == null ? null : token.Continuation_Token);
+            var result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql, 30, token?.Continuation_Token == null ? null : token.Continuation_Token);
 
             // generate continuationToken
             string newToken = null;

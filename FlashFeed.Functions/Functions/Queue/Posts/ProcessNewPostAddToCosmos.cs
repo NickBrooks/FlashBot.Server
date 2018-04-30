@@ -17,11 +17,12 @@ namespace FlashFeed.Functions.Functions.Queue
 
             List<string> tags = post.tags.Split(',').ToList();
 
-            PostCosmos postCosmos = new PostCosmos()
+            PostQueryDTO postCosmos = new PostQueryDTO()
             {
                 id = post.RowKey,
                 track_id = post.PartitionKey,
                 date_created = post.date_created,
+                track_name = post.track_name,
                 summary = post.summary,
                 tags = tags,
                 title = post.title,
