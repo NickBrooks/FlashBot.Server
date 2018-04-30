@@ -403,7 +403,7 @@ namespace FlashFeed.Engine.Repositories
                 string predicate = postQuery.continuation_time == null ? trackPredicate : TableQuery.CombineFilters(trackPredicate, TableOperators.And, continuationPredicate);
 
                 // add the created clause
-                TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url" }).Take(count);
+                TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url", "has_image" }).Take(count);
 
                 List<PostQueryDTO> postQueryDTO = new List<PostQueryDTO>();
 

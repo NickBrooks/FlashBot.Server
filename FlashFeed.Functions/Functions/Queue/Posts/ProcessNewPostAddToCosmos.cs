@@ -25,6 +25,7 @@ namespace FlashFeed.Functions.Functions.Queue
                 track_name = post.track_name,
                 summary = post.summary,
                 tags = tags,
+                has_image = post.has_image,
                 title = post.title,
                 type = post.type,
                 url = post.url

@@ -25,7 +25,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // validate post
-                PostDTO post = await req.Content.ReadAsAsync<PostDTO>();
+                PostSubmitDTO post = await req.Content.ReadAsAsync<PostSubmitDTO>();
                 post = PostRepository.ValidatePost(post);
                 if (post == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest);

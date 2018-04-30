@@ -72,7 +72,7 @@ namespace FlashFeed.Engine
 
         private static string GenerateSQLQueryString(string trackId, List<string> tags, string continuation_time = null)
         {
-            var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary, r.track_id, r.track_name, r.url, r.type FROM r WHERE r.track_id = '{trackId}'";
+            var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary, r.track_id, r.track_name, r.url, r.type, r.has_image FROM r WHERE r.track_id = '{trackId}'";
 
             foreach (var tag in tags)
             {
@@ -103,6 +103,13 @@ namespace FlashFeed.Engine
             }
 
             return validatedHashtags.Take(12).ToList();
+        }
+
+        public static bool ValidateUri(string uri)
+        {
+            Uri uriResult;
+            return Uri.TryCreate(uri, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         public static string GetHeaderValue(HttpRequestHeaders headers, string value)
@@ -137,7 +144,8 @@ namespace FlashFeed.Engine
                 track_id = post.PartitionKey,
                 track_name = post.track_name,
                 type = post.type,
-                url = post.url
+                url = post.url,
+                has_image = post.has_image
             };
         }
     }

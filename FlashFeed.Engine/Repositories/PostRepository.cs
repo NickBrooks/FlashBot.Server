@@ -2,7 +2,10 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace FlashFeed.Engine.Repositories
@@ -10,7 +13,7 @@ namespace FlashFeed.Engine.Repositories
     public class PostRepository
     {
         // table storage stuff
-        public static async Task<Post> InsertPostToTableStorage(PostDTO postDTO)
+        public static async Task<Post> InsertPostToTableStorage(PostSubmitDTO postDTO)
         {
             long now = Tools.ConvertToEpoch(DateTime.UtcNow);
             long countdown = Tools.GetCountdownFromDateTime(now);
@@ -25,8 +28,14 @@ namespace FlashFeed.Engine.Repositories
                 track_name = postDTO.track_name,
                 tags = string.Join(",", postDTO.tags),
                 title = postDTO.title,
-                type = postDTO.type
+                type = postDTO.type,
+                has_image = null
             };
+
+            if (Tools.ValidateUri(postDTO.image_url))
+            {
+                post.has_image = await ProcessImage(id, postDTO.image_url);
+            }
 
             var result = await TableStorageRepository.InsertPost(post);
 
@@ -109,7 +118,7 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // validation
-        public static PostDTO ValidatePost(PostDTO postDTO)
+        public static PostSubmitDTO ValidatePost(PostSubmitDTO postDTO)
         {
             if (postDTO == null) return null;
             if (postDTO.title == null) return null;
@@ -117,11 +126,7 @@ namespace FlashFeed.Engine.Repositories
             if (postDTO.tags.Count > 12) return null;
 
             // check valid URL
-            Uri uriResult;
-            bool validURI = Uri.TryCreate(postDTO.url, UriKind.Absolute, out uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-
-            if (!string.IsNullOrEmpty(postDTO.url) && !validURI)
+            if (!string.IsNullOrEmpty(postDTO.url) && !Tools.ValidateUri(postDTO.url))
                 return null;
 
             // if has URL
@@ -138,6 +143,86 @@ namespace FlashFeed.Engine.Repositories
             postDTO.tags = Tools.ValidateTags(postDTO.tags);
 
             return postDTO;
+        }
+
+        // process image
+        private static async Task<string> ProcessImage(string postId, string imageUrl)
+        {
+            using (WebClient webClient = new WebClient())
+            {
+                byte[] data = webClient.DownloadData(imageUrl);
+                string contentType = webClient.ResponseHeaders["Content-Type"];
+
+                // check correct content type
+                if (!new[] { "image/jpeg", "image/png" }.Any(s => s == contentType))
+                    return null;
+
+                // generate small thumb
+                using (MemoryStream input = new MemoryStream(data))
+                {
+                    using (MemoryStream output = new MemoryStream())
+                    {
+                        Images.CropSquare(32, input, output);
+
+                        using (var fetchedImage = Image.FromStream(output))
+                        {
+                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/thumb_mini", contentType);
+                        }
+                    }
+                }
+
+                // generate medium thumb
+                using (MemoryStream input = new MemoryStream(data))
+                {
+                    using (MemoryStream output = new MemoryStream())
+                    {
+                        Images.CropSquare(150, input, output);
+
+                        using (var fetchedImage = Image.FromStream(output))
+                        {
+                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/thumb", contentType);
+                        }
+                    }
+                }
+
+                // generate hero
+                using (MemoryStream input = new MemoryStream(data))
+                {
+                    using (MemoryStream output = new MemoryStream())
+                    {
+                        Images.GenerateHero(400, input, output);
+
+                        using (var fetchedImage = Image.FromStream(output))
+                        {
+                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/hero", contentType);
+                        }
+                    }
+                }
+
+                // save a fullish size
+                using (MemoryStream input = new MemoryStream(data))
+                {
+                    using (MemoryStream output = new MemoryStream())
+                    {
+                        Images.ResizeToMax(800, input, output);
+
+                        using (var fetchedImage = Image.FromStream(output))
+                        {
+                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/full", contentType);
+                        }
+                    }
+                }
+
+                switch (contentType)
+                {
+                    case "image/jpeg":
+                        return "jpeg";
+                    case "image/png":
+                        return "png";
+                    default:
+                        return null;
+                }
+            }
         }
     }
 }
