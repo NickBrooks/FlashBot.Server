@@ -1,2 +1,2 @@
-# Abstrack.Admin
-Public and user admin side of Abstrack.
+# FlashFeed.Admin
+Public and user admin side of FlashFeed.

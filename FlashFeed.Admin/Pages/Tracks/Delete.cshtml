@@ -1,0 +1,18 @@
+﻿@page "{id}"
+@model FlashFeed.Admin.Pages.Tracks.DeleteModel
+@{
+    ViewData["Title"] = "Delete " + Model.Track.name;
+}
+
+<form method="post">
+    <div class="card mb-3">
+        <h5 class="card-header">
+            Delete @Model.Track.name
+        </h5>
+        <div class="card-body">
+            <p class="card-text">This will delete <strong>@Model.Track.name</strong> and all requests within the track. Are you sure you wish to proceed?</p>
+            <button type="submit" class="btn btn-danger"><i class="fas fa-frown"></i> Yes</button>
+            <a class="btn btn-light" asp-page="./Index"><i class="fas fa-smile"></i> Nope, not today</a>
+        </div>
+    </div>
+</form>
