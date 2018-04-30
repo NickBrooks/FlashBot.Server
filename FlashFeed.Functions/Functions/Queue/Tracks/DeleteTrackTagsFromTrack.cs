@@ -7,7 +7,7 @@ namespace FlashFeed.Functions.Functions.Queue
     public static class DeleteTrackTagsFromTrack
     {
         [FunctionName("DeleteTrackTagsFromTrack")]
-        public static async void Run([QueueTrigger("delete-tracktags-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
+        public static async void Run([QueueTrigger("delete-tracktags-from-track", Connection = "TABLESTORAGE_CONNECTION")]string trackId, TraceWriter log)
         {
             var listOfTrackTagsToDelete = await TrackTagRepository.GetTagsByTrack(trackId);
 

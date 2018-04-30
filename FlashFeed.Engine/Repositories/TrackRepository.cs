@@ -110,7 +110,6 @@ namespace FlashFeed.Engine.Repositories
             // send messages to queue
             TableStorageRepository.AddMessageToQueue("delete-posts-from-track", trackId);
             TableStorageRepository.AddMessageToQueue("delete-tracktags-from-track", trackId);
-            TableStorageRepository.AddMessageToQueue("delete-postmeta-from-track", trackId);
 
             // then delete track
             TableStorageRepository.DeleteTrack(trackId);

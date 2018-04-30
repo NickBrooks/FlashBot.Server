@@ -8,7 +8,7 @@ namespace FlashFeed.Functions.Functions.Queue
     public static class DeletePostsFromTrack
     {
         [FunctionName("DeletePostsFromTrack")]
-        public static void Run([QueueTrigger("delete-posts-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
+        public static void Run([QueueTrigger("delete-posts-from-track", Connection = "TABLESTORAGE_CONNECTION")]string trackId, TraceWriter log)
         {
             List<string> listOfPostsToDelete = PostRepository.GetPostIdsInTrack(trackId);
 

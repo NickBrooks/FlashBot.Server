@@ -425,17 +425,14 @@ namespace FlashFeed.Engine.Repositories
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
 
-            TableQuery<DynamicTableEntity> projectionQuery = new TableQuery<DynamicTableEntity>().Where(
+            TableQuery<Post> projectionQuery = new TableQuery<Post>().Where(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId)).Select(new string[] { "RowKey" });
-
-            // Define an entity resolver to work with the entity after retrieval.
-            EntityResolver<string> resolver = (pk, rk, ts, props, etag) => props.ContainsKey("RowKey") ? props["RowKey"].StringValue : null;
 
             List<string> idsInTrack = new List<string>();
 
-            foreach (string id in table.ExecuteQuery(projectionQuery, resolver, null, null))
+            foreach (Post post in table.ExecuteQuery(projectionQuery))
             {
-                idsInTrack.Add(id);
+                idsInTrack.Add(post.RowKey);
             }
 
             return idsInTrack;
