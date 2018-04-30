@@ -29,12 +29,12 @@ namespace FlashFeed.Engine
             return Guid.TryParse(guid, out Guid o);
         }
 
-        public static RequestQuery GetQueryFromQueryParams(string trackId, IEnumerable<KeyValuePair<string, string>> queryParams)
+        public static PostQuery GetQueryFromQueryParams(string trackId, IEnumerable<KeyValuePair<string, string>> queryParams)
         {
             string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
             List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(12).ToList());
 
-            return new RequestQuery()
+            return new PostQuery()
             {
                 tags = tags,
                 sql = GenerateSQLQueryString(trackId, tags)

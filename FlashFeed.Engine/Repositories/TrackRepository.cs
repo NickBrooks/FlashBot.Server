@@ -33,7 +33,7 @@ namespace FlashFeed.Engine.Repositories
                 description = description,
                 is_private = isPrivate,
                 rate_limit = extendedUser.Rate_Per_Track,
-                max_requests = extendedUser.Max_Track_Storage
+                max_posts = extendedUser.Max_Track_Storage
             };
 
             // create the track
@@ -88,9 +88,9 @@ namespace FlashFeed.Engine.Repositories
             return track;
         }
 
-        public static async Task<Track> GetTrackByRequestKey(string requestKey, bool rateLimited = true)
+        public static async Task<Track> GetTrackByPostKey(string postKey, bool rateLimited = true)
         {
-            var track = await TableStorageRepository.GetTrackByRequestKey(requestKey);
+            var track = await TableStorageRepository.GetTrackByPostKey(postKey);
 
             if (track == null)
                 return null;
@@ -108,9 +108,9 @@ namespace FlashFeed.Engine.Repositories
             ExtendedUserRepository.DecrementTrackCount(track.PartitionKey, track.is_private);
 
             // send messages to queue
-            TableStorageRepository.AddMessageToQueue("delete-requests-from-track", trackId);
+            TableStorageRepository.AddMessageToQueue("delete-posts-from-track", trackId);
             TableStorageRepository.AddMessageToQueue("delete-tracktags-from-track", trackId);
-            TableStorageRepository.AddMessageToQueue("delete-requestmeta-from-track", trackId);
+            TableStorageRepository.AddMessageToQueue("delete-postmeta-from-track", trackId);
 
             // then delete track
             TableStorageRepository.DeleteTrack(trackId);

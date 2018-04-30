@@ -9,12 +9,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.Functions.API.RequestControllers
+namespace FlashFeed.Functions.Functions.API.PostControllers
 {
-    public static class PostRequest
+    public static class PostPost
     {
-        [FunctionName("PostRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "track/{trackId}/request")]HttpRequestMessage req, string trackId, TraceWriter log)
+        [FunctionName("PostPost")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "track/{trackId}/post")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
             try
             {
@@ -24,10 +24,10 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                 if (!AuthRepository.ValidateSHA256(trackId, keySecret))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // validate request
-                RequestDTO request = await req.Content.ReadAsAsync<RequestDTO>();
-                request = RequestRepository.ValidateRequest(request);
-                if (request == null)
+                // validate post
+                PostDTO post = await req.Content.ReadAsAsync<PostDTO>();
+                post = PostRepository.ValidatePost(post);
+                if (post == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 // get track
@@ -39,16 +39,16 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                 if (track.rate_limit_exceeded)
                     return req.CreateResponse(HttpStatusCode.Forbidden);
 
-                // create the request
-                request.track_id = trackId;
-                RequestDTO newRequest = await RequestRepository.InsertRequest(request);
+                // create the post
+                post.track_id = trackId;
+                PostDTO newPost = await PostRepository.InsertPost(post);
 
                 // if didn't create return bad response
-                if (newRequest == null)
+                if (newPost == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newRequest.id);
+                response.Headers.Add("Location", newPost.id);
                 return response;
             }
             catch (Exception e)

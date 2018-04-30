@@ -2,7 +2,7 @@
 
 namespace FlashFeed.Engine.Models
 {
-    public class RequestQuery
+    public class PostQuery
     {
         public List<string> tags { get; set; }
         public string sql { get; set; }

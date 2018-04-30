@@ -23,7 +23,7 @@ namespace FlashFeed.Engine.Models
         public string description { get; set; }
         public int rate_limit { get; set; }
         public bool rate_limit_exceeded { get; set; }
-        public int max_requests { get; set; }
+        public int max_posts { get; set; }
 
         public Track(string partitionKey)
         {

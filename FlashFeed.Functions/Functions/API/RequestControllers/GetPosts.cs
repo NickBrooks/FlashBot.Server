@@ -1,33 +1,40 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using FlashFeed.Engine;
 using FlashFeed.Engine.Models;
 using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.Functions.API.RequestControllers
+namespace FlashFeed.Functions.Functions.API.PostControllers
 {
-    public static class GetRequest
+    public static class GetPosts
     {
-        [FunctionName("GetRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/request/{requestId}")]HttpRequestMessage req, string trackId, string requestId, TraceWriter log)
+        [FunctionName("GetPosts")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
             try
             {
-                // check requestId and trackId provided
-                if (!Tools.IsValidGuid(requestId) || !Tools.IsValidGuid(trackId))
+                // check valid trackId provided
+                if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                // check for continuation token
+                var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
+
+                // get query object from query params
+                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
                 // get the track
                 Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // private request so check key
+                // private post so check key
                 if (track.is_private)
                 {
                     KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
@@ -41,12 +48,8 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
 
-                // get the request
-                RequestDTO request = await RequestRepository.GetRequest(trackId, requestId);
-                if (request == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-                return req.CreateResponse(HttpStatusCode.OK, request);
+                PostReturnObject posts = await PostRepository.GetPosts(trackId, query, continuationToken == null ? null : continuationToken);
+                return req.CreateResponse(HttpStatusCode.OK, posts);
             }
             catch (Exception e)
             {

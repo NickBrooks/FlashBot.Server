@@ -71,8 +71,8 @@
   <ItemGroup>
     <Compile Include="Models\ContinuationToken.cs" />
     <Compile Include="Models\ExtendedUser.cs" />
-    <Compile Include="Models\Request.cs" />
-    <Compile Include="Models\RequestQuery.cs" />
+    <Compile Include="Models\Post.cs" />
+    <Compile Include="Models\PostQuery.cs" />
     <Compile Include="Models\TrackTag.cs" />
     <Compile Include="Models\Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,8 +80,8 @@
     <Compile Include="Repositories\ContinuationTokenRepository.cs" />
     <Compile Include="Repositories\CosmosRepository.cs" />
     <Compile Include="Repositories\ExtendedUserRepository.cs" />
-    <Compile Include="Repositories\RequestTableStorageRepository.cs" />
-    <Compile Include="Repositories\RequestRepository.cs" />
+    <Compile Include="Repositories\PostTableStorageRepository.cs" />
+    <Compile Include="Repositories\PostRepository.cs" />
     <Compile Include="Repositories\TableStorageRepository.cs" />
     <Compile Include="Repositories\TrackRepository.cs" />
     <Compile Include="Repositories\TrackTagRepository.cs" />

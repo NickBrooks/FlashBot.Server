@@ -21,7 +21,7 @@ namespace FlashFeed.Engine.Repositories
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
-        private static readonly string RequestsTable = "requests";
+        private static readonly string PostsTable = "posts";
         private static readonly string ContinuationTokenTable = "continuationtokens";
 
         /// <summary>
@@ -162,11 +162,11 @@ namespace FlashFeed.Engine.Repositories
         }
 
         /// <summary>
-        /// Fetches the track based upon the requestKey.
+        /// Fetches the track based upon the postKey.
         /// </summary>
-        /// <param name="requestKey"></param>
+        /// <param name="postKey"></param>
         /// <returns></returns>
-        internal static async Task<Track> GetTrackByRequestKey(string requestKey)
+        internal static async Task<Track> GetTrackByPostKey(string postKey)
         {
             try
             {
@@ -174,7 +174,7 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(TracksTable);
 
                 // query tracks
-                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("request_key", QueryComparisons.Equal, requestKey));
+                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("post_key", QueryComparisons.Equal, postKey));
 
                 TableContinuationToken token = null;
 
@@ -344,22 +344,22 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<RequestTableStorage> InsertRequest(RequestTableStorage request)
+        internal static async Task<PostTableStorage> InsertPost(PostTableStorage post)
         {
             try
             {
                 // reference users table
-                CloudTable table = tableClient.GetTableReference(RequestsTable);
+                CloudTable table = tableClient.GetTableReference(PostsTable);
                 await table.CreateIfNotExistsAsync();
 
                 // insert the user
-                TableOperation op = TableOperation.Insert(request);
+                TableOperation op = TableOperation.Insert(post);
                 var result = await table.ExecuteAsync(op);
 
                 if (result == null)
                     return null;
 
-                return request;
+                return post;
             }
             catch
             {
@@ -367,19 +367,19 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<RequestTableStorage> GetRequest(string trackId, string requestId)
+        internal static async Task<PostTableStorage> GetPost(string trackId, string postId)
         {
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(RequestsTable);
+                CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<RequestTableStorage>(trackId, requestId);
+                TableOperation retrieveOperation = TableOperation.Retrieve<PostTableStorage>(trackId, postId);
 
                 // Execute the retrieve operation.
                 TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
-                return (RequestTableStorage)retrievedResult.Result;
+                return (PostTableStorage)retrievedResult.Result;
             }
             catch
             {
@@ -387,28 +387,28 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<List<RequestTableStorage>> GetRequestsInTrack(string trackId)
+        internal static async Task<List<PostTableStorage>> GetPostsInTrack(string trackId)
         {
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(RequestsTable);
+                CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 // query tracks
-                TableQuery<RequestTableStorage> query = new TableQuery<RequestTableStorage>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
+                TableQuery<PostTableStorage> query = new TableQuery<PostTableStorage>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
 
-                List<RequestTableStorage> requestMetaList = new List<RequestTableStorage>();
+                List<PostTableStorage> postMetaList = new List<PostTableStorage>();
                 TableContinuationToken token = null;
 
                 do
                 {
                     var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
                     token = queryResponse.ContinuationToken;
-                    requestMetaList.AddRange(queryResponse.Results);
+                    postMetaList.AddRange(queryResponse.Results);
                 }
                 while (token != null);
 
-                return requestMetaList.ToList();
+                return postMetaList.ToList();
             }
             catch
             {
@@ -416,14 +416,14 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
-        internal static async void DeleteRequest(RequestTableStorage requestMeta)
+        internal static async void DeletePost(PostTableStorage postMeta)
         {
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(RequestsTable);
+                CloudTable table = tableClient.GetTableReference(PostsTable);
 
-                TableOperation op = TableOperation.Delete(requestMeta);
+                TableOperation op = TableOperation.Delete(postMeta);
                 await table.ExecuteAsync(op);
             }
             catch

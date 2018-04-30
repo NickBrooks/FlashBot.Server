@@ -18,7 +18,7 @@ namespace FlashFeed.Functions.Functions.API.TrackControllers
         {
             try
             {
-                // check requestId and trackId provided
+                // check postId and trackId provided
                 if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 

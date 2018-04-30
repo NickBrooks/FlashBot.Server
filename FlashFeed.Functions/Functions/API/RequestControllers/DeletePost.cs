@@ -9,12 +9,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.Functions.API.RequestControllers
+namespace FlashFeed.Functions.Functions.API.PostControllers
 {
-    public static class DeleteRequest
+    public static class DeletePost
     {
-        [FunctionName("DeleteRequest")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "track/{trackId}/request/{requestId}")]HttpRequestMessage req, string trackId, string requestId, TraceWriter log)
+        [FunctionName("DeletePost")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "track/{trackId}/post/{postId}")]HttpRequestMessage req, string trackId, string postId, TraceWriter log)
         {
             try
             {
@@ -29,14 +29,14 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                 if (track == null || track.track_key != keySecret.Key)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // get request
-                RequestTableStorage request = await RequestTableStorageRepository.GetRequest(trackId, requestId);
-                if (request == null || track.RowKey != request.PartitionKey)
+                // get post
+                PostTableStorage post = await PostTableStorageRepository.GetPost(trackId, postId);
+                if (post == null || track.RowKey != post.PartitionKey)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // delete the request
-                RequestTableStorageRepository.DeleteRequest(request);
-                RequestRepository.DeleteRequest(request.RowKey);
+                // delete the post
+                PostTableStorageRepository.DeletePost(post);
+                PostRepository.DeletePost(post.RowKey);
 
                 // return response
                 return req.CreateResponse(HttpStatusCode.OK);
