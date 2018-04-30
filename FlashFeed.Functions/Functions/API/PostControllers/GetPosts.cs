@@ -11,16 +11,22 @@ using System.Threading.Tasks;
 
 namespace FlashFeed.Functions.Functions.API.PostControllers
 {
-    public static class GetPost
+    public static class GetPosts
     {
-        [FunctionName("GetPost")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequestMessage req, string trackId, string postId, TraceWriter log)
+        [FunctionName("GetPosts")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequestMessage req, string trackId, TraceWriter log)
         {
             try
             {
-                // check postId and trackId provided
-                if (!Tools.IsValidGuid(postId) || !Tools.IsValidGuid(trackId))
+                // check valid trackId provided
+                if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                // check for continuation token
+                var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
+
+                // get query object from query params
+                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
                 // get the track
                 Track track = await TrackRepository.GetTrack(trackId);
@@ -41,12 +47,8 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
 
-                // get the post
-                PostDTO post = await PostRepository.GetPost(trackId, postId);
-                if (post == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-                return req.CreateResponse(HttpStatusCode.OK, post);
+                PostReturnObject posts = await PostRepository.QueryPosts(trackId, query, continuationToken == null ? null : continuationToken);
+                return req.CreateResponse(HttpStatusCode.OK, posts);
             }
             catch (Exception e)
             {

@@ -30,13 +30,13 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get post
-                Post post = await PostTableStorageRepository.GetPost(trackId, postId);
+                Post post = await PostRepository.GetPost(trackId, postId);
                 if (post == null || track.RowKey != post.PartitionKey)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // delete the post
-                PostTableStorageRepository.DeletePost(post);
-                PostRepository.DeletePost(post.RowKey);
+                PostRepository.DeletePostFromTableStorage(post);
+                PostRepository.DeletePostFromCosmos(post.RowKey);
 
                 // return response
                 return req.CreateResponse(HttpStatusCode.OK);

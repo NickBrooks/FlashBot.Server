@@ -10,7 +10,7 @@ namespace FlashFeed.Functions.Functions.Queue
         public static async void Run([QueueTrigger("process-new-post-check-rate-limit", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
         {
             var track = await TrackRepository.GetTrack(queueItem);
-            int postsLastHour = PostTableStorageRepository.PostsLastHourCount(queueItem);
+            int postsLastHour = PostRepository.PostsLastHourCount(queueItem);
 
             if (postsLastHour > track.rate_limit)
             {

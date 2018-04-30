@@ -12,11 +12,11 @@ namespace FlashFeed.Functions.Functions.Queue
         [FunctionName("DeletePostMetaFromTrack")]
         public static async void Run([QueueTrigger("delete-postmeta-from-track", Connection = "AzureWebJobsStorage")]string trackId, TraceWriter log)
         {
-            List<Post> postsToDelete = await PostTableStorageRepository.GetPostsInTrack(trackId);
+            List<Post> postsToDelete = await PostRepository.GetPostsInTrack(trackId);
 
             foreach (var post in postsToDelete)
             {
-                PostTableStorageRepository.DeletePost(post);
+                PostRepository.DeletePostFromTableStorage(post);
             }
 
             log.Info($"C# Queue trigger function deleted track tags: {trackId}");

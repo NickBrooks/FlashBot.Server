@@ -41,7 +41,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
 
                 // create the post
                 post.track_id = trackId;
-                Post newPost = await PostRepository.InsertPost(post);
+                Post newPost = await PostRepository.InsertPostToTableStorage(post);
 
                 // if didn't create return bad response
                 if (newPost == null)

@@ -9,7 +9,8 @@ namespace FlashFeed.Engine.Repositories
 {
     public class PostRepository
     {
-        public static async Task<Post> InsertPost(PostDTO postDTO)
+        // table storage stuff
+        public static async Task<Post> InsertPostToTableStorage(PostDTO postDTO)
         {
             DateTime now = DateTime.UtcNow;
             long countdown = Tools.GetCountdownFromDateTime(now);
@@ -26,7 +27,7 @@ namespace FlashFeed.Engine.Repositories
                 type = postDTO.type
             };
 
-            var result = await PostTableStorageRepository.InsertPost(post);
+            var result = await TableStorageRepository.InsertPost(post);
 
             if (result == null)
                 return null;
@@ -36,37 +37,50 @@ namespace FlashFeed.Engine.Repositories
 
             // add to queues for further processing
             TableStorageRepository.AddMessageToQueue("process-new-post-increment-track-tags", JsonConvert.SerializeObject(post));
+            TableStorageRepository.AddMessageToQueue("process-new-post-add-to-cosmos", JsonConvert.SerializeObject(post));
 
             // check rate limit
-            //Random rnd = new Random();
-            //if (rnd.Next(1, 8) == 3)
-            //{
-            TableStorageRepository.AddMessageToQueue("process-new-post-check-rate-limit", post.PartitionKey);
-            //}
+            Random rnd = new Random();
+            if (rnd.Next(1, 8) == 3)
+            {
+                TableStorageRepository.AddMessageToQueue("process-new-post-check-rate-limit", post.PartitionKey);
+            }
 
             return post;
         }
 
-        public static async Task<PostDTO> GetPost(string trackId, string postId)
+        public static List<string> GetPostIdsInTrack(string trackId)
         {
-            var result = await PostTableStorageRepository.GetPost(trackId, postId);
-
-            if (result == null)
-                return null;
-
-            return new PostDTO()
-            {
-                id = postId,
-                track_id = trackId,
-                date_created = result.date_created,
-                title = result.title,
-                body = result.body,
-                summary = result.summary,
-                tags = result.tags.Split(',').ToList()
-            };
+            return TableStorageRepository.GetPostIdsInTrack(trackId);
         }
 
-        public static async Task<PostReturnObject> GetPosts(string trackId, PostQuery query, string continuationToken = null)
+        public static async Task<List<Post>> GetPostsInTrack(string trackId)
+        {
+            return await TableStorageRepository.GetPostsInTrack(trackId);
+        }
+
+        public static void DeletePostFromTableStorage(Post postMeta)
+        {
+            TableStorageRepository.DeletePost(postMeta);
+        }
+
+        public static async Task<Post> GetPost(string trackId, string postId)
+        {
+            return await TableStorageRepository.GetPost(trackId, postId);
+        }
+
+        public static int PostsLastHourCount(string trackId)
+        {
+            return TableStorageRepository.GetPostCountSince(trackId, 60);
+        }
+
+        // cosmos stuff
+        public static async Task<PostCosmos> InsertPostToCosmos(PostCosmos post)
+        {
+            return await (dynamic)CosmosRepository<PostCosmos>.CreateItemAsync(post);
+        }
+
+        public static async Task<PostReturnObject> QueryPosts(string trackId, PostQuery query, string continuationToken = null)
         {
             ContinuationToken token = null;
 
@@ -97,16 +111,12 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
-        public static async Task<List<PostDTO>> GetListOfPostIdsInTrack(string trackId)
-        {
-            return await CosmosRepository<PostDTO>.GetItemsSqlAsync($"SELECT r.id FROM r WHERE r.track_id = '{trackId}'");
-        }
-
-        public static async void DeletePost(string postId)
+        public static async void DeletePostFromCosmos(string postId)
         {
             await CosmosRepository<PostDTO>.DeleteItemAsync(postId);
         }
 
+        // validation
         public static PostDTO ValidatePost(PostDTO postDTO)
         {
             if (postDTO == null) return null;

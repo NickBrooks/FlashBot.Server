@@ -80,7 +80,6 @@
     <Compile Include="Repositories\ContinuationTokenRepository.cs" />
     <Compile Include="Repositories\CosmosRepository.cs" />
     <Compile Include="Repositories\ExtendedUserRepository.cs" />
-    <Compile Include="Repositories\PostTableStorageRepository.cs" />
     <Compile Include="Repositories\PostRepository.cs" />
     <Compile Include="Repositories\TableStorageRepository.cs" />
     <Compile Include="Repositories\TrackRepository.cs" />

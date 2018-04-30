@@ -51,6 +51,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
+
         internal static List<Track> GetRateLimitedTracks()
         {
             return QueryEntities<Track>(t => t.rate_limit_exceeded == true, TracksTable);
@@ -416,6 +417,27 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
+        internal static List<string> GetPostIdsInTrack(string trackId)
+        {
+            // reference track table
+            CloudTable table = tableClient.GetTableReference(PostsTable);
+
+            TableQuery<DynamicTableEntity> projectionQuery = new TableQuery<DynamicTableEntity>().Where(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId)).Select(new string[] { "RowKey" });
+
+            // Define an entity resolver to work with the entity after retrieval.
+            EntityResolver<string> resolver = (pk, rk, ts, props, etag) => props.ContainsKey("RowKey") ? props["RowKey"].StringValue : null;
+
+            List<string> idsInTrack = new List<string>();
+
+            foreach (string id in table.ExecuteQuery(projectionQuery, resolver, null, null))
+            {
+                idsInTrack.Add(id);
+            }
+
+            return idsInTrack;
+        }
+
         internal static int GetPostCountSince(string trackId, int minutes)
         {
             // reference track table
@@ -423,13 +445,13 @@ namespace FlashFeed.Engine.Repositories
 
             long epochTime = Tools.GetCountdownFromDateTime(DateTime.UtcNow.AddMinutes(minutes * -1));
 
-            TableQuery<Post> rangeQuery = new TableQuery<Post>().Where(
+            TableQuery<DynamicTableEntity> projectionQuery = new TableQuery<DynamicTableEntity>().Where(
                 TableQuery.CombineFilters(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId),
                     TableOperators.And,
                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, epochTime.ToString()))).Select(new string[] { "RowKey" });
 
-            return table.ExecuteQuery(rangeQuery).Count();
+            return table.ExecuteQuery(projectionQuery).Count();
         }
 
         internal static async void DeletePost(Post postMeta)
@@ -495,7 +517,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async void AddMessageToQueue(string queueName, string messageBody)
+        public static async void AddMessageToQueue(string queueName, string messageBody)
         {
             // Retrieve a reference to a queue.
             CloudQueue queue = queueClient.GetQueueReference(queueName);

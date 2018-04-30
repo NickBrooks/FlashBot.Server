@@ -11,22 +11,16 @@ using System.Threading.Tasks;
 
 namespace FlashFeed.Functions.Functions.API.PostControllers
 {
-    public static class GetPosts
+    public static class GetPost
     {
-        [FunctionName("GetPosts")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequestMessage req, string trackId, TraceWriter log)
+        [FunctionName("GetPost")]
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequestMessage req, string trackId, string postId, TraceWriter log)
         {
             try
             {
-                // check valid trackId provided
-                if (!Tools.IsValidGuid(trackId))
+                // check postId and trackId provided
+                if (!Tools.IsValidGuid(postId) || !Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-                // check for continuation token
-                var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
-
-                // get query object from query params
-                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
                 // get the track
                 Track track = await TrackRepository.GetTrack(trackId);
@@ -47,8 +41,13 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
 
-                PostReturnObject posts = await PostRepository.GetPosts(trackId, query, continuationToken == null ? null : continuationToken);
-                return req.CreateResponse(HttpStatusCode.OK, posts);
+                // get the post
+                Post post = await PostRepository.GetPost(trackId, postId);
+                if (post == null)
+                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                // TODO: Convert to postDTO
+                return req.CreateResponse(HttpStatusCode.OK, post);
             }
             catch (Exception e)
             {
