@@ -24,13 +24,30 @@ namespace FlashFeed.Engine
             return true;
         }
 
+        internal static long GetCountdownFromDateTime(long now)
+        {
+            // Sat, 20 Nov 2286 17:46:39 +0000 Epoch in milliseconds
+            long futureUnixDate = 9999999999999;
+            return futureUnixDate - now;
+        }
+
         internal static long GetCountdownFromDateTime(DateTime now)
         {
             // Sat, 20 Nov 2286 17:46:39 +0000 Epoch in milliseconds
             long futureUnixDate = 9999999999999;
-            long currentUnixDate = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
+            return futureUnixDate - ConvertToEpoch(now);
+        }
 
-            return futureUnixDate - currentUnixDate;
+        internal static long GetCountdownFromDateTime(string now)
+        {
+            // Sat, 20 Nov 2286 17:46:39 +0000 Epoch in milliseconds
+            long futureUnixDate = 9999999999999;
+            return futureUnixDate - Convert.ToInt64(now);
+        }
+
+        public static long ConvertToEpoch(DateTime time)
+        {
+            return ((DateTimeOffset)time).ToUnixTimeMilliseconds();
         }
 
         public static bool IsValidGuid(string guid)
@@ -41,16 +58,19 @@ namespace FlashFeed.Engine
         public static PostQuery GetQueryFromQueryParams(string trackId, IEnumerable<KeyValuePair<string, string>> queryParams)
         {
             string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
+            string continuation_time = queryParams.FirstOrDefault(q => string.Compare(q.Key, "continuation_time", true) == 0).Value;
             List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(12).ToList());
 
             return new PostQuery()
             {
                 tags = tags,
-                sql = GenerateSQLQueryString(trackId, tags)
+                track_id = trackId,
+                sql = GenerateSQLQueryString(trackId, tags, continuation_time),
+                continuation_time = continuation_time
             };
         }
 
-        private static string GenerateSQLQueryString(string trackId, List<string> tags)
+        private static string GenerateSQLQueryString(string trackId, List<string> tags, string continuation_time = null)
         {
             var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary, r.track_id, r.track_name, r.url, r.type FROM r WHERE r.track_id = '{trackId}'";
 
@@ -59,7 +79,12 @@ namespace FlashFeed.Engine
                 sqlString += $" and ARRAY_CONTAINS(r.tags, \"{tag}\")";
             }
 
-            sqlString += " ORDER BY r._ts DESC";
+            if (continuation_time != null)
+            {
+                sqlString += $" and r.date_created < {continuation_time}";
+            }
+
+            sqlString += " ORDER BY r.date_created DESC";
 
             return sqlString;
         }
@@ -98,6 +123,22 @@ namespace FlashFeed.Engine
             var plainText = Markdown.ToPlainText(body, pipeline);
 
             return plainText.Length > 140 ? plainText.Substring(0, 140) : plainText;
+        }
+
+        internal static PostQueryDTO ConvertPostToPostQueryDTO(Post post)
+        {
+            return new PostQueryDTO()
+            {
+                date_created = post.date_created,
+                id = post.RowKey,
+                summary = post.summary,
+                tags = post.tags.Split(',').ToList(),
+                title = post.title,
+                track_id = post.PartitionKey,
+                track_name = post.track_name,
+                type = post.type,
+                url = post.url
+            };
         }
     }
 }

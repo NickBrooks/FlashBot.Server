@@ -22,9 +22,6 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                 if (!Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // check for continuation token
-                var continuationToken = Tools.GetHeaderValue(req.Headers, "X-Continuation-Token");
-
                 // get query object from query params
                 PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
@@ -47,7 +44,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
 
-                PostReturnObject posts = await PostRepository.QueryPosts(trackId, query, continuationToken == null ? null : continuationToken);
+                PostReturnObject posts = query.tags.Count > 0 ? await PostRepository.QueryPosts(query) : PostRepository.GetPosts(query);
                 return req.CreateResponse(HttpStatusCode.OK, posts);
             }
             catch (Exception e)

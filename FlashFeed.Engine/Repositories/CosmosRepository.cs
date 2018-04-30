@@ -72,12 +72,12 @@ namespace FlashFeed.Engine.Repositories
             return results.ToList();
         }
 
-        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 30, string postContinuation = null)
+        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 30)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
                 queryString,
-                new FeedOptions { MaxItemCount = maxItemCount, RequestContinuation = postContinuation })
+                new FeedOptions { MaxItemCount = maxItemCount })
                 .AsDocumentQuery();
 
             var results = await query.ExecuteNextAsync<T>();

@@ -4,18 +4,9 @@ using System.Collections.Generic;
 
 namespace FlashFeed.Engine.Models
 {
-    public class PostDTO
+    public class PostDTO : PostQueryDTO
     {
-        public string id { get; set; }
-        public string track_id { get; set; }
-        public string track_name { get; set; }
-        public DateTime date_created { get; set; }
-        public List<string> tags { get; set; }
-        public string type { get; set; }
-        public string title { get; set; }
-        public string summary { get; set; }
         public string body { get; set; }
-        public string url { get; set; }
     }
 
     public class PostQueryDTO
@@ -23,7 +14,7 @@ namespace FlashFeed.Engine.Models
         public string id { get; set; }
         public string track_id { get; set; }
         public string track_name { get; set; }
-        public DateTime date_created { get; set; }
+        public long date_created { get; set; }
         public List<string> tags { get; set; }
         public string type { get; set; }
         public string title { get; set; }
@@ -33,7 +24,7 @@ namespace FlashFeed.Engine.Models
 
     public class Post : TableEntity
     {
-        public DateTime date_created { get; set; }
+        public long date_created { get; set; }
         public string track_name { get; set; }
         public string type { get; set; }
         public string tags { get; set; }
@@ -55,7 +46,7 @@ namespace FlashFeed.Engine.Models
 
     public class PostReturnObject
     {
-        public string continuation_token { get; set; }
+        public string continuation_time { get; set; }
         public int count { get; internal set; }
         public List<PostQueryDTO> data { get; set; }
     }

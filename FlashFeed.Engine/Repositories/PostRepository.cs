@@ -12,7 +12,7 @@ namespace FlashFeed.Engine.Repositories
         // table storage stuff
         public static async Task<Post> InsertPostToTableStorage(PostDTO postDTO)
         {
-            DateTime now = DateTime.UtcNow;
+            long now = Tools.ConvertToEpoch(DateTime.UtcNow);
             long countdown = Tools.GetCountdownFromDateTime(now);
             string id = countdown.ToString() + Guid.NewGuid().ToString();
 
@@ -55,9 +55,17 @@ namespace FlashFeed.Engine.Repositories
             return TableStorageRepository.GetPostIdsInTrack(trackId);
         }
 
-        public static async Task<List<Post>> GetPostsInTrack(string trackId)
+        public static PostReturnObject GetPosts(PostQuery query)
         {
-            return await TableStorageRepository.GetPostsInTrack(trackId);
+            List<PostQueryDTO> data = TableStorageRepository.GetPosts(query);
+            string continuation_time = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
+
+            return new PostReturnObject()
+            {
+                continuation_time = continuation_time,
+                count = data.Count,
+                data = data
+            };
         }
 
         public static void DeletePostFromTableStorage(Post postMeta)
@@ -81,34 +89,17 @@ namespace FlashFeed.Engine.Repositories
             return await (dynamic)CosmosRepository<PostQueryDTO>.CreateItemAsync(post);
         }
 
-        public static async Task<PostReturnObject> QueryPosts(string trackId, PostQuery query, string continuationToken = null)
+        public static async Task<PostReturnObject> QueryPosts(PostQuery query)
         {
-            ContinuationToken token = null;
-
-            if (continuationToken != null)
-                token = await ContinuationTokenRepository.GetContinuationToken(trackId, continuationToken);
-
-            var result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql, 30, token?.Continuation_Token == null ? null : token.Continuation_Token);
-
-            // generate continuationToken
-            string newToken = null;
-            if (!string.IsNullOrEmpty(result.continuationToken))
-            {
-                newToken = AuthRepository.GenerateSHA256(result.continuationToken, DateTime.UtcNow.ToString());
-                ContinuationTokenRepository.InsertContinuationToken(new ContinuationToken(trackId, newToken)
-                {
-                    Continuation_Token = result.continuationToken,
-                });
-            }
-
-            if (token != null)
-                ContinuationTokenRepository.DeleteContinuationToken(token);
+            CosmosQueryPagingResults<PostQueryDTO> result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql);
+            List<PostQueryDTO> data = result.results.ToList();
+            string continuation_time = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
 
             return new PostReturnObject()
             {
-                continuation_token = newToken,
-                count = result.results.Count(),
-                data = result.results
+                continuation_time = continuation_time,
+                count = data.Count,
+                data = data
             };
         }
 

@@ -22,7 +22,6 @@ namespace FlashFeed.Engine.Repositories
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
-        private static readonly string ContinuationTokenTable = "continuationtokens";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -388,28 +387,32 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<List<Post>> GetPostsInTrack(string trackId)
+        internal static List<PostQueryDTO> GetPosts(PostQuery postQuery, int count = 30)
         {
             try
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
-                // query tracks
-                TableQuery<Post> query = new TableQuery<Post>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
+                // set track condition
+                long countdownTime = Convert.ToInt64(postQuery.continuation_time) - 1;
+                string trackPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, postQuery.track_id);
+                string continuationPredicate = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThan, Tools.GetCountdownFromDateTime(countdownTime).ToString());
 
-                List<Post> postMetaList = new List<Post>();
-                TableContinuationToken token = null;
+                // continuation, yay or nay
+                string predicate = postQuery.continuation_time == null ? trackPredicate : TableQuery.CombineFilters(trackPredicate, TableOperators.And, continuationPredicate);
 
-                do
+                // add the created clause
+                TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url" }).Take(count);
+
+                List<PostQueryDTO> postQueryDTO = new List<PostQueryDTO>();
+
+                foreach (var post in table.ExecuteQuery(query))
                 {
-                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
-                    token = queryResponse.ContinuationToken;
-                    postMetaList.AddRange(queryResponse.Results);
+                    postQueryDTO.Add(Tools.ConvertPostToPostQueryDTO(post));
                 }
-                while (token != null);
 
-                return postMetaList.ToList();
+                return postQueryDTO;
             }
             catch
             {
@@ -445,13 +448,13 @@ namespace FlashFeed.Engine.Repositories
 
             long epochTime = Tools.GetCountdownFromDateTime(DateTime.UtcNow.AddMinutes(minutes * -1));
 
-            TableQuery<DynamicTableEntity> projectionQuery = new TableQuery<DynamicTableEntity>().Where(
+            TableQuery<DynamicTableEntity> query = new TableQuery<DynamicTableEntity>().Where(
                 TableQuery.CombineFilters(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId),
                     TableOperators.And,
                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, epochTime.ToString()))).Select(new string[] { "RowKey" });
 
-            return table.ExecuteQuery(projectionQuery).Count();
+            return table.ExecuteQuery(query).Count();
         }
 
         internal static async void DeletePost(Post postMeta)
@@ -462,53 +465,6 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 TableOperation op = TableOperation.Delete(postMeta);
-                await table.ExecuteAsync(op);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        internal static async void InsertContinuationToken(ContinuationToken token)
-        {
-            try
-            {
-                // reference users table
-                CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
-                await table.CreateIfNotExistsAsync();
-
-                // insert the user
-                TableOperation op = TableOperation.Insert(token);
-                await table.ExecuteAsync(op);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        internal static async Task<ContinuationToken> GetContinuationToken(string trackId, string rowKey)
-        {
-            // get the table
-            CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
-
-            // Create a retrieve operation that takes a customer entity.
-            TableOperation retrieveOperation = TableOperation.Retrieve<ContinuationToken>(trackId, rowKey);
-
-            // Execute the retrieve operation.
-            TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
-            return (ContinuationToken)retrievedResult.Result;
-        }
-
-        internal static async void DeleteContinuationToken(ContinuationToken token)
-        {
-            try
-            {
-                // reference track table
-                CloudTable table = tableClient.GetTableReference(ContinuationTokenTable);
-
-                TableOperation op = TableOperation.Delete(token);
                 await table.ExecuteAsync(op);
             }
             catch
