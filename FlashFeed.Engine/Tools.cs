@@ -24,6 +24,15 @@ namespace FlashFeed.Engine
             return true;
         }
 
+        internal static long GetCountdownFromDateTime(DateTime now)
+        {
+            // Sat, 20 Nov 2286 17:46:39 +0000 Epoch in milliseconds
+            long futureUnixDate = 9999999999999;
+            long currentUnixDate = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
+
+            return futureUnixDate - currentUnixDate;
+        }
+
         public static bool IsValidGuid(string guid)
         {
             return Guid.TryParse(guid, out Guid o);

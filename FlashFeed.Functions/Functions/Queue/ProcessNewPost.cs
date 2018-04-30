@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FlashFeed.Functions.Functions.Queue
@@ -11,12 +12,14 @@ namespace FlashFeed.Functions.Functions.Queue
     public static class ProcessNewPost
     {
         [FunctionName("ProcessNewPost")]
-        public static async void Run([QueueTrigger("process-new-post", Connection = "AzureWebJobsStorage")]string queueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
         {
-            PostTableStorage post = JsonConvert.DeserializeObject<PostTableStorage>(queueItem);
+            Post post = JsonConvert.DeserializeObject<Post>(queueItem);
+
+            List<string> tags = post.tags.Split(',').ToList();
 
             // add tags to tracktag list
-            foreach (var tag in post.tags.Split(',').ToList())
+            foreach (var tag in tags)
             {
                 TrackTagRepository.InsertOrIncrementTrackTag(new TrackTag(post.PartitionKey, tag));
             }

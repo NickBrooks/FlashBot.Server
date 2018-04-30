@@ -41,14 +41,14 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
 
                 // create the post
                 post.track_id = trackId;
-                PostDTO newPost = await PostRepository.InsertPost(post);
+                Post newPost = await PostRepository.InsertPost(post);
 
                 // if didn't create return bad response
                 if (newPost == null)
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
-                response.Headers.Add("Location", newPost.id);
+                response.Headers.Add("Location", newPost.RowKey);
                 return response;
             }
             catch (Exception e)

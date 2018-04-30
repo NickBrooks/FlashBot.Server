@@ -344,7 +344,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<PostTableStorage> InsertPost(PostTableStorage post)
+        internal static async Task<Post> InsertPost(Post post)
         {
             try
             {
@@ -367,7 +367,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<PostTableStorage> GetPost(string trackId, string postId)
+        internal static async Task<Post> GetPost(string trackId, string postId)
         {
             try
             {
@@ -375,11 +375,11 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<PostTableStorage>(trackId, postId);
+                TableOperation retrieveOperation = TableOperation.Retrieve<Post>(trackId, postId);
 
                 // Execute the retrieve operation.
                 TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
-                return (PostTableStorage)retrievedResult.Result;
+                return (Post)retrievedResult.Result;
             }
             catch
             {
@@ -387,7 +387,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<List<PostTableStorage>> GetPostsInTrack(string trackId)
+        internal static async Task<List<Post>> GetPostsInTrack(string trackId)
         {
             try
             {
@@ -395,9 +395,9 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 // query tracks
-                TableQuery<PostTableStorage> query = new TableQuery<PostTableStorage>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
+                TableQuery<Post> query = new TableQuery<Post>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
 
-                List<PostTableStorage> postMetaList = new List<PostTableStorage>();
+                List<Post> postMetaList = new List<Post>();
                 TableContinuationToken token = null;
 
                 do
@@ -416,7 +416,7 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
-        internal static async void DeletePost(PostTableStorage postMeta)
+        internal static async void DeletePost(Post postMeta)
         {
             try
             {

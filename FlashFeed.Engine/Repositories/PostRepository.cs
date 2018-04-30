@@ -9,40 +9,33 @@ namespace FlashFeed.Engine.Repositories
 {
     public class PostRepository
     {
-        public static async Task<PostDTO> InsertPost(PostDTO postDTO)
+        public static async Task<Post> InsertPost(PostDTO postDTO)
         {
-            // cosmos insertion
-            PostCosmos postCosmos = new PostCosmos()
+            string id = Guid.NewGuid().ToString();
+            DateTime now = DateTime.UtcNow;
+            long countdown = Tools.GetCountdownFromDateTime(now);
+
+            Post post = new Post(id, postDTO.track_id)
             {
-                date_created = postDTO.date_created,
+                body = postDTO.body,
+                countdown = countdown,
+                url = postDTO.url,
                 summary = postDTO.summary,
-                tags = postDTO.tags,
-                title = postDTO.title,
-                track_id = postDTO.track_id
-            };
-
-            var cosmosResult = await (dynamic)CosmosRepository<PostCosmos>.CreateItemAsync(postCosmos);
-
-            if (cosmosResult == null)
-                return null;
-
-            // table storage insertion
-            PostTableStorage postTableStorage = new PostTableStorage(cosmosResult.id, postDTO.track_id)
-            {
-                summary = postDTO.summary,
+                date_created = now,
                 tags = string.Join(",", postDTO.tags),
                 title = postDTO.title,
-                body = postDTO.body,
-                date_created = postDTO.date_created,
-                _ts = cosmosResult._ts
+                type = postDTO.type
             };
 
-            await PostTableStorageRepository.InsertPost(postTableStorage);
+            var result = await PostTableStorageRepository.InsertPost(post);
+
+            if (result == null)
+                return null;
 
             // add to queue for further processing
-            TableStorageRepository.AddMessageToQueue("process-new-post", JsonConvert.SerializeObject(postTableStorage));
+            TableStorageRepository.AddMessageToQueue("process-new-post", JsonConvert.SerializeObject(post));
 
-            return cosmosResult;
+            return post;
         }
 
         public static async Task<PostDTO> GetPost(string trackId, string postId)
@@ -108,8 +101,21 @@ namespace FlashFeed.Engine.Repositories
         public static PostDTO ValidatePost(PostDTO postDTO)
         {
             if (postDTO == null) return null;
-            if (postDTO.body == null) return null;
+            if (postDTO.title == null) return null;
+            if (postDTO.body == null && postDTO.url == null) return null;
             if (postDTO.tags.Count > 12) return null;
+
+            // check valid URL
+            Uri uriResult;
+            bool validURI = Uri.TryCreate(postDTO.url, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+            if (!string.IsNullOrEmpty(postDTO.url) && !validURI)
+                return null;
+
+            // if has URL
+            postDTO.type = string.IsNullOrEmpty(postDTO.url) ? "post" : "url";
+            postDTO.body = postDTO.type == "post" ? postDTO.body : "";
 
             // check for provided summary
             if (!string.IsNullOrEmpty(postDTO.summary))
@@ -119,7 +125,6 @@ namespace FlashFeed.Engine.Repositories
             postDTO.body = postDTO.body.Length > 10000 ? postDTO.body.Substring(0, 10000) : postDTO.body;
             postDTO.summary = string.IsNullOrEmpty(postDTO.summary) ? Tools.GenerateSummary(postDTO.body) : postDTO.summary;
             postDTO.tags = Tools.ValidateTags(postDTO.tags);
-            postDTO.date_created = DateTime.UtcNow;
 
             return postDTO;
         }
