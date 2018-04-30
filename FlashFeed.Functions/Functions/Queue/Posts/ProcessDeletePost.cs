@@ -20,6 +20,11 @@ namespace FlashFeed.Functions.Functions.Queue
             PostRepository.DeletePostFromTableStorage(post);
             PostRepository.DeletePostFromCosmos(postId);
 
+            if (post.has_image != null)
+            {
+                PostRepository.DeleteImages(postId, post.has_image);
+            }
+
             // TODO: delete from feeds
 
             log.Info($"Deleted post: {post.RowKey}");

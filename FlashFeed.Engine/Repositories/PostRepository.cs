@@ -145,7 +145,7 @@ namespace FlashFeed.Engine.Repositories
             return postDTO;
         }
 
-        // process image
+        // images
         private static async Task<string> ProcessImage(string postId, string imageUrl)
         {
             using (WebClient webClient = new WebClient())
@@ -223,6 +223,14 @@ namespace FlashFeed.Engine.Repositories
                         return null;
                 }
             }
+        }
+
+        public static void DeleteImages(string postId, string extension)
+        {
+            BlobRepository.DeleteFile($"{postId}/thumb_mini.{extension}");
+            BlobRepository.DeleteFile($"{postId}/thumb.{extension}");
+            BlobRepository.DeleteFile($"{postId}/hero.{extension}");
+            BlobRepository.DeleteFile($"{postId}/full.{extension}");
         }
     }
 }

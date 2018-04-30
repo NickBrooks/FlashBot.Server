@@ -37,9 +37,6 @@ namespace FlashFeed.Engine.Repositories
                 case "image/png":
                     fileName += ".png";
                     break;
-                case "image/gif":
-                    fileName += ".gif";
-                    break;
                 default:
                     fileName += ".jpeg";
                     break;
@@ -52,6 +49,14 @@ namespace FlashFeed.Engine.Repositories
             await blockBlob.SetPropertiesAsync();
 
             return blockBlob.Uri.ToString();
+        }
+
+        public static void DeleteFile(string fileIdentifier)
+        {
+            CloudBlobContainer container = cloudBlobClient.GetContainerReference(PostsContainer);
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileIdentifier);
+
+            blockBlob.DeleteIfExists();
         }
     }
 }
