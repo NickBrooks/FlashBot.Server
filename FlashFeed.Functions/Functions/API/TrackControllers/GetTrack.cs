@@ -27,9 +27,19 @@ namespace FlashFeed.Functions.Functions.API.TrackControllers
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // check auth if private
-                if (track.is_private && !AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                if (track.is_private)
+                {
+                    // private track
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
+
+                    // validate authKey
+                    if (!AuthRepository.ValidateSHA256(trackId, keySecret))
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                    // validate track key
+                    if (track == null || track.track_key != keySecret.Key)
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+                }
 
                 TrackDTO trackDTO = new TrackDTO()
                 {

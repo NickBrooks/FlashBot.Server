@@ -18,8 +18,10 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
         {
             try
             {
+                KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
+
                 // validate authKey
-                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                if (!AuthRepository.ValidateSHA256(trackId, keySecret))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // validate request
@@ -30,7 +32,7 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
 
                 // get track
                 Track track = await TrackRepository.GetTrack(trackId);
-                if (track == null)
+                if (track == null || track.track_key != keySecret.Key)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // check rate limit

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FlashFeed.Engine.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,15 +12,17 @@ namespace FlashFeed.Engine.Repositories
     {
         private static readonly string appSecret = Environment.GetEnvironmentVariable("FLASHFEED_SECRET_KEY");
 
-        public static bool ValidateSHA256(string objectId, string objectKey, string sha256)
+        public static bool ValidateSHA256(string objectId, KeySecret keySecret)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(objectId + objectKey + appSecret);
+            if (keySecret == null)
+                return false;
+
+            byte[] bytes = Encoding.UTF8.GetBytes(objectId + keySecret.Key + appSecret);
             SHA256Managed sha256HashString = new SHA256Managed();
             byte[] hash = sha256HashString.ComputeHash(bytes);
+            var haha = ByteArrayToHexString(hash);
 
-            var result = ByteArrayToHexString(hash);
-
-            return sha256 == result ? true : false;
+            return keySecret.Secret == ByteArrayToHexString(hash) ? true : false;
         }
 
         internal static string GenerateSHA256(string objectId, string objectKey)
@@ -37,6 +41,30 @@ namespace FlashFeed.Engine.Repositories
                 hex.AppendFormat("{0:x2}", b);
 
             return hex.ToString();
+        }
+
+        public static string EncodeKeyAndSecretToBase64(string key, string secret)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes($"{key}.{secret}");
+
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static KeySecret DecodeKeyAndSecretFromBase64(string base64String)
+        {
+            byte[] bytes = Convert.FromBase64String(base64String);
+            string decodedString = Encoding.ASCII.GetString(bytes);
+
+            List<string> result = decodedString.Split('.').ToList();
+
+            if (result.Count < 2)
+                return null;
+
+            return new KeySecret()
+            {
+                Key = result[0],
+                Secret = result[1]
+            };
         }
 
         internal static string GenerateRandomString(int length)

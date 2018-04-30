@@ -30,12 +30,18 @@ namespace FlashFeed.Engine.Models
             PartitionKey = partitionKey;
             RowKey = Guid.NewGuid().ToString();
             date_created = DateTime.UtcNow;
-            track_key = AuthRepository.GenerateRandomString(32);
+            track_key = AuthRepository.GenerateRandomString(64);
             track_secret = AuthRepository.GenerateSHA256(RowKey, track_key);
         }
 
         public Track()
         {
         }
+    }
+
+    public class KeySecret
+    {
+        public string Key { get; set; }
+        public string Secret { get; set; }
     }
 }

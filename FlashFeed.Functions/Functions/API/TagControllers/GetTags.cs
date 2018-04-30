@@ -29,22 +29,23 @@ namespace FlashFeed.Functions.Functions.API.TagControllers
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // public request so return it
-                if (!track.is_private)
+                if (track.is_private)
                 {
-                    List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                    return req.CreateResponse(HttpStatusCode.OK, result);
-                }
-                // private request
-                else
-                {
+                    // private track
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
+
                     // validate authKey
-                    if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                    if (!AuthRepository.ValidateSHA256(trackId, keySecret))
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                    List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                    return req.CreateResponse(HttpStatusCode.OK, result);
+                    // validate track key
+                    if (track == null || track.track_key != keySecret.Key)
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
+
+                List<TrackTagDTO> result = await TrackTagRepository.GetTagsDTOByTrack(trackId);
+                return req.CreateResponse(HttpStatusCode.OK, result);
+
             }
             catch (Exception e)
             {

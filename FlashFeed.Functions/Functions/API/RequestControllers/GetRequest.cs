@@ -22,22 +22,28 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                 if (!Tools.IsValidGuid(requestId) || !Tools.IsValidGuid(trackId))
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // get the request
-                RequestDTO request = await RequestRepository.GetRequest(trackId, requestId);
-                if (request == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
-
                 // get the track
                 Track track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // public request so return it
-                if (!track.is_private)
-                    return req.CreateResponse(HttpStatusCode.OK, request);
+                // private request so check key
+                if (track.is_private)
+                {
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
 
-                // validate authKey
-                if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                    // validate authKey
+                    if (!AuthRepository.ValidateSHA256(trackId, keySecret))
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+                    // validate track key
+                    if (track == null || track.track_key != keySecret.Key)
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+                }
+
+                // get the request
+                RequestDTO request = await RequestRepository.GetRequest(trackId, requestId);
+                if (request == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 return req.CreateResponse(HttpStatusCode.OK, request);

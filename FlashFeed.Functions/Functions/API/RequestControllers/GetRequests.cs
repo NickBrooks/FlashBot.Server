@@ -34,22 +34,22 @@ namespace FlashFeed.Functions.Functions.API.RequestControllers
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                // public request so return it
-                if (!track.is_private)
+                // private request so check key
+                if (track.is_private)
                 {
-                    RequestReturnObject result = await RequestRepository.GetRequests(trackId, query, continuationToken == null ? null : continuationToken);
-                    return req.CreateResponse(HttpStatusCode.OK, result);
-                }
-                // private request
-                else
-                {
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
+
                     // validate authKey
-                    if (!AuthRepository.ValidateSHA256(trackId, Tools.GetHeaderValue(req.Headers, "X-Track-Key"), Tools.GetHeaderValue(req.Headers, "X-Track-Secret")))
+                    if (!AuthRepository.ValidateSHA256(trackId, keySecret))
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
 
-                    RequestReturnObject result = await RequestRepository.GetRequests(trackId, query, continuationToken == null ? null : continuationToken);
-                    return req.CreateResponse(HttpStatusCode.OK, result);
+                    // validate track key
+                    if (track == null || track.track_key != keySecret.Key)
+                        return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
+
+                RequestReturnObject requests = await RequestRepository.GetRequests(trackId, query, continuationToken == null ? null : continuationToken);
+                return req.CreateResponse(HttpStatusCode.OK, requests);
             }
             catch (Exception e)
             {

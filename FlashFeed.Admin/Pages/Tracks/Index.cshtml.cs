@@ -28,6 +28,7 @@ namespace FlashFeed.Admin.Pages.Tracks
         public List<Track> Tracks { get; set; }
         public ApplicationUser CurrentUser { get; set; }
         public ExtendedUser ExtendedUser { get; set; }
+        public string TrackKey { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -39,6 +40,11 @@ namespace FlashFeed.Admin.Pages.Tracks
 
             CurrentUser = user;
             Tracks = await TrackRepository.GetTracks(user.Id);
+
+            foreach (var track in Tracks)
+            {
+                track.track_key = AuthRepository.EncodeKeyAndSecretToBase64(track.track_key, track.track_secret);
+            }
 
             ExtendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
 
