@@ -14,7 +14,7 @@ namespace FlashFeed.Engine.Repositories
     {
         private static readonly string Endpoint = Environment.GetEnvironmentVariable("COSMOSDB_ENDPOINT");
         private static readonly string AuthKey = Environment.GetEnvironmentVariable("COSMOSDB_AUTHKEY");
-        private static readonly string Database = "FlashFeedCosmosDb";
+        private static readonly string Database = "FlashFeed";
         private static readonly string Collection = "FlashFeed";
         private static DocumentClient client = new DocumentClient(new Uri(Endpoint), AuthKey, new ConnectionPolicy { EnableEndpointDiscovery = false });
 

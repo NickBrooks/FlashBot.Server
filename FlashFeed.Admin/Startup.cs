@@ -45,12 +45,6 @@ namespace FlashFeed.Admin
                 facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
             });
 
-            services.AddAuthentication().AddTwitter(twitterOptions =>
-            {
-                twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"];
-                twitterOptions.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
-            });
-
             services.AddMvc()
                 .AddRazorPagesOptions(options =>
                 {

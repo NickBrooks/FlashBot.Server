@@ -8,7 +8,7 @@ namespace FlashFeed.Engine.Repositories
     // https://goo.gl/sShUhC
     public class AuthRepository
     {
-        private static readonly string appSecret = Environment.GetEnvironmentVariable("ABSTRACK_SECRET_KEY");
+        private static readonly string appSecret = Environment.GetEnvironmentVariable("FLASHFEED_SECRET_KEY");
 
         public static bool ValidateSHA256(string objectId, string objectKey, string sha256)
         {
