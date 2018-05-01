@@ -15,23 +15,30 @@ namespace FlashFeed.Engine.Models
         public List<string> tags { get; set; }
         public string has_image { get; set; }
         public int subscribers { get; set; }
+        public string track_key { get; set; }
+        public string track_secret { get; set; }
+        public int rate_limit { get; set; }
     }
 
     public class TrackAuth : TableEntity
     {
+        public string name { get; set; }
         public bool is_private { get; set; }
         public string track_key { get; set; }
         public string track_secret { get; set; }
         public int rate_limit { get; set; }
         public bool rate_limit_exceeded { get; set; }
-        public int max_posts { get; set; }
 
-        public TrackAuth(string partitionKey, string rowKey)
+        public TrackAuth(Track track)
         {
-            PartitionKey = partitionKey;
-            RowKey = rowKey;
-            track_key = AuthRepository.GenerateRandomString(64);
-            track_secret = AuthRepository.GenerateSHA256(RowKey, track_key);
+            PartitionKey = track.owner_id;
+            RowKey = track.id;
+            name = track.name;
+            is_private = track.is_private;
+            track_key = track.track_key;
+            track_secret = track.track_secret;
+            rate_limit = track.rate_limit;
+            rate_limit_exceeded = false;
         }
 
         public TrackAuth()

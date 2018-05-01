@@ -31,12 +31,7 @@ namespace FlashFeed.Admin.Pages.Tracks
         public async Task<IActionResult> OnGetAsync(string id)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            CurrentUser = user;
+            CurrentUser = user ?? throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             Track = await TrackRepository.GetTrackVerifyOwner(id, user.Id);
 
             return Page();

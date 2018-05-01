@@ -12,7 +12,7 @@ namespace FlashFeed.Functions.Functions.Queue
     public static class ProcessNewPostIncrementTrackTags
     {
         [FunctionName("ProcessNewPostIncrementTrackTags")]
-        public static async void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
+        public static void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
         {
             Post post = JsonConvert.DeserializeObject<Post>(queueItem);
 

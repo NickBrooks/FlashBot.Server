@@ -40,16 +40,8 @@ namespace FlashFeed.Functions.Functions.API.TrackControllers
                     if (track == null || track.track_key != keySecret.Key)
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
-
-                TrackResultDTO trackDTO = new TrackResultDTO()
-                {
-                    id = trackId,
-                    name = track.name,
-                    description = track.description,
-                    tags = await TrackTagRepository.GetTagsDTOByTrack(trackId)
-                };
-
-                return req.CreateResponse(HttpStatusCode.OK, trackDTO);
+                // TODO: Track DTO
+                return req.CreateResponse(HttpStatusCode.OK, track);
             }
             catch (Exception e)
             {

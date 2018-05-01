@@ -11,22 +11,23 @@ namespace FlashFeed.Engine.Repositories
 
         private static CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
 
-        private static readonly string PostsContainer = "posts";
+        public static readonly string PostsContainer = "posts";
+        public static readonly string TracksContainer = "tracks";
 
-        public static async Task<string> UploadFileAsync(byte[] file, string fileName, string contentType)
+        public static async Task<string> UploadFileAsync(string container, byte[] file, string fileName, string contentType = null)
         {
             // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
-            var cloudBlobContainer = cloudBlobClient.GetContainerReference(PostsContainer);
-            if (!cloudBlobContainer.Exists())
+            var c = cloudBlobClient.GetContainerReference(PostsContainer);
+            if (!c.Exists())
             {
-                await cloudBlobContainer.CreateIfNotExistsAsync();
+                await c.CreateIfNotExistsAsync();
 
                 // Set the permissions so the blobs are public. 
                 BlobContainerPermissions permissions = new BlobContainerPermissions
                 {
                     PublicAccess = BlobContainerPublicAccessType.Blob
                 };
-                await cloudBlobContainer.SetPermissionsAsync(permissions);
+                await c.SetPermissionsAsync(permissions);
             }
 
             switch (contentType)
@@ -42,19 +43,22 @@ namespace FlashFeed.Engine.Repositories
                     break;
             }
 
-            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(fileName);
+            CloudBlockBlob blockBlob = c.GetBlockBlobReference(fileName);
             await blockBlob.UploadFromByteArrayAsync(file, 0, file.Length);
 
-            blockBlob.Properties.ContentType = contentType;
-            await blockBlob.SetPropertiesAsync();
+            if (contentType != null)
+            {
+                blockBlob.Properties.ContentType = contentType;
+                await blockBlob.SetPropertiesAsync();
+            }
 
             return blockBlob.Uri.ToString();
         }
 
-        public static void DeleteFile(string fileIdentifier)
+        public static void DeleteFile(string container, string fileIdentifier)
         {
-            CloudBlobContainer container = cloudBlobClient.GetContainerReference(PostsContainer);
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileIdentifier);
+            CloudBlobContainer c = cloudBlobClient.GetContainerReference(PostsContainer);
+            CloudBlockBlob blockBlob = c.GetBlockBlobReference(fileIdentifier);
 
             blockBlob.DeleteIfExists();
         }

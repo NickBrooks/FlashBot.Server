@@ -166,7 +166,7 @@ namespace FlashFeed.Engine.Repositories
 
                         using (var fetchedImage = Image.FromStream(output))
                         {
-                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/thumb_mini", contentType);
+                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb_mini", contentType);
                         }
                     }
                 }
@@ -178,10 +178,7 @@ namespace FlashFeed.Engine.Repositories
                     {
                         Images.CropSquare(150, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
-                        {
-                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/thumb", contentType);
-                        }
+                        await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb", contentType);
                     }
                 }
 
@@ -194,7 +191,7 @@ namespace FlashFeed.Engine.Repositories
 
                         using (var fetchedImage = Image.FromStream(output))
                         {
-                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/hero", contentType);
+                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/hero", contentType);
                         }
                     }
                 }
@@ -208,7 +205,7 @@ namespace FlashFeed.Engine.Repositories
 
                         using (var fetchedImage = Image.FromStream(output))
                         {
-                            await BlobRepository.UploadFileAsync(Images.ImageToByteArray(fetchedImage), postId + "/full", contentType);
+                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/full", contentType);
                         }
                     }
                 }
@@ -227,10 +224,12 @@ namespace FlashFeed.Engine.Repositories
 
         public static void DeleteImages(string postId, string extension)
         {
-            BlobRepository.DeleteFile($"{postId}/thumb_mini.{extension}");
-            BlobRepository.DeleteFile($"{postId}/thumb.{extension}");
-            BlobRepository.DeleteFile($"{postId}/hero.{extension}");
-            BlobRepository.DeleteFile($"{postId}/full.{extension}");
+            var c = BlobRepository.PostsContainer;
+
+            BlobRepository.DeleteFile(c, $"{postId}/thumb_mini.{extension}");
+            BlobRepository.DeleteFile(c, $"{postId}/thumb.{extension}");
+            BlobRepository.DeleteFile(c, $"{postId}/hero.{extension}");
+            BlobRepository.DeleteFile(c, $"{postId}/full.{extension}");
         }
     }
 }

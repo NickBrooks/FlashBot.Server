@@ -12,15 +12,15 @@
         <a class="text-success" asp-page="./Create"><i class="fas fa-plus"></i></a>
     </div>
 </div>
-<small class="text-muted"><strong>Public:</strong> (@Model.ExtendedUser.Public_Tracks of @Model.ExtendedUser.Public_Tracks_Max)</small><br />
+<small class="text-muted"><strong>Public:</strong> (@Model._extendedUser.Public_Tracks of @Model._extendedUser.Public_Tracks_Max)</small><br />
 <small class="text-muted">
-    <strong>Private:</strong> (@Model.ExtendedUser.Private_Tracks of @Model.ExtendedUser.Private_Tracks_Max) @if (Model.ExtendedUser.Private_Tracks >= Model.ExtendedUser.Private_Tracks_Max)
+    <strong>Private:</strong> (@Model._extendedUser.Private_Tracks of @Model._extendedUser.Private_Tracks_Max) @if (Model._extendedUser.Private_Tracks >= Model._extendedUser.Private_Tracks_Max)
     {<strong><a asp-page="../Subscription">Upgrade</a></strong>}
 </small>
 <hr />
 <div class="row">
     <div class="col-12">
-        @if (Model.Tracks.Count == 0)
+        @if (Model._tracks.Count == 0)
         {
             <div class="text-center">
                 <h5>No tracks, <a asp-page="./Create">create one</a>?</h5>
@@ -28,7 +28,7 @@
         }
         else
         {
-            @foreach (var track in Model.Tracks)
+            @foreach (var track in Model._tracks)
             {
                 <div class="card mb-3">
                     <h5 class="card-header">
@@ -40,7 +40,7 @@
                         <hr />
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon3"><i class="fas fa-id-card text-muted mr-2"></i> Track ID</span>
-                            <input value="@track.RowKey" class="form-control form-control-sm" autocomplete="off" disabled />
+                            <input value="@track.id" class="form-control form-control-sm" autocomplete="off" disabled />
                         </div>
                         <br />
                         <div class="input-group">
@@ -49,7 +49,7 @@
                         </div>
                         <br />
                         <div class="input-group">
-                            <a class="btn btn-danger btn-sm mt-3" asp-page="./Delete" asp-route-id="@track.RowKey"><i class="fas fa-trash-alt"></i> Delete track</a>
+                            <a class="btn btn-danger btn-sm mt-3" asp-page="./Delete" asp-route-id="@track.id"><i class="fas fa-trash-alt"></i> Delete track</a>
                         </div>
                     </div>
                 </div>

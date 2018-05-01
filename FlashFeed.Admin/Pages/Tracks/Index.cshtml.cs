@@ -25,32 +25,27 @@ namespace FlashFeed.Admin.Pages.Tracks
             _logger = logger;
         }
 
-        public List<TrackAuth> Tracks { get; set; }
-        public ApplicationUser CurrentUser { get; set; }
-        public ExtendedUser ExtendedUser { get; set; }
-        public string TrackKey { get; set; }
+        public List<Track> _tracks { get; set; }
+        public ApplicationUser _currentUser { get; set; }
+        public ExtendedUser _extendedUser { get; set; }
+        public string _trackKey { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+            _currentUser = user ?? throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            _tracks = await TrackRepository.GetTracksByOwnerId(user.Id);
 
-            CurrentUser = user;
-            Tracks = await TrackRepository.GetTracksByOwnerId(user.Id);
-
-            foreach (var track in Tracks)
+            foreach (var track in _tracks)
             {
                 track.track_key = AuthRepository.EncodeKeyAndSecretToBase64(track.track_key, track.track_secret);
             }
 
-            ExtendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
+            _extendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
 
-            if (ExtendedUser == null)
+            if (_extendedUser == null)
             {
-                ExtendedUser = await ExtendedUserRepository.CreateExtendedUser(new ExtendedUser(user.Id));
+                _extendedUser = await ExtendedUserRepository.CreateExtendedUser(new ExtendedUser(user.Id));
             }
 
             return Page();

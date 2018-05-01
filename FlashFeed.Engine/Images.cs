@@ -2,6 +2,7 @@
 using ImageProcessor.Imaging;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 
 namespace FlashFeed.Engine
@@ -59,6 +60,20 @@ namespace FlashFeed.Engine
                 image.Save(ms, image.RawFormat);
                 return ms.ToArray();
             }
+        }
+
+        public static string GetContentType(byte[] data)
+        {
+            if (ImageFormat.Jpeg.Equals(data))
+            {
+                return "image/jpeg";
+            }
+            else if (ImageFormat.Png.Equals(data))
+            {
+                return "image/png";
+            }
+
+            return null;
         }
     }
 }
