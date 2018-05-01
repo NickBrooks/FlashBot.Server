@@ -25,7 +25,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             _logger = logger;
         }
 
-        public List<Track> Tracks { get; set; }
+        public List<TrackAuth> Tracks { get; set; }
         public ApplicationUser CurrentUser { get; set; }
         public ExtendedUser ExtendedUser { get; set; }
         public string TrackKey { get; set; }
@@ -39,7 +39,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             }
 
             CurrentUser = user;
-            Tracks = await TrackRepository.GetTracks(user.Id);
+            Tracks = await TrackRepository.GetTracksByOwnerId(user.Id);
 
             foreach (var track in Tracks)
             {

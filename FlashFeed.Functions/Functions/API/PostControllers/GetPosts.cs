@@ -26,7 +26,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                 PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.GetQueryNameValuePairs());
 
                 // get the track
-                Track track = await TrackRepository.GetTrack(trackId);
+                TrackAuth track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 

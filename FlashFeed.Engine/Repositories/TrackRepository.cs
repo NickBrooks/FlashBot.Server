@@ -7,50 +7,52 @@ namespace FlashFeed.Engine.Repositories
 {
     public class TrackRepository
     {
-        public static async Task<Track> CreateTrack(string ownerId, string name, string description, bool isPrivate = false)
+        public static async Task<Track> CreateTrack(Track track)
         {
-            if (ownerId == null || name == null) return null;
+            if (track.owner_id == null || track.name == null) return null;
 
-            var extendedUser = await ExtendedUserRepository.GetExtendedUser(ownerId);
+            var extendedUser = await ExtendedUserRepository.GetExtendedUser(track.owner_id);
 
             // check private maxed out
-            if (isPrivate)
+            if (track.is_private)
             {
                 if (extendedUser.Private_Tracks >= extendedUser.Private_Tracks_Max)
                     return null;
             }
 
             // check public maxed out
-            if (!isPrivate)
+            if (!track.is_private)
             {
                 if (extendedUser.Public_Tracks >= extendedUser.Public_Tracks_Max)
                     return null;
             }
 
-            Track track = new Track(ownerId)
+            track.id = Guid.NewGuid().ToString();
+            track.subscribers = 0;
+
+            // create the track
+            var newTrack = await (dynamic)CosmosRepository<Track>.CreateItemAsync(track);
+
+            TrackAuth trackAuth = new TrackAuth(track.owner_id, track.id)
             {
-                name = name,
-                description = description,
-                is_private = isPrivate,
                 rate_limit = extendedUser.Rate_Per_Track,
                 max_posts = extendedUser.Max_Track_Storage
             };
 
-            // create the track
-            var newTrack = await TableStorageRepository.InsertTrack(track);
+            await TableStorageRepository.InsertTrackAuth(trackAuth);
 
             // increment user's track count
-            ExtendedUserRepository.IncrementTrackCount(ownerId, isPrivate);
+            ExtendedUserRepository.IncrementTrackCount(track.owner_id, track.is_private);
 
             return newTrack;
         }
 
-        public static List<Track> GetRateLimitedTracks()
+        public static List<TrackAuth> GetRateLimitedTracks()
         {
             return TableStorageRepository.GetRateLimitedTracks();
         }
 
-        public static void UpdateTrack(Track track)
+        public static void UpdateTrack(TrackAuth track)
         {
             TableStorageRepository.UpdateTrack(track);
         }
@@ -60,12 +62,12 @@ namespace FlashFeed.Engine.Repositories
         /// </summary>
         /// <param name="ownerId"></param>
         /// <returns>List of tracks.</returns>
-        public static async Task<List<Track>> GetTracks(string ownerId)
+        public static async Task<List<TrackAuth>> GetTracksByOwnerId(string ownerId)
         {
             return await TableStorageRepository.GetTracks(ownerId);
         }
 
-        public static async Task<Track> GetTrack(string trackId)
+        public static async Task<TrackAuth> GetTrack(string trackId)
         {
             var track = await TableStorageRepository.GetTrack(trackId);
 
@@ -75,7 +77,7 @@ namespace FlashFeed.Engine.Repositories
             return track;
         }
 
-        public static async Task<Track> GetVerifiedTrack(string trackId, string userId)
+        public static async Task<TrackAuth> GetTrackVerifyOwner(string trackId, string userId)
         {
             var track = await TableStorageRepository.GetTrack(trackId);
 
@@ -83,19 +85,6 @@ namespace FlashFeed.Engine.Repositories
                 return null;
 
             if (track.PartitionKey != userId)
-                return null;
-
-            return track;
-        }
-
-        public static async Task<Track> GetTrackByPostKey(string postKey, bool rateLimited = true)
-        {
-            var track = await TableStorageRepository.GetTrackByPostKey(postKey);
-
-            if (track == null)
-                return null;
-
-            if (track.rate_limit_exceeded && rateLimited)
                 return null;
 
             return track;

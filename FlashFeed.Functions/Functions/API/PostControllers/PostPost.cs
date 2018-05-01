@@ -31,7 +31,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
                 // get track
-                Track track = await TrackRepository.GetTrack(trackId);
+                TrackAuth track = await TrackRepository.GetTrack(trackId);
                 if (track == null || track.track_key != keySecret.Key)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 

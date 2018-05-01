@@ -1,13 +1,16 @@
 ﻿using FlashFeed.Admin.Data;
 using FlashFeed.Admin.Pages.Account.Manage;
+using FlashFeed.Engine;
 using FlashFeed.Engine.Models;
 using FlashFeed.Engine.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlashFeed.Admin.Pages.Tracks
@@ -47,17 +50,18 @@ namespace FlashFeed.Admin.Pages.Tracks
 
             [Display(Name = "Private")]
             public bool IsPrivate { get; set; }
+
+            [Display(Name = "Tags")]
+            public string Tags { get; set; }
+
+            [Display(Name = "Track Image")]
+            public IFormFile UploadTrackImage { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
-
-            CurrentUser = user;
+            CurrentUser = user ?? throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             ExtendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
             PrivateTracksLeft = ExtendedUser.Private_Tracks_Max - ExtendedUser.Private_Tracks;
 
@@ -77,9 +81,18 @@ namespace FlashFeed.Admin.Pages.Tracks
                 return Page();
             }
 
+            var track = new Track()
+            {
+                owner_id = user.Id,
+                description = Input.Description,
+                is_private = Input.IsPrivate,
+                name = Input.Name,
+                tags = Tools.ValidateTags(Input.Tags.Split(',').ToList())
+            };
+
             // create track
-            var createdTrack = await TrackRepository.CreateTrack(user.Id, Input.Name, Input.Description, Input.IsPrivate);
-            _logger.LogInformation($"Track with ID '{createdTrack.RowKey}' has been created by '{user.Id}'.");
+            var createdTrack = await TrackRepository.CreateTrack(track);
+            _logger.LogInformation($"Track with ID '{createdTrack.id}' has been created by '{user.Id}'.");
             return RedirectToPage("./Index");
         }
     }

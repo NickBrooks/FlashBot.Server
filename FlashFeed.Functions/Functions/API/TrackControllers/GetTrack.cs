@@ -23,7 +23,7 @@ namespace FlashFeed.Functions.Functions.API.TrackControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get the track
-                Track track = await TrackRepository.GetTrack(trackId);
+                TrackAuth track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -41,7 +41,7 @@ namespace FlashFeed.Functions.Functions.API.TrackControllers
                         return req.CreateResponse(HttpStatusCode.Unauthorized);
                 }
 
-                TrackDTO trackDTO = new TrackDTO()
+                TrackResultDTO trackDTO = new TrackResultDTO()
                 {
                     id = trackId,
                     name = track.name,

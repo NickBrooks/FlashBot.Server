@@ -25,7 +25,7 @@ namespace FlashFeed.Functions.Functions.API.TagControllers
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 
                 // get the track
-                Track track = await TrackRepository.GetTrack(trackId);
+                TrackAuth track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
                     return req.CreateResponse(HttpStatusCode.Unauthorized);
 

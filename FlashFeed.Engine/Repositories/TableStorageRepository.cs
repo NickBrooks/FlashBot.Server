@@ -28,7 +28,7 @@ namespace FlashFeed.Engine.Repositories
         /// </summary>
         /// <param name="track"></param>
         /// <returns>Returns the inserted track.</returns>
-        internal static async Task<Track> InsertTrack(Track track)
+        internal static async Task<TrackAuth> InsertTrackAuth(TrackAuth track)
         {
             try
             {
@@ -51,12 +51,12 @@ namespace FlashFeed.Engine.Repositories
         }
 
 
-        internal static List<Track> GetRateLimitedTracks()
+        internal static List<TrackAuth> GetRateLimitedTracks()
         {
-            return QueryEntities<Track>(t => t.rate_limit_exceeded == true, TracksTable);
+            return QueryEntities<TrackAuth>(t => t.rate_limit_exceeded == true, TracksTable);
         }
 
-        internal static async void UpdateTrack(Track track)
+        internal static async void UpdateTrack(TrackAuth track)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace FlashFeed.Engine.Repositories
         /// </summary>
         /// <param name="trackId"></param>
         /// <returns>Returns the inserted track.</returns>
-        internal static async Task<Track> GetTrack(string trackId)
+        internal static async Task<TrackAuth> GetTrack(string trackId)
         {
             try
             {
@@ -85,11 +85,11 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(TracksTable);
 
                 // query tracks
-                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
+                TableQuery<TrackAuth> rangeQuery = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
 
                 TableContinuationToken token = null;
 
-                TableQuerySegment<Track> tableQueryResult =
+                TableQuerySegment<TrackAuth> tableQueryResult =
                     await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
 
                 return tableQueryResult.FirstOrDefault();
@@ -112,76 +112,14 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(TracksTable);
 
                 // query tracks
-                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
+                TableQuery<TrackAuth> rangeQuery = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
 
                 TableContinuationToken token = null;
 
-                TableQuerySegment<Track> tableQueryResult = await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
+                TableQuerySegment<TrackAuth> tableQueryResult = await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
 
                 TableOperation op = TableOperation.Delete(tableQueryResult.FirstOrDefault());
                 await table.ExecuteAsync(op);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get tracks by ownerId.
-        /// </summary>
-        /// <param name="ownerId"></param>
-        /// <returns>List of tracks by ownerId.</returns>
-        internal static async Task<List<Track>> GetTracks(string ownerId)
-        {
-            try
-            {
-                // reference track table
-                CloudTable table = tableClient.GetTableReference(TracksTable);
-
-                // query tracks
-                TableQuery<Track> query = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, ownerId));
-
-                List<Track> allTracks = new List<Track>();
-                TableContinuationToken token = null;
-
-                do
-                {
-                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
-                    token = queryResponse.ContinuationToken;
-                    allTracks.AddRange(queryResponse.Results);
-                }
-                while (token != null);
-
-                return allTracks.OrderByDescending(t => t.date_created).ToList();
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Fetches the track based upon the postKey.
-        /// </summary>
-        /// <param name="postKey"></param>
-        /// <returns></returns>
-        internal static async Task<Track> GetTrackByPostKey(string postKey)
-        {
-            try
-            {
-                // reference track table
-                CloudTable table = tableClient.GetTableReference(TracksTable);
-
-                // query tracks
-                TableQuery<Track> rangeQuery = new TableQuery<Track>().Where(TableQuery.GenerateFilterCondition("post_key", QueryComparisons.Equal, postKey));
-
-                TableContinuationToken token = null;
-
-                TableQuerySegment<Track> tableQueryResult =
-                    await table.ExecuteQuerySegmentedAsync(rangeQuery, token);
-
-                return tableQueryResult.FirstOrDefault();
             }
             catch
             {

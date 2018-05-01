@@ -24,7 +24,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             _logger = logger;
         }
 
-        public Track Track { get; set; }
+        public TrackAuth Track { get; set; }
         public ApplicationUser CurrentUser { get; set; }
         public ExtendedUser ExtendedUser { get; set; }
 
@@ -37,7 +37,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             }
 
             CurrentUser = user;
-            Track = await TrackRepository.GetVerifiedTrack(id, user.Id);
+            Track = await TrackRepository.GetTrackVerifyOwner(id, user.Id);
 
             return Page();
         }
@@ -50,7 +50,7 @@ namespace FlashFeed.Admin.Pages.Tracks
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            Track = await TrackRepository.GetVerifiedTrack(id, user.Id);
+            Track = await TrackRepository.GetTrackVerifyOwner(id, user.Id);
 
             // cant find or no permission to delete
             if (Track == null)
