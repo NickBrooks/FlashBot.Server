@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
+using System.IO;
 
 namespace FlashFeed.Engine
 {
@@ -6,7 +10,12 @@ namespace FlashFeed.Engine
     {
         public static void CropSquare(int size, Stream input, Stream output)
         {
+            using (var image = Image.Load(input))
             {
+                image.Mutate(x => x
+                     .Resize(150, 150));
+
+                image.SaveAsJpeg(output);
             }
         }
 
