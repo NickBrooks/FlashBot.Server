@@ -50,14 +50,13 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-
-        internal static async Task<List<string>> GetRateLimitedTracks()
+        internal static async Task<List<TrackAuth>> GetRateLimitedTracks()
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
 
             TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(
-                    TableQuery.GenerateFilterCondition("rate_limit_exceeded", QueryComparisons.Equal, "true")).Select(new string[] { "RowKey" });
+                    TableQuery.GenerateFilterCondition("rate_limit_exceeded", QueryComparisons.Equal, "true")).Select(new string[] { "RowKey", "rate_limit" });
 
             List<TrackAuth> tracks = new List<TrackAuth>();
             TableContinuationToken token = null;
@@ -70,14 +69,7 @@ namespace FlashFeed.Engine.Repositories
             }
             while (token != null);
 
-            List<string> idList = new List<string>();
-
-            foreach (var post in tracks)
-            {
-                idList.Add(post.RowKey);
-            }
-
-            return idList;
+            return tracks;
         }
 
         internal static async void UpdateTrack(TrackAuth track)
@@ -157,7 +149,7 @@ namespace FlashFeed.Engine.Repositories
         /// Delete the track.
         /// </summary>
         /// <param name="trackId"></param>
-        internal static async void DeleteTrack(string trackId)
+        internal static async Task<bool> DeleteTrack(string trackId)
         {
             try
             {
@@ -173,10 +165,11 @@ namespace FlashFeed.Engine.Repositories
 
                 TableOperation op = TableOperation.Delete(tableQueryResult.FirstOrDefault());
                 await table.ExecuteAsync(op);
+                return true;
             }
             catch
             {
-                throw;
+                return false;
             }
         }
 
@@ -386,12 +379,12 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 // set track condition
-                long countdownTime = Convert.ToInt64(postQuery.continuation_time) - 1;
+                long countdownTime = Convert.ToInt64(postQuery.continuation) - 1;
                 string trackPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, postQuery.track_id);
                 string continuationPredicate = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThan, Tools.GetCountdownFromDateTime(countdownTime).ToString());
 
                 // continuation, yay or nay
-                string predicate = postQuery.continuation_time == null ? trackPredicate : TableQuery.CombineFilters(trackPredicate, TableOperators.And, continuationPredicate);
+                string predicate = postQuery.continuation == null ? trackPredicate : TableQuery.CombineFilters(trackPredicate, TableOperators.And, continuationPredicate);
 
                 // add the created clause
                 TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url", "has_image" }).Take(count);

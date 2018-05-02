@@ -111,7 +111,7 @@ namespace FlashFeed.Engine.Repositories
             return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id), item);
         }
 
-        internal static async Task DeleteItemAsync(string id)
+        internal static async void DeleteItemAsync(string id)
         {
             await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id));
         }

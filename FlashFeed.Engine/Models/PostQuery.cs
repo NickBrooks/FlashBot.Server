@@ -7,7 +7,7 @@ namespace FlashFeed.Engine.Models
         public string track_id { get; set; }
         public List<string> tags { get; set; }
         public string sql { get; set; }
-        public string continuation_time { get; set; }
+        public string continuation { get; set; }
     }
 
     public class CosmosQueryPagingResults<T> where T : class

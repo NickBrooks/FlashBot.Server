@@ -22,7 +22,7 @@ namespace FlashFeed.Engine.Models
         public long date_created { get; set; }
         public List<string> tags { get; set; }
         public string type { get; set; }
-        public string has_image { get; set; }
+        public bool has_image { get; set; }
         public string title { get; set; }
         public string summary { get; set; }
         public string url { get; set; }
@@ -34,7 +34,7 @@ namespace FlashFeed.Engine.Models
         public string track_name { get; set; }
         public string tags { get; set; }
         public string type { get; set; }
-        public string has_image { get; set; }
+        public bool has_image { get; set; }
         public string title { get; set; }
         public string summary { get; set; }
         public string body { get; set; }
@@ -53,7 +53,7 @@ namespace FlashFeed.Engine.Models
 
     public class PostReturnObject
     {
-        public string continuation_time { get; set; }
+        public string continuation { get; set; }
         public int count { get; internal set; }
         public List<PostQueryDTO> data { get; set; }
     }

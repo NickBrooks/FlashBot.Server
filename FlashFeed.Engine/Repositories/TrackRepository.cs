@@ -46,7 +46,7 @@ namespace FlashFeed.Engine.Repositories
             return newTrack;
         }
 
-        public static async Task<List<string>> GetRateLimitedTracks()
+        public static async Task<List<TrackAuth>> GetRateLimitedTracks()
         {
             return await TableStorageRepository.GetRateLimitedTracks();
         }
@@ -91,7 +91,7 @@ namespace FlashFeed.Engine.Repositories
             return track;
         }
 
-        public static async void DeleteTrack(string trackId)
+        public static async Task<bool> DeleteTrack(string trackId)
         {
             // decrement the count
             var track = await GetTrack(trackId);
@@ -101,8 +101,19 @@ namespace FlashFeed.Engine.Repositories
             TableStorageRepository.AddMessageToQueue("delete-posts-from-track", trackId);
             TableStorageRepository.AddMessageToQueue("delete-tracktags-from-track", trackId);
 
-            // then delete track
-            TableStorageRepository.DeleteTrack(trackId);
+            // then delete track cosmos
+            CosmosRepository<Track>.DeleteItemAsync(trackId);
+
+            // then delete profile pics
+            DeleteImages(trackId);
+
+            // then delete from table storage, and return
+            return await TableStorageRepository.DeleteTrack(trackId);
+        }
+
+        public static void DeleteImages(string trackId)
+        {
+            BlobRepository.DeleteFolder(trackId, BlobRepository.TracksContainer);
         }
     }
 }

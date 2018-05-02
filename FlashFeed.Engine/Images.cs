@@ -11,7 +11,7 @@ namespace FlashFeed.Engine
             MagicImageProcessor.ProcessImage(input, output, new ProcessImageSettings { Width = size, Height = size, SaveFormat = FileFormat.Jpeg, ResizeMode = CropScaleMode.Crop });
         }
 
-        public static void ResizeToMax(int size, Stream input, Stream output)
+        public static void Resize(int size, Stream input, Stream output)
         {
             MagicImageProcessor.ProcessImage(input, output, new ProcessImageSettings { Width = size, Height = size, SaveFormat = FileFormat.Jpeg, ResizeMode = CropScaleMode.Max });
         }
