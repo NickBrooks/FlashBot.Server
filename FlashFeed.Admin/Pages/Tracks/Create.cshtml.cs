@@ -91,19 +91,35 @@ namespace FlashFeed.Admin.Pages.Tracks
             };
 
             // generate small thumb
-            using (MemoryStream input = new MemoryStream())
+            if (Input.UploadTrackImage != null)
             {
-                await Input.UploadTrackImage.CopyToAsync(input);
-                byte[] data = input.ToArray();
-
-                using (MemoryStream output = new MemoryStream())
+                using (MemoryStream uploadStream = new MemoryStream())
                 {
-                    Images.CropSquare(32, input, output);
+                    await Input.UploadTrackImage.CopyToAsync(uploadStream);
+                    byte[] data = uploadStream.ToArray();
 
-                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), track.RowKey + "/thumb_mini");
+                    using (MemoryStream input = new MemoryStream(data))
+                    {
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            Images.CropSquare(150, input, output);
+
+                            await BlobRepository.UploadFileAsync(BlobRepository.TracksContainer, output.ToArray(), track.RowKey + "/thumb");
+                        }
+                    }
+
+                    using (MemoryStream input = new MemoryStream(data))
+                    {
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            Images.CropSquare(32, input, output);
+
+                            await BlobRepository.UploadFileAsync(BlobRepository.TracksContainer, output.ToArray(), track.RowKey + "/thumb_mini");
+                        }
+                    }
+
+                    track.has_image = "jpeg";
                 }
-
-                track.has_image = "true";
             }
 
             // create track

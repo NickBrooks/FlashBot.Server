@@ -17,7 +17,7 @@ namespace FlashFeed.Engine.Repositories
         public static async Task<string> UploadFileAsync(string container, byte[] file, string fileName, string contentType = null)
         {
             // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
-            var c = cloudBlobClient.GetContainerReference(PostsContainer);
+            var c = cloudBlobClient.GetContainerReference(container);
             if (!await c.ExistsAsync())
             {
                 await c.CreateIfNotExistsAsync();

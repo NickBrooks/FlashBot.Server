@@ -32,10 +32,14 @@
             {
                 <div class="card mb-3">
                     <h5 class="card-header">
-                        @track.name @if (track.is_private)
+                        @track.name
+                        @if (track.is_private)
                         {<small><i class="fas fa-user-secret text-muted"></i></small>}
                     </h5>
                     <div class="card-body">
+                        @if (track.has_image != null)
+                        {<p><img src="http://127.0.0.1:10000/devstoreaccount1/tracks/@track.RowKey/thumb_mini.jpeg" /></p>
+                            <p><img src="http://127.0.0.1:10000/devstoreaccount1/tracks/@track.RowKey/thumb.jpeg" /></p>}
                         <p class="card-text">@track.description</p>
                         <hr />
                         <div class="input-group">

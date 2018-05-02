@@ -7,7 +7,7 @@ namespace FlashFeed.Engine
     {
         public static void CropSquare(int size, Stream input, Stream output)
         {
-            MagicImageProcessor.ProcessImage(input, output, new ProcessImageSettings { Width = 200, Height = 200, SaveFormat = FileFormat.Jpeg, ResizeMode = CropScaleMode.Crop });
+            MagicImageProcessor.ProcessImage(input, output, new ProcessImageSettings { Width = size, Height = size, SaveFormat = FileFormat.Jpeg, ResizeMode = CropScaleMode.Crop });
         }
 
         //public static void ResizeToMax(int size, MemoryStream input, MemoryStream output)
