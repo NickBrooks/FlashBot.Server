@@ -72,6 +72,35 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
+        internal static async Task<List<TrackAuth>> GetTracksByOwnerId(string ownerId)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TracksTable);
+
+                // query tracks
+                TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, ownerId));
+
+                List<TrackAuth> tracks = new List<TrackAuth>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                    token = queryResponse.ContinuationToken;
+                    tracks.AddRange(queryResponse.Results);
+                }
+                while (token != null);
+
+                return tracks.OrderByDescending(t => t.subscribers).ToList();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// Get track from Table Storage.
         /// </summary>

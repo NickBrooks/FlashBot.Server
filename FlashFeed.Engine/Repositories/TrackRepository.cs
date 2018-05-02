@@ -7,11 +7,11 @@ namespace FlashFeed.Engine.Repositories
 {
     public class TrackRepository
     {
-        public static async Task<Track> CreateTrack(Track track)
+        public static async Task<TrackAuth> CreateTrack(TrackAuth track)
         {
-            if (track.owner_id == null || track.name == null) return null;
+            if (track.PartitionKey == null || track.name == null) return null;
 
-            var extendedUser = await ExtendedUserRepository.GetExtendedUser(track.owner_id);
+            var extendedUser = await ExtendedUserRepository.GetExtendedUser(track.PartitionKey);
 
             // check private maxed out
             if (track.is_private)
@@ -27,21 +27,21 @@ namespace FlashFeed.Engine.Repositories
                     return null;
             }
 
-            track.id = track.id == null ? Guid.NewGuid().ToString() : track.id;
+            track.RowKey = track.RowKey == null ? Guid.NewGuid().ToString() : track.RowKey;
             track.subscribers = 0;
             track.rate_limit = extendedUser.Rate_Per_Track;
             track.track_key = AuthRepository.GenerateRandomString(64);
-            track.track_secret = AuthRepository.GenerateSHA256(track.id, track.track_key);
-
-            // create the track
-            var newTrack = await (dynamic)CosmosRepository<Track>.CreateItemAsync(track);
-            if (newTrack == null) return null;
+            track.track_secret = AuthRepository.GenerateSHA256(track.RowKey, track.track_key);
 
             // insert into table storage
-            await TableStorageRepository.InsertTrackAuth(new TrackAuth(track));
+            var newTrack = await TableStorageRepository.InsertTrackAuth(track);
+            if (newTrack == null) return null;
+
+            // insert into Cosmos
+            await (dynamic)CosmosRepository<Track>.CreateItemAsync(new Track(track));
 
             // increment user's track count
-            ExtendedUserRepository.IncrementTrackCount(track.owner_id, track.is_private);
+            ExtendedUserRepository.IncrementTrackCount(track.PartitionKey, track.is_private);
 
             return newTrack;
         }
@@ -61,9 +61,9 @@ namespace FlashFeed.Engine.Repositories
         /// </summary>
         /// <param name="ownerId"></param>
         /// <returns>List of tracks.</returns>
-        public static async Task<List<Track>> GetTracksByOwnerId(string ownerId)
+        public static async Task<List<TrackAuth>> GetTracksByOwnerId(string ownerId)
         {
-            List<Track> tracks = await (dynamic)CosmosRepository<Track>.GetItemsAsync(t => t.owner_id == ownerId);
+            List<TrackAuth> tracks = await TableStorageRepository.GetTracksByOwnerId(ownerId);
 
             return tracks;
         }

@@ -25,7 +25,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             _logger = logger;
         }
 
-        public List<Track> _tracks { get; set; }
+        public List<TrackAuth> _tracks { get; set; }
         public ApplicationUser _currentUser { get; set; }
         public ExtendedUser _extendedUser { get; set; }
         public string _trackKey { get; set; }
@@ -38,7 +38,7 @@ namespace FlashFeed.Admin.Pages.Tracks
 
             foreach (var track in _tracks)
             {
-                track.track_key = AuthRepository.EncodeKeyAndSecretToBase64(track.track_key, track.track_secret);
+                _trackKey = AuthRepository.EncodeKeyAndSecretToBase64(track.track_key, track.track_secret);
             }
 
             _extendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);

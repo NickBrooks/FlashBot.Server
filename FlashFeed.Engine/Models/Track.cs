@@ -2,6 +2,7 @@
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FlashFeed.Engine.Models
 {
@@ -15,9 +16,23 @@ namespace FlashFeed.Engine.Models
         public List<string> tags { get; set; }
         public string has_image { get; set; }
         public int subscribers { get; set; }
-        public string track_key { get; set; }
-        public string track_secret { get; set; }
-        public int rate_limit { get; set; }
+
+        public Track(TrackAuth trackAuth)
+        {
+            id = trackAuth.RowKey;
+            owner_id = trackAuth.PartitionKey;
+            is_private = trackAuth.is_private;
+            name = trackAuth.name;
+            description = trackAuth.description;
+            tags = trackAuth.tags.Split(',').ToList();
+            has_image = trackAuth.has_image;
+            subscribers = trackAuth.subscribers;
+        }
+
+        public Track()
+        {
+
+        }
     }
 
     public class TrackAuth : TableEntity
@@ -28,17 +43,17 @@ namespace FlashFeed.Engine.Models
         public string track_secret { get; set; }
         public int rate_limit { get; set; }
         public bool rate_limit_exceeded { get; set; }
+        public string description { get; set; }
+        public string tags { get; set; }
+        public string has_image { get; set; }
+        public int subscribers { get; set; }
 
-        public TrackAuth(Track track)
+        public TrackAuth(string ownerId, string trackId)
         {
-            PartitionKey = track.owner_id;
-            RowKey = track.id;
-            name = track.name;
-            is_private = track.is_private;
-            track_key = track.track_key;
-            track_secret = track.track_secret;
-            rate_limit = track.rate_limit;
-            rate_limit_exceeded = false;
+            PartitionKey = ownerId;
+            RowKey = trackId;
+            track_key = AuthRepository.GenerateRandomString(64);
+            track_secret = AuthRepository.GenerateSHA256(RowKey, track_key);
         }
 
         public TrackAuth()

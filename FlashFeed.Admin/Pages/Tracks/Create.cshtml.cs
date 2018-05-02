@@ -82,14 +82,12 @@ namespace FlashFeed.Admin.Pages.Tracks
                 return Page();
             }
 
-            var track = new Track()
+            var track = new TrackAuth(user.Id, Guid.NewGuid().ToString())
             {
-                id = Guid.NewGuid().ToString(),
-                owner_id = user.Id,
                 description = Input.Description,
                 is_private = Input.IsPrivate,
                 name = Input.Name,
-                tags = Tools.ValidateTags(Input.Tags.Split(',').ToList())
+                tags = string.IsNullOrWhiteSpace(Input.Tags) ? null : string.Join(",", Tools.ValidateTags(Input.Tags.Split(',').ToList()))
             };
 
             // generate small thumb
@@ -97,34 +95,20 @@ namespace FlashFeed.Admin.Pages.Tracks
             {
                 await Input.UploadTrackImage.CopyToAsync(input);
                 byte[] data = input.ToArray();
-                string contentType = Images.GetContentType(data);
-
-                if (contentType == null)
-                    return RedirectToPage("./Index");
 
                 using (MemoryStream output = new MemoryStream())
                 {
                     Images.CropSquare(32, input, output);
 
-                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), track.id + "/thumb_mini", contentType);
+                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), track.RowKey + "/thumb_mini");
                 }
 
-                switch (contentType)
-                {
-                    case "image/jpeg":
-                        track.has_image = "jpeg";
-                        break;
-                    case "image/png":
-                        track.has_image = "png";
-                        break;
-                    default:
-                        break;
-                }
+                track.has_image = "true";
             }
 
             // create track
             var createdTrack = await TrackRepository.CreateTrack(track);
-            _logger.LogInformation($"Track with ID '{createdTrack.id}' has been created by '{user.Id}'.");
+            _logger.LogInformation($"Track with ID '{createdTrack.RowKey}' has been created by '{user.Id}'.");
             return RedirectToPage("./Index");
         }
     }
