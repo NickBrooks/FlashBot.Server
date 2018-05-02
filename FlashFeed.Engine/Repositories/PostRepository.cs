@@ -102,8 +102,7 @@ namespace FlashFeed.Engine.Repositories
 
         public static async Task<PostReturnObject> QueryPosts(PostQuery query)
         {
-            CosmosQueryPagingResults<PostQueryDTO> result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql);
-            List<PostQueryDTO> data = result.results.ToList();
+            List<PostQueryDTO> data = await CosmosRepository<PostQueryDTO>.GetItemsSqlAsync(query.sql);
             string continuation = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
 
             return new PostReturnObject()

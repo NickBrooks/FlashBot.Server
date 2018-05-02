@@ -50,7 +50,7 @@ namespace FlashFeed.Functions.API.PostControllers
             catch (Exception e)
             {
                 log.Info(e.Message);
-                return new UnauthorizedResult();
+                return new BadRequestObjectResult(e.Message);
             }
         }
     }
