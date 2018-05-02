@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -33,6 +34,9 @@ namespace FlashFeed.Functions
                     byte[] data = webClient.DownloadData(url);
                     string contentType = webClient.ResponseHeaders["Content-Type"];
 
+                    List<string> list = new List<string>();
+                    var id = Guid.NewGuid().ToString();
+
                     // generate small thumb
                     using (MemoryStream input = new MemoryStream(data))
                     {
@@ -42,17 +46,45 @@ namespace FlashFeed.Functions
 
                             using (output)
                             {
-                                var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), Guid.NewGuid().ToString() + "/thumb_mini", contentType);
-
-                                return new OkObjectResult(result);
+                                var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), id + "/cropped", contentType);
+                                list.Add(result);
                             }
                         }
                     }
+
+                    using (MemoryStream input = new MemoryStream(data))
+                    {
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            Images.ResizeToMax(1024, input, output);
+
+                            using (output)
+                            {
+                                var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), id + "/resized", contentType);
+                                list.Add(result);
+                            }
+                        }
+                    }
+
+                    using (MemoryStream input = new MemoryStream(data))
+                    {
+                        using (MemoryStream output = new MemoryStream())
+                        {
+                            Images.GenerateHero(400, input, output);
+
+                            using (output)
+                            {
+                                var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), id + "/hero", contentType);
+                                list.Add(result);
+                            }
+                        }
+                    }
+                    return new OkObjectResult(list);
                 }
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(e.InnerException);
+                return new BadRequestObjectResult(e.Message);
             }
         }
     }
