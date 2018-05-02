@@ -1,7 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Transforms;
+﻿using PhotoSauce.MagicScaler;
 using System.IO;
 
 namespace FlashFeed.Engine
@@ -10,13 +7,7 @@ namespace FlashFeed.Engine
     {
         public static void CropSquare(int size, Stream input, Stream output)
         {
-            using (var image = Image.Load(input))
-            {
-                image.Mutate(x => x
-                     .Resize(150, 150));
-
-                image.SaveAsJpeg(output);
-            }
+            MagicImageProcessor.ProcessImage(input, output, new ProcessImageSettings { Width = 200, Height = 200, SaveFormat = FileFormat.Jpeg, ResizeMode = CropScaleMode.Crop });
         }
 
         //public static void ResizeToMax(int size, MemoryStream input, MemoryStream output)

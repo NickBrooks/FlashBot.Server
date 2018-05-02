@@ -1,15 +1,14 @@
 
-using System.IO;
+using FlashFeed.Engine;
+using FlashFeed.Engine.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
-using Newtonsoft.Json;
-using System.Net;
-using FlashFeed.Engine;
 using System;
-using FlashFeed.Engine.Repositories;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace FlashFeed.Functions
@@ -21,28 +20,39 @@ namespace FlashFeed.Functions
         {
             log.Info("C# HTTP trigger function processed a request.");
 
-            string url = req.Query["uel"];
-
-            using (WebClient webClient = new WebClient())
+            try
             {
-                byte[] data = webClient.DownloadData(url);
-                string contentType = webClient.ResponseHeaders["Content-Type"];
 
-                // generate small thumb
-                using (MemoryStream input = new MemoryStream(data))
+                using (WebClient webClient = new WebClient())
                 {
-                    using (MemoryStream output = new MemoryStream())
+                    string url = req.Query["url"];
+
+                    if (url == null)
+                        return new BadRequestObjectResult("No Url specified.");
+
+                    byte[] data = webClient.DownloadData(url);
+                    string contentType = webClient.ResponseHeaders["Content-Type"];
+
+                    // generate small thumb
+                    using (MemoryStream input = new MemoryStream(data))
                     {
-                        Images.CropSquare(32, input, output);
-
-                        using (output)
+                        using (MemoryStream output = new MemoryStream())
                         {
-                            var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), Guid.NewGuid().ToString() + "/thumb_mini", contentType);
+                            Images.CropSquare(150, input, output);
 
-                            return new OkObjectResult(result);
+                            using (output)
+                            {
+                                var result = await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), Guid.NewGuid().ToString() + "/thumb_mini", contentType);
+
+                                return new OkObjectResult(result);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(e.InnerException);
             }
         }
     }
