@@ -1,5 +1,6 @@
 ﻿using FlashFeed.Engine.Models;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,9 +33,11 @@ namespace FlashFeed.Engine.Repositories
                 has_image = null
             };
 
+
+            // TODO: process image
             if (Tools.ValidateUri(postDTO.image_url))
             {
-                post.has_image = await ProcessImage(id, postDTO.image_url);
+                // post.has_image = await ProcessImage(id, postDTO.image_url);
             }
 
             var result = await TableStorageRepository.InsertPost(post);
@@ -59,14 +62,14 @@ namespace FlashFeed.Engine.Repositories
             return post;
         }
 
-        public static List<string> GetPostIdsInTrack(string trackId)
+        public static async Task<List<string>> GetPostIdsInTrack(string trackId)
         {
-            return TableStorageRepository.GetPostIdsInTrack(trackId);
+            return await TableStorageRepository.GetPostIdsInTrack(trackId);
         }
 
-        public static PostReturnObject GetPosts(PostQuery query)
+        public static async Task<PostReturnObject> GetPosts(PostQuery query)
         {
-            List<PostQueryDTO> data = TableStorageRepository.GetPosts(query);
+            List<PostQueryDTO> data = await TableStorageRepository.GetPosts(query);
             string continuation_time = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
 
             return new PostReturnObject()
@@ -87,9 +90,9 @@ namespace FlashFeed.Engine.Repositories
             return await TableStorageRepository.GetPost(trackId, postId);
         }
 
-        public static int PostsLastHourCount(string trackId)
+        public static async Task<int> PostsLastHourCount(string trackId)
         {
-            return TableStorageRepository.GetPostCountSince(trackId, 60);
+            return await TableStorageRepository.GetPostCountSince(trackId, 60);
         }
 
         // cosmos stuff
@@ -146,81 +149,81 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // images
-        private static async Task<string> ProcessImage(string postId, string imageUrl)
-        {
-            using (WebClient webClient = new WebClient())
-            {
-                byte[] data = webClient.DownloadData(imageUrl);
-                string contentType = webClient.ResponseHeaders["Content-Type"];
+        //private static async Task<string> ProcessImage(string postId, string imageUrl)
+        //{
+        //    using (WebClient webClient = new WebClient())
+        //    {
+        //        byte[] data = webClient.DownloadData(imageUrl);
+        //        string contentType = webClient.ResponseHeaders["Content-Type"];
 
-                // check correct content type
-                if (!new[] { "image/jpeg", "image/png" }.Any(s => s == contentType))
-                    return null;
+        //        // check correct content type
+        //        if (!new[] { "image/jpeg", "image/png" }.Any(s => s == contentType))
+        //            return null;
 
-                // generate small thumb
-                using (MemoryStream input = new MemoryStream(data))
-                {
-                    using (MemoryStream output = new MemoryStream())
-                    {
-                        Images.CropSquare(32, input, output);
+        //        // generate small thumb
+        //        using (MemoryStream input = new MemoryStream(data))
+        //        {
+        //            using (MemoryStream output = new MemoryStream())
+        //            {
+        //                Images.CropSquare(32, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
-                        {
-                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb_mini", contentType);
-                        }
-                    }
-                }
+        //                using (var fetchedImage = Image.FromStream(output))
+        //                {
+        //                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb_mini", contentType);
+        //                }
+        //            }
+        //        }
 
-                // generate medium thumb
-                using (MemoryStream input = new MemoryStream(data))
-                {
-                    using (MemoryStream output = new MemoryStream())
-                    {
-                        Images.CropSquare(150, input, output);
+        //        // generate medium thumb
+        //        using (MemoryStream input = new MemoryStream(data))
+        //        {
+        //            using (MemoryStream output = new MemoryStream())
+        //            {
+        //                Images.CropSquare(150, input, output);
 
-                        await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb", contentType);
-                    }
-                }
+        //                await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb", contentType);
+        //            }
+        //        }
 
-                // generate hero
-                using (MemoryStream input = new MemoryStream(data))
-                {
-                    using (MemoryStream output = new MemoryStream())
-                    {
-                        Images.GenerateHero(400, input, output);
+        //        // generate hero
+        //        using (MemoryStream input = new MemoryStream(data))
+        //        {
+        //            using (MemoryStream output = new MemoryStream())
+        //            {
+        //                Images.GenerateHero(400, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
-                        {
-                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/hero", contentType);
-                        }
-                    }
-                }
+        //                using (var fetchedImage = Image.FromStream(output))
+        //                {
+        //                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/hero", contentType);
+        //                }
+        //            }
+        //        }
 
-                // save a fullish size
-                using (MemoryStream input = new MemoryStream(data))
-                {
-                    using (MemoryStream output = new MemoryStream())
-                    {
-                        Images.ResizeToMax(800, input, output);
+        //        // save a fullish size
+        //        using (MemoryStream input = new MemoryStream(data))
+        //        {
+        //            using (MemoryStream output = new MemoryStream())
+        //            {
+        //                Images.ResizeToMax(800, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
-                        {
-                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/full", contentType);
-                        }
-                    }
-                }
+        //                using (var fetchedImage = Image.FromStream(output))
+        //                {
+        //                    await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/full", contentType);
+        //                }
+        //            }
+        //        }
 
-                switch (contentType)
-                {
-                    case "image/jpeg":
-                        return "jpeg";
-                    case "image/png":
-                        return "png";
-                    default:
-                        return null;
-                }
-            }
-        }
+        //        switch (contentType)
+        //        {
+        //            case "image/jpeg":
+        //                return "jpeg";
+        //            case "image/png":
+        //                return "png";
+        //            default:
+        //                return null;
+        //        }
+        //    }
+        //}
 
         public static void DeleteImages(string postId, string extension)
         {

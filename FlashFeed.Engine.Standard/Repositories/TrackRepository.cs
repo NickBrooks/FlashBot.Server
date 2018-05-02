@@ -27,7 +27,7 @@ namespace FlashFeed.Engine.Repositories
                     return null;
             }
 
-            track.RowKey = track.RowKey == null ? Guid.NewGuid().ToString() : track.RowKey;
+            track.RowKey = track.RowKey ?? Guid.NewGuid().ToString();
             track.subscribers = 0;
             track.rate_limit = extendedUser.Rate_Per_Track;
             track.track_key = AuthRepository.GenerateRandomString(64);
@@ -46,9 +46,9 @@ namespace FlashFeed.Engine.Repositories
             return newTrack;
         }
 
-        public static List<TrackAuth> GetRateLimitedTracks()
+        public static async Task<List<string>> GetRateLimitedTracks()
         {
-            return TableStorageRepository.GetRateLimitedTracks();
+            return await TableStorageRepository.GetRateLimitedTracks();
         }
 
         public static void UpdateTrack(TrackAuth track)

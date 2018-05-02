@@ -51,9 +51,33 @@ namespace FlashFeed.Engine.Repositories
         }
 
 
-        internal static List<TrackAuth> GetRateLimitedTracks()
+        internal static async Task<List<string>> GetRateLimitedTracks()
         {
-            return QueryEntities<TrackAuth>(t => t.rate_limit_exceeded == true, TracksTable);
+            // reference track table
+            CloudTable table = tableClient.GetTableReference(PostsTable);
+
+            TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(
+                    TableQuery.GenerateFilterCondition("rate_limit_exceeded", QueryComparisons.Equal, "true")).Select(new string[] { "RowKey" });
+
+            List<TrackAuth> tracks = new List<TrackAuth>();
+            TableContinuationToken token = null;
+
+            do
+            {
+                var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = queryResponse.ContinuationToken;
+                tracks.AddRange(queryResponse.Results);
+            }
+            while (token != null);
+
+            List<string> idList = new List<string>();
+
+            foreach (var post in tracks)
+            {
+                idList.Add(post.RowKey);
+            }
+
+            return idList;
         }
 
         internal static async void UpdateTrack(TrackAuth track)
@@ -354,7 +378,7 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static List<PostQueryDTO> GetPosts(PostQuery postQuery, int count = 30)
+        internal static async Task<List<PostQueryDTO>> GetPosts(PostQuery postQuery, int count = 30)
         {
             try
             {
@@ -372,14 +396,15 @@ namespace FlashFeed.Engine.Repositories
                 // add the created clause
                 TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url", "has_image" }).Take(count);
 
-                List<PostQueryDTO> postQueryDTO = new List<PostQueryDTO>();
+                TableQuerySegment<Post> results = await table.ExecuteQuerySegmentedAsync(query, null);
 
-                foreach (var post in table.ExecuteQuery(query))
+                List<PostQueryDTO> posts = new List<PostQueryDTO>();
+                foreach (var post in results)
                 {
-                    postQueryDTO.Add(Tools.ConvertPostToPostQueryDTO(post));
+                    posts.Add(Tools.ConvertPostToPostQueryDTO(post));
                 }
 
-                return postQueryDTO;
+                return posts.OrderByDescending(p => p.date_created).ToList();
             }
             catch
             {
@@ -387,38 +412,60 @@ namespace FlashFeed.Engine.Repositories
             };
         }
 
-        internal static List<string> GetPostIdsInTrack(string trackId)
+        internal static async Task<List<string>> GetPostIdsInTrack(string trackId)
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
 
-            TableQuery<Post> projectionQuery = new TableQuery<Post>().Where(
+            TableQuery<Post> query = new TableQuery<Post>().Where(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId)).Select(new string[] { "RowKey" });
 
-            List<string> idsInTrack = new List<string>();
+            List<Post> posts = new List<Post>();
+            TableContinuationToken token = null;
 
-            foreach (Post post in table.ExecuteQuery(projectionQuery))
+            do
             {
-                idsInTrack.Add(post.RowKey);
+                var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = queryResponse.ContinuationToken;
+                posts.AddRange(queryResponse.Results);
+            }
+            while (token != null);
+
+            List<string> idList = new List<string>();
+
+            foreach (var post in posts)
+            {
+                idList.Add(post.RowKey);
             }
 
-            return idsInTrack;
+            return idList;
         }
 
-        internal static int GetPostCountSince(string trackId, int minutes)
+        internal static async Task<int> GetPostCountSince(string trackId, int minutes)
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
 
             long epochTime = Tools.GetCountdownFromDateTime(DateTime.UtcNow.AddMinutes(minutes * -1));
 
-            TableQuery<DynamicTableEntity> query = new TableQuery<DynamicTableEntity>().Where(
+            TableQuery<Post> query = new TableQuery<Post>().Where(
                 TableQuery.CombineFilters(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId),
                     TableOperators.And,
                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, epochTime.ToString()))).Select(new string[] { "RowKey" });
 
-            return table.ExecuteQuery(query).Count();
+            List<Post> posts = new List<Post>();
+            TableContinuationToken token = null;
+
+            do
+            {
+                var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = queryResponse.ContinuationToken;
+                posts.AddRange(queryResponse.Results);
+            }
+            while (token != null);
+
+            return posts.Count;
         }
 
         internal static async void DeletePost(Post postMeta)
@@ -448,18 +495,6 @@ namespace FlashFeed.Engine.Repositories
             // Create a message and add it to the queue.
             CloudQueueMessage message = new CloudQueueMessage(messageBody);
             await queue.AddMessageAsync(message);
-        }
-
-        // https://goo.gl/gyaX67
-        internal static List<T> QueryEntities<T>(Expression<Func<T, bool>> criteria, string tableName) where T : ITableEntity, new()
-        {
-            // reference table
-            CloudTable table = tableClient.GetTableReference(tableName);
-
-            // table, in this case, is my `CloudTable` instance
-            List<T> results = table.CreateQuery<T>().Where(criteria).ToList();
-
-            return results;
         }
     }
 }

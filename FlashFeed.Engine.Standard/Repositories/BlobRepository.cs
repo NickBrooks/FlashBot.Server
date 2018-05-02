@@ -18,7 +18,7 @@ namespace FlashFeed.Engine.Repositories
         {
             // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
             var c = cloudBlobClient.GetContainerReference(PostsContainer);
-            if (!c.Exists())
+            if (!await c.ExistsAsync())
             {
                 await c.CreateIfNotExistsAsync();
 
@@ -60,7 +60,7 @@ namespace FlashFeed.Engine.Repositories
             CloudBlobContainer c = cloudBlobClient.GetContainerReference(PostsContainer);
             CloudBlockBlob blockBlob = c.GetBlockBlobReference(fileIdentifier);
 
-            blockBlob.DeleteIfExists();
+            blockBlob.DeleteIfExistsAsync();
         }
     }
 }
