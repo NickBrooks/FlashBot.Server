@@ -5,14 +5,7 @@ VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Admin", "FlashFeed.Admin\FlashFeed.Admin.csproj", "{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Functions", "FlashFeed.Functions\FlashFeed.Functions.csproj", "{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashFeed.Functions.Core", "FlashFeed.Functions.Core\FlashFeed.Functions.Core.csproj", "{558DC600-D615-4499-BA94-E2CD6AAB0F90}"
-	ProjectSection(ProjectDependencies) = postProject
-		{55F52768-1762-4D53-B160-0F824EA8DF4F} = {55F52768-1762-4D53-B160-0F824EA8DF4F}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashFeed.Engine", "FlashFeed.Engine.Standard\FlashFeed.Engine.csproj", "{55F52768-1762-4D53-B160-0F824EA8DF4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Engine", "FlashFeed.Engine\FlashFeed.Engine.csproj", "{55F52768-1762-4D53-B160-0F824EA8DF4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,14 +17,6 @@ Global
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57FBF3C9-E44B-4772-AD8F-1BAF7DE32D1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{558DC600-D615-4499-BA94-E2CD6AAB0F90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{558DC600-D615-4499-BA94-E2CD6AAB0F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{558DC600-D615-4499-BA94-E2CD6AAB0F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{558DC600-D615-4499-BA94-E2CD6AAB0F90}.Release|Any CPU.Build.0 = Release|Any CPU
 		{55F52768-1762-4D53-B160-0F824EA8DF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{55F52768-1762-4D53-B160-0F824EA8DF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55F52768-1762-4D53-B160-0F824EA8DF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
