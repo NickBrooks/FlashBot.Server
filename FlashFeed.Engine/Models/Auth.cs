@@ -10,6 +10,11 @@ namespace FlashFeed.Engine.Models
             PartitionKey = token;
             RowKey = userId;
         }
+
+        public RefreshToken()
+        {
+
+        }
     }
 
     public class JWTObject
@@ -37,6 +42,11 @@ namespace FlashFeed.Engine.Models
             typ = "JWT";
             issuer = "flashfeed";
             expiration = _expiration;
+        }
+
+        public AuthHeader()
+        {
+
         }
     }
 }

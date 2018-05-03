@@ -31,7 +31,7 @@ namespace FlashFeed.Functions.API.PostControllers
                 // private post so check key
                 if (track.is_private)
                 {
-                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(req.Headers["X-Track-Key"]);
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecret(req.Headers["X-Track-Key"]);
 
                     // validate authKey
                     if (!AuthRepository.ValidateSHA256(trackId, keySecret.Secret))

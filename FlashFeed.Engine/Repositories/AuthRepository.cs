@@ -34,14 +34,14 @@ namespace FlashFeed.Engine.Repositories
             var token = GenerateSHA256(userId + Tools.ConvertToEpoch(DateTime.UtcNow).ToString());
 
             // insert to db
-            await TableStorageRepository.InsertRefreshToken(new RefreshToken(token, userId));
+            await TableStorageRepository.InsertRefreshToken(new RefreshToken(userId, token));
 
-            return EncodeKeyAndSecretToBase64(userId, token);
+            return EncodeKeyAndSecret(userId, token);
         }
 
         public static async Task<string> GetRefreshTokenUserAndDestroyToken(string encodedToken)
         {
-            KeySecret keySecret = DecodeKeyAndSecretFromBase64(encodedToken);
+            KeySecret keySecret = DecodeKeyAndSecret(encodedToken);
 
             var refreshToken = await TableStorageRepository.GetRefreshToken(keySecret.Key, keySecret.Secret);
             if (refreshToken == null)
@@ -60,13 +60,13 @@ namespace FlashFeed.Engine.Repositories
             string secret = jwt[2];
 
             // check expiration
-            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(authHeader);
+            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(Base64Decode(authHeader));
             if (Tools.ConvertToEpoch(DateTime.UtcNow) > header.expiration) return null;
 
             // check SHA256 hash
             if (!ValidateSHA256(authHeader + authClaim, secret)) return null;
 
-            return JsonConvert.DeserializeObject<AuthClaim>(authClaim);
+            return JsonConvert.DeserializeObject<AuthClaim>(Base64Decode(authClaim));
         }
 
         public static bool ValidateSHA256(string objectToCompare, string secret)
@@ -113,16 +113,16 @@ namespace FlashFeed.Engine.Repositories
             return hex.ToString();
         }
 
-        public static string EncodeKeyAndSecretToBase64(string key, string secret)
+        public static string EncodeKeyAndSecret(string key, string secret)
         {
             return Base64Encode($"{key}.{secret}");
         }
 
-        public static KeySecret DecodeKeyAndSecretFromBase64(string base64String)
+        public static KeySecret DecodeKeyAndSecret(string base64String)
         {
-            string decodedString = Base64Decode(base64String);
+            string base64 = Base64Decode(base64String);
 
-            List<string> result = decodedString.Split('.').ToList();
+            List<string> result = base64.Split('.').ToList();
 
             if (result.Count < 2)
                 return null;
@@ -136,15 +136,24 @@ namespace FlashFeed.Engine.Repositories
 
         public static string Base64Encode(string plainTextString)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(plainTextString);
+            byte[] bytes = Encoding.UTF8.GetBytes(plainTextString);
 
-            return Convert.ToBase64String(bytes);
+            var encodedString = Convert.ToBase64String(bytes);
+
+            // must be multiple of 4
+            int mod4 = encodedString.Length % 4;
+            if (mod4 > 0)
+            {
+                encodedString += new string('=', 4 - mod4);
+            }
+
+            return encodedString;
         }
 
         public static string Base64Decode(string base64String)
         {
             byte[] bytes = Convert.FromBase64String(base64String);
-            return Encoding.ASCII.GetString(bytes);
+            return Encoding.UTF8.GetString(bytes);
         }
 
         internal static string GenerateRandomString(int length)

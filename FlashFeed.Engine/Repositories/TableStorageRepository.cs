@@ -22,7 +22,7 @@ namespace FlashFeed.Engine.Repositories
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
-        private static readonly string RefreshTokensTable = "refreshtoken";
+        private static readonly string RefreshTokensTable = "refreshtokens";
 
         /// <summary>
         /// Insert track into Table Storage.
