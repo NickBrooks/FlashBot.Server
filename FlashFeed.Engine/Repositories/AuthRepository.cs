@@ -140,18 +140,18 @@ namespace FlashFeed.Engine.Repositories
 
             var encodedString = Convert.ToBase64String(bytes);
 
-            // must be multiple of 4
-            int mod4 = encodedString.Length % 4;
-            if (mod4 > 0)
-            {
-                encodedString += new string('=', 4 - mod4);
-            }
-
             return encodedString;
         }
 
         public static string Base64Decode(string base64String)
         {
+            // must be multiple of 4
+            int mod4 = base64String.Length % 4;
+            if (mod4 > 0)
+            {
+                base64String += new string('=', 4 - mod4);
+            }
+
             byte[] bytes = Convert.FromBase64String(base64String);
             return Encoding.UTF8.GetString(bytes);
         }

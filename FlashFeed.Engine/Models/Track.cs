@@ -13,7 +13,7 @@ namespace FlashFeed.Engine.Models
         public string name { get; set; }
         public string description { get; set; }
         public List<string> tags { get; set; }
-        public string has_image { get; set; }
+        public bool has_image { get; set; }
         public int subscribers { get; set; }
 
         public Track(TrackAuth trackAuth)
@@ -44,7 +44,7 @@ namespace FlashFeed.Engine.Models
         public bool rate_limit_exceeded { get; set; }
         public string description { get; set; }
         public string tags { get; set; }
-        public string has_image { get; set; }
+        public bool has_image { get; set; }
         public int subscribers { get; set; }
 
         public TrackAuth(string ownerId, string trackId)

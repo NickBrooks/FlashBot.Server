@@ -2,6 +2,7 @@ using FlashFeed.Engine.Models;
 using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
 namespace FlashFeed.Functions.Queue.Posts
@@ -9,9 +10,9 @@ namespace FlashFeed.Functions.Queue.Posts
     public static class ProcessNewPostIncrementTrackTags
     {
         [FunctionName("ProcessNewPostIncrementTrackTags")]
-        public static void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]string myQueueItem, TraceWriter log)
+        public static void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
         {
-            Post post = JsonConvert.DeserializeObject<Post>(myQueueItem);
+            Post post = JsonConvert.DeserializeObject<Post>(myQueueItem.AsString);
 
             string[] tags = post.tags.Split(',');
 

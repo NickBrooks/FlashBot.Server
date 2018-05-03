@@ -24,11 +24,7 @@ namespace FlashFeed.Functions
                 if (authToken == null)
                     return new UnauthorizedResult();
 
-                AuthClaim authenticated = AuthRepository.ValidateAuthClaim(authToken);
-                if (authenticated == null)
-                    return new UnauthorizedResult();
-
-                return new OkObjectResult(authenticated);
+                return new OkObjectResult(AuthRepository.Base64Decode(authToken));
             }
             catch
             {

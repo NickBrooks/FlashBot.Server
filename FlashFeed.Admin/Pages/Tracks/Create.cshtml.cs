@@ -118,7 +118,7 @@ namespace FlashFeed.Admin.Pages.Tracks
                         }
                     }
 
-                    track.has_image = "jpeg";
+                    track.has_image = true;
                 }
             }
 
