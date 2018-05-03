@@ -28,17 +28,35 @@ namespace FlashFeed.Functions.API.PostControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
-                // private post so check key
                 if (track.is_private)
                 {
-                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecret(req.Headers["X-Track-Key"]);
+                    string trackKeyHeader = req.Headers["X-Track-Key"];
+                    string authToken = req.Headers["Authorization"];
 
-                    // validate authKey
-                    if (!AuthRepository.ValidateSHA256(trackId, keySecret.Secret))
-                        return new UnauthorizedResult();
+                    if (authToken != null)
+                    {
+                        // validate authKey
+                        AuthClaim authClaim = AuthRepository.ValidateAuthClaim(authToken);
+                        if (authClaim == null)
+                            return new UnauthorizedResult();
 
-                    // validate track key
-                    if (track == null || track.track_key != keySecret.Key)
+                        // check track userID matches authClaim userId
+                        if (track.PartitionKey != authClaim.user_id)
+                            return new UnauthorizedResult();
+                    }
+                    else if (trackKeyHeader != null)
+                    {
+                        KeySecret keySecret = AuthRepository.DecodeKeyAndSecret(trackKeyHeader);
+
+                        // validate authKey
+                        if (!AuthRepository.ValidateSHA256(trackId, keySecret.Secret))
+                            return new UnauthorizedResult();
+
+                        // validate track key
+                        if (track.track_key != keySecret.Key)
+                            return new UnauthorizedResult();
+                    }
+                    else
                         return new UnauthorizedResult();
                 }
 
