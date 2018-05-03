@@ -3,19 +3,19 @@ using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace FlashFeed.Functions.Functions.Timer
+namespace FlashFeed.Functions.Timer
 {
     public static class CheckRateLimitedTracks
     {
         [FunctionName("CheckRateLimitedTracks")]
-        public static void Run([TimerTrigger("*/10 * * * * *")]TimerInfo myTimer, TraceWriter log)
+        public static async void Run([TimerTrigger("*/10 * * * * *")]TimerInfo myTimer, TraceWriter log)
         {
-            var tracks = TrackRepository.GetRateLimitedTracks();
+            var tracks = await TrackRepository.GetRateLimitedTracks();
 
             int count = 0;
             foreach (var track in tracks)
             {
-                int postsLastHour = PostRepository.PostsLastHourCount(track.RowKey);
+                int postsLastHour = await PostRepository.PostsLastHourCount(track.RowKey);
 
                 if (postsLastHour <= track.rate_limit)
                 {

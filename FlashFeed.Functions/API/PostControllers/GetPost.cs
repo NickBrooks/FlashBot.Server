@@ -1,54 +1,54 @@
 using FlashFeed.Engine;
 using FlashFeed.Engine.Models;
 using FlashFeed.Engine.Repositories;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.Functions.API.PostControllers
+namespace FlashFeed.Functions.API.PostControllers
 {
     public static class GetPost
     {
         [FunctionName("GetPost")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequestMessage req, string trackId, string postId, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequest req, string trackId, string postId, TraceWriter log)
         {
             try
             {
                 // check postId and trackId provided
                 if (!Tools.IsValidGuid(trackId))
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                    return new UnauthorizedResult();
 
                 // get the track
                 TrackAuth track = await TrackRepository.GetTrack(trackId);
                 if (track == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                    return new UnauthorizedResult();
 
                 // private post so check key
                 if (track.is_private)
                 {
-                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(Tools.GetHeaderValue(req.Headers, "X-Track-Key"));
+                    KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(req.Headers["X-Track-Key"]);
 
                     // validate authKey
                     if (!AuthRepository.ValidateSHA256(trackId, keySecret))
-                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+                        return new UnauthorizedResult();
 
                     // validate track key
                     if (track == null || track.track_key != keySecret.Key)
-                        return req.CreateResponse(HttpStatusCode.Unauthorized);
+                        return new UnauthorizedResult();
                 }
 
                 // get the post
                 Post post = await PostRepository.GetPost(trackId, postId);
                 if (post == null)
-                    return req.CreateResponse(HttpStatusCode.Unauthorized);
+                    return new UnauthorizedResult();
 
                 // convert to post DTO
-                return req.CreateResponse(HttpStatusCode.OK, new PostDTO()
+                return new OkObjectResult(new PostDTO()
                 {
                     body = post.body,
                     date_created = post.date_created,
@@ -65,7 +65,7 @@ namespace FlashFeed.Functions.Functions.API.PostControllers
             catch (Exception e)
             {
                 log.Info(e.Message);
-                return req.CreateResponse(HttpStatusCode.Unauthorized);
+                return new UnauthorizedResult();
             }
         }
     }

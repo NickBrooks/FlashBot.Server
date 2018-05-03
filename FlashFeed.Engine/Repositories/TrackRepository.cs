@@ -27,7 +27,7 @@ namespace FlashFeed.Engine.Repositories
                     return null;
             }
 
-            track.RowKey = track.RowKey == null ? Guid.NewGuid().ToString() : track.RowKey;
+            track.RowKey = track.RowKey ?? Guid.NewGuid().ToString();
             track.subscribers = 0;
             track.rate_limit = extendedUser.Rate_Per_Track;
             track.track_key = AuthRepository.GenerateRandomString(64);
@@ -46,9 +46,9 @@ namespace FlashFeed.Engine.Repositories
             return newTrack;
         }
 
-        public static List<TrackAuth> GetRateLimitedTracks()
+        public static async Task<List<TrackAuth>> GetRateLimitedTracks()
         {
-            return TableStorageRepository.GetRateLimitedTracks();
+            return await TableStorageRepository.GetRateLimitedTracks();
         }
 
         public static void UpdateTrack(TrackAuth track)
@@ -91,7 +91,7 @@ namespace FlashFeed.Engine.Repositories
             return track;
         }
 
-        public static async void DeleteTrack(string trackId)
+        public static async Task<bool> DeleteTrack(string trackId)
         {
             // decrement the count
             var track = await GetTrack(trackId);
@@ -101,8 +101,19 @@ namespace FlashFeed.Engine.Repositories
             TableStorageRepository.AddMessageToQueue("delete-posts-from-track", trackId);
             TableStorageRepository.AddMessageToQueue("delete-tracktags-from-track", trackId);
 
-            // then delete track
-            TableStorageRepository.DeleteTrack(trackId);
+            // then delete track cosmos
+            CosmosRepository<Track>.DeleteItemAsync(trackId);
+
+            // then delete profile pics
+            DeleteImages(trackId);
+
+            // then delete from table storage, and return
+            return await TableStorageRepository.DeleteTrack(trackId);
+        }
+
+        public static void DeleteImages(string trackId)
+        {
+            BlobRepository.DeleteFolder(trackId, BlobRepository.TracksContainer);
         }
     }
 }

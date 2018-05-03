@@ -1,6 +1,5 @@
 ﻿using FlashFeed.Engine.Repositories;
 using Microsoft.WindowsAzure.Storage.Table;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,7 +23,7 @@ namespace FlashFeed.Engine.Models
             is_private = trackAuth.is_private;
             name = trackAuth.name;
             description = trackAuth.description;
-            tags = trackAuth.tags.Split(',').ToList();
+            tags = string.IsNullOrEmpty(trackAuth.tags) ? new List<string>() : trackAuth.tags.Split(',').ToList();
             has_image = trackAuth.has_image;
             subscribers = trackAuth.subscribers;
         }

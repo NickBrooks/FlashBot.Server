@@ -55,22 +55,20 @@ namespace FlashFeed.Engine
             return Guid.TryParse(guid, out Guid o);
         }
 
-        public static PostQuery GetQueryFromQueryParams(string trackId, IEnumerable<KeyValuePair<string, string>> queryParams)
+        public static PostQuery GetQueryFromQueryParams(string trackId, string tagString, string continuation)
         {
-            string tagString = queryParams.FirstOrDefault(q => string.Compare(q.Key, "tags", true) == 0).Value;
-            string continuation_time = queryParams.FirstOrDefault(q => string.Compare(q.Key, "continuation_time", true) == 0).Value;
             List<string> tags = string.IsNullOrEmpty(tagString) ? new List<string>() : ValidateTags(tagString.Split(',').Take(12).ToList());
 
             return new PostQuery()
             {
                 tags = tags,
                 track_id = trackId,
-                sql = GenerateSQLQueryString(trackId, tags, continuation_time),
-                continuation_time = continuation_time
+                sql = GenerateSQLQueryString(trackId, tags, continuation),
+                continuation = continuation
             };
         }
 
-        private static string GenerateSQLQueryString(string trackId, List<string> tags, string continuation_time = null)
+        private static string GenerateSQLQueryString(string trackId, List<string> tags, string continuation = null)
         {
             var sqlString = $"SELECT r.id, r.date_created, r.tags, r.title, r.summary, r.track_id, r.track_name, r.url, r.type, r.has_image FROM r WHERE r.track_id = '{trackId}'";
 
@@ -79,9 +77,9 @@ namespace FlashFeed.Engine
                 sqlString += $" and ARRAY_CONTAINS(r.tags, \"{tag}\")";
             }
 
-            if (continuation_time != null)
+            if (continuation != null)
             {
-                sqlString += $" and r.date_created < {continuation_time}";
+                sqlString += $" and r.date_created < {continuation}";
             }
 
             sqlString += " ORDER BY r.date_created DESC";
@@ -110,18 +108,6 @@ namespace FlashFeed.Engine
             Uri uriResult;
             return Uri.TryCreate(uri, UriKind.Absolute, out uriResult)
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-        }
-
-        public static string GetHeaderValue(HttpRequestHeaders headers, string value)
-        {
-            var header = headers.Where(t => t.Key == value).FirstOrDefault();
-
-            if (header.Value == null)
-                return null;
-
-            var key = header.Value.ToList()[0];
-
-            return key;
         }
 
         public static string GenerateSummary(string body)

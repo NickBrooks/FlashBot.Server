@@ -55,7 +55,7 @@ namespace FlashFeed.Engine.Repositories
             return results;
         }
 
-        internal static async Task<List<T>> GetItemsSqlAsync(string queryString, int maxItemCount = 100)
+        internal static async Task<List<T>> GetItemsSqlAsync(string queryString, int maxItemCount = 30)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
@@ -70,23 +70,6 @@ namespace FlashFeed.Engine.Repositories
             }
 
             return results.ToList();
-        }
-
-        internal static async Task<CosmosQueryPagingResults<T>> GetItemsSqlWithPagingAsync(string queryString, int maxItemCount = 30)
-        {
-            IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
-                UriFactory.CreateDocumentCollectionUri(Database, Collection),
-                queryString,
-                new FeedOptions { MaxItemCount = maxItemCount })
-                .AsDocumentQuery();
-
-            var results = await query.ExecuteNextAsync<T>();
-
-            return new CosmosQueryPagingResults<T>()
-            {
-                results = results.ToList(),
-                continuationToken = results.ResponseContinuation
-            };
         }
 
         internal static async Task<Document> CreateItemAsync(T item)
@@ -111,7 +94,7 @@ namespace FlashFeed.Engine.Repositories
             return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id), item);
         }
 
-        internal static async Task DeleteItemAsync(string id)
+        internal static async void DeleteItemAsync(string id)
         {
             await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(Database, Collection, id));
         }

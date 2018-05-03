@@ -51,7 +51,7 @@ namespace FlashFeed.Admin.Pages.Tracks
             if (Track == null)
                 return RedirectToPage("./Index");
 
-            TrackRepository.DeleteTrack(Track.RowKey);
+            await TrackRepository.DeleteTrack(Track.RowKey);
             _logger.LogInformation($"Track with ID '{Track.RowKey}' has been deleted by '{user.Id}'.");
             return RedirectToPage("./Index");
         }

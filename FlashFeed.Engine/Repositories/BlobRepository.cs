@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FlashFeed.Engine.Repositories
@@ -17,8 +18,8 @@ namespace FlashFeed.Engine.Repositories
         public static async Task<string> UploadFileAsync(string container, byte[] file, string fileName, string contentType = null)
         {
             // Create a container called 'quickstartblobs' and append a GUID value to it to make the name unique. 
-            var c = cloudBlobClient.GetContainerReference(PostsContainer);
-            if (!c.Exists())
+            var c = cloudBlobClient.GetContainerReference(container);
+            if (!await c.ExistsAsync())
             {
                 await c.CreateIfNotExistsAsync();
 
@@ -60,7 +61,31 @@ namespace FlashFeed.Engine.Repositories
             CloudBlobContainer c = cloudBlobClient.GetContainerReference(PostsContainer);
             CloudBlockBlob blockBlob = c.GetBlockBlobReference(fileIdentifier);
 
-            blockBlob.DeleteIfExists();
+            blockBlob.DeleteIfExistsAsync();
+        }
+
+        internal static async void DeleteFolder(string objectId, string container)
+        {
+            CloudBlobContainer c = storageAccount.CreateCloudBlobClient().GetContainerReference(container);
+
+            BlobContinuationToken continuationToken = null;
+            List<IListBlobItem> blobs = new List<IListBlobItem>();
+
+            do
+            {
+                var response = await c.GetDirectoryReference(objectId).ListBlobsSegmentedAsync(continuationToken);
+                continuationToken = response.ContinuationToken;
+                blobs.AddRange(response.Results);
+            }
+            while (continuationToken != null);
+
+            foreach (IListBlobItem blob in blobs)
+            {
+                if (blob.GetType() == typeof(CloudBlob) || blob.GetType().BaseType == typeof(CloudBlob))
+                {
+                    await ((CloudBlob)blob).DeleteIfExistsAsync();
+                }
+            }
         }
     }
 }

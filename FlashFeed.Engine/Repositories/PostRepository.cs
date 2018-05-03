@@ -13,7 +13,7 @@ namespace FlashFeed.Engine.Repositories
     public class PostRepository
     {
         // table storage stuff
-        public static async Task<Post> InsertPostToTableStorage(PostSubmitDTO postDTO)
+        public static async Task<Post> InsertPost(PostSubmitDTO postDTO)
         {
             long now = Tools.ConvertToEpoch(DateTime.UtcNow);
             long countdown = Tools.GetCountdownFromDateTime(now);
@@ -29,9 +29,11 @@ namespace FlashFeed.Engine.Repositories
                 tags = string.Join(",", postDTO.tags),
                 title = postDTO.title,
                 type = postDTO.type,
-                has_image = null
+                has_image = false
             };
 
+
+            // TODO: process image
             if (Tools.ValidateUri(postDTO.image_url))
             {
                 post.has_image = await ProcessImage(id, postDTO.image_url);
@@ -59,19 +61,19 @@ namespace FlashFeed.Engine.Repositories
             return post;
         }
 
-        public static List<string> GetPostIdsInTrack(string trackId)
+        public static async Task<List<string>> GetPostIdsInTrack(string trackId)
         {
-            return TableStorageRepository.GetPostIdsInTrack(trackId);
+            return await TableStorageRepository.GetPostIdsInTrack(trackId);
         }
 
-        public static PostReturnObject GetPosts(PostQuery query)
+        public static async Task<PostReturnObject> GetPosts(PostQuery query)
         {
-            List<PostQueryDTO> data = TableStorageRepository.GetPosts(query);
-            string continuation_time = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
+            List<PostQueryDTO> data = await TableStorageRepository.GetPosts(query);
+            string continuation = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
 
             return new PostReturnObject()
             {
-                continuation_time = continuation_time,
+                continuation = continuation,
                 count = data.Count,
                 data = data
             };
@@ -87,9 +89,9 @@ namespace FlashFeed.Engine.Repositories
             return await TableStorageRepository.GetPost(trackId, postId);
         }
 
-        public static int PostsLastHourCount(string trackId)
+        public static async Task<int> PostsLastHourCount(string trackId)
         {
-            return TableStorageRepository.GetPostCountSince(trackId, 60);
+            return await TableStorageRepository.GetPostCountSince(trackId, 60);
         }
 
         // cosmos stuff
@@ -100,21 +102,20 @@ namespace FlashFeed.Engine.Repositories
 
         public static async Task<PostReturnObject> QueryPosts(PostQuery query)
         {
-            CosmosQueryPagingResults<PostQueryDTO> result = await CosmosRepository<PostQueryDTO>.GetItemsSqlWithPagingAsync(query.sql);
-            List<PostQueryDTO> data = result.results.ToList();
-            string continuation_time = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
+            List<PostQueryDTO> data = await CosmosRepository<PostQueryDTO>.GetItemsSqlAsync(query.sql);
+            string continuation = data.Count > 1 ? data[data.Count - 1].date_created.ToString() : null;
 
             return new PostReturnObject()
             {
-                continuation_time = continuation_time,
+                continuation = continuation,
                 count = data.Count,
                 data = data
             };
         }
 
-        public static async void DeletePostFromCosmos(string postId)
+        public static void DeletePostFromCosmos(string postId)
         {
-            await CosmosRepository<PostDTO>.DeleteItemAsync(postId);
+            CosmosRepository<PostDTO>.DeleteItemAsync(postId);
         }
 
         // validation
@@ -146,7 +147,7 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // images
-        private static async Task<string> ProcessImage(string postId, string imageUrl)
+        private static async Task<bool> ProcessImage(string postId, string imageUrl)
         {
             using (WebClient webClient = new WebClient())
             {
@@ -154,82 +155,72 @@ namespace FlashFeed.Engine.Repositories
                 string contentType = webClient.ResponseHeaders["Content-Type"];
 
                 // check correct content type
-                if (!new[] { "image/jpeg", "image/png" }.Any(s => s == contentType))
-                    return null;
+                if ("image/jpeg" != contentType)
+                    return false;
 
-                // generate small thumb
+                /// generate mini
                 using (MemoryStream input = new MemoryStream(data))
                 {
                     using (MemoryStream output = new MemoryStream())
                     {
-                        Images.CropSquare(32, input, output);
+                        Images.CropSquare(48, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
+                        using (output)
                         {
                             await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb_mini", contentType);
                         }
                     }
                 }
 
-                // generate medium thumb
+                // generate thumb
                 using (MemoryStream input = new MemoryStream(data))
                 {
                     using (MemoryStream output = new MemoryStream())
                     {
                         Images.CropSquare(150, input, output);
 
-                        await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb", contentType);
+                        using (output)
+                        {
+                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/thumb", contentType);
+                        }
                     }
                 }
 
-                // generate hero
+                // hero
                 using (MemoryStream input = new MemoryStream(data))
                 {
                     using (MemoryStream output = new MemoryStream())
                     {
                         Images.GenerateHero(400, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
+                        using (output)
                         {
                             await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/hero", contentType);
                         }
                     }
                 }
 
-                // save a fullish size
+                // resized
                 using (MemoryStream input = new MemoryStream(data))
                 {
                     using (MemoryStream output = new MemoryStream())
                     {
-                        Images.ResizeToMax(800, input, output);
+                        Images.Resize(800, input, output);
 
-                        using (var fetchedImage = Image.FromStream(output))
+                        using (output)
                         {
-                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/full", contentType);
+                            await BlobRepository.UploadFileAsync(BlobRepository.PostsContainer, output.ToArray(), postId + "/large", contentType);
                         }
                     }
                 }
 
-                switch (contentType)
-                {
-                    case "image/jpeg":
-                        return "jpeg";
-                    case "image/png":
-                        return "png";
-                    default:
-                        return null;
-                }
+                return true;
             }
         }
 
-        public static void DeleteImages(string postId, string extension)
+        public static void DeleteImages(string postId)
         {
-            var c = BlobRepository.PostsContainer;
-
-            BlobRepository.DeleteFile(c, $"{postId}/thumb_mini.{extension}");
-            BlobRepository.DeleteFile(c, $"{postId}/thumb.{extension}");
-            BlobRepository.DeleteFile(c, $"{postId}/hero.{extension}");
-            BlobRepository.DeleteFile(c, $"{postId}/full.{extension}");
+            BlobRepository.DeleteFolder(postId, BlobRepository.PostsContainer);
         }
     }
 }

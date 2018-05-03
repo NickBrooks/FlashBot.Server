@@ -1,17 +1,15 @@
 using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace FlashFeed.Functions.Functions.Queue
+namespace FlashFeed.Functions.Queue.Posts
 {
     public static class ProcessDeletePost
     {
         [FunctionName("ProcessDeletePost")]
-        public static async void Run([QueueTrigger("process-delete-post", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-delete-post", Connection = "TABLESTORAGE_CONNECTION")]string myQueueItem, TraceWriter log)
         {
-            List<string> queueItemList = queueItem.Split('.').ToList();
+            string[] queueItemList = myQueueItem.Split('.');
             string trackId = queueItemList[0];
             string postId = queueItemList[1];
 
@@ -22,7 +20,7 @@ namespace FlashFeed.Functions.Functions.Queue
 
             if (post.has_image != null)
             {
-                PostRepository.DeleteImages(postId, post.has_image);
+                PostRepository.DeleteImages(postId);
             }
 
             // TODO: delete from feeds

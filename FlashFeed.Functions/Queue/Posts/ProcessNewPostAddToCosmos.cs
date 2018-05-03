@@ -6,14 +6,14 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FlashFeed.Functions.Functions.Queue
+namespace FlashFeed.Functions.Queue.Posts
 {
     public static class ProcessNewPostAddToCosmos
     {
         [FunctionName("ProcessNewPostAddToCosmos")]
-        public static async void Run([QueueTrigger("process-new-post-add-to-cosmos", Connection = "TABLESTORAGE_CONNECTION")]string queueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-new-post-add-to-cosmos", Connection = "TABLESTORAGE_CONNECTION")]string myQueueItem, TraceWriter log)
         {
-            Post post = JsonConvert.DeserializeObject<Post>(queueItem);
+            Post post = JsonConvert.DeserializeObject<Post>(myQueueItem);
 
             List<string> tags = post.tags.Split(',').ToList();
 
