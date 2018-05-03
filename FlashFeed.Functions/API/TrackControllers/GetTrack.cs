@@ -33,7 +33,7 @@ namespace FlashFeed.Functions.API.TrackControllers
                     KeySecret keySecret = AuthRepository.DecodeKeyAndSecretFromBase64(req.Headers["X-Track-Key"]);
 
                     // validate authKey
-                    if (!AuthRepository.ValidateSHA256(trackId, keySecret))
+                    if (!AuthRepository.ValidateSHA256(trackId, keySecret.Secret))
                         return new UnauthorizedResult();
 
                     // validate track key

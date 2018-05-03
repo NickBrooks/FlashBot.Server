@@ -31,7 +31,7 @@ namespace FlashFeed.Engine.Repositories
             track.subscribers = 0;
             track.rate_limit = extendedUser.Rate_Per_Track;
             track.track_key = AuthRepository.GenerateRandomString(64);
-            track.track_secret = AuthRepository.GenerateSHA256(track.RowKey, track.track_key);
+            track.track_secret = AuthRepository.GenerateSHA256(track.RowKey + track.track_key);
 
             // insert into table storage
             var newTrack = await TableStorageRepository.InsertTrackAuth(track);

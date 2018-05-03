@@ -22,6 +22,7 @@ namespace FlashFeed.Engine.Repositories
         private static readonly string TracksTable = "tracks";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
+        private static readonly string RefreshTokensTable = "refreshtoken";
 
         /// <summary>
         /// Insert track into Table Storage.
@@ -469,6 +470,59 @@ namespace FlashFeed.Engine.Repositories
                 CloudTable table = tableClient.GetTableReference(PostsTable);
 
                 TableOperation op = TableOperation.Delete(postMeta);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        // refresh tokens
+        internal static async Task InsertRefreshToken(RefreshToken refreshToken)
+        {
+            try
+            {
+                // reference tokens table
+                CloudTable table = tableClient.GetTableReference(RefreshTokensTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the token
+                TableOperation op = TableOperation.Insert(refreshToken);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<RefreshToken> GetRefreshToken(string userId, string refreshToken)
+        {
+            try
+            {
+                // reference refreshToken table
+                CloudTable table = tableClient.GetTableReference(RefreshTokensTable);
+
+                // Execute the retrieve operation.
+                TableOperation retrieveOperation = TableOperation.Retrieve<RefreshToken>(userId, refreshToken);
+                TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
+                return (RefreshToken)retrievedResult.Result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async void DeleteRefreshToken(RefreshToken refreshToken)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(RefreshTokensTable);
+
+                TableOperation op = TableOperation.Delete(refreshToken);
                 await table.ExecuteAsync(op);
             }
             catch

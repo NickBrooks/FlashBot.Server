@@ -52,7 +52,7 @@ namespace FlashFeed.Engine.Models
             PartitionKey = ownerId;
             RowKey = trackId;
             track_key = AuthRepository.GenerateRandomString(64);
-            track_secret = AuthRepository.GenerateSHA256(RowKey, track_key);
+            track_secret = AuthRepository.GenerateSHA256(RowKey + track_key);
         }
 
         public TrackAuth()
