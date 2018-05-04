@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FlashFeed.Engine
@@ -108,6 +109,28 @@ namespace FlashFeed.Engine
             Uri uriResult;
             return Uri.TryCreate(uri, UriKind.Absolute, out uriResult)
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        }
+
+        public static string Base64Encode(string plainTextString)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(plainTextString);
+
+            var encodedString = Convert.ToBase64String(bytes);
+
+            return encodedString;
+        }
+
+        public static string Base64Decode(string base64String)
+        {
+            // must be multiple of 4
+            int mod4 = base64String.Length % 4;
+            if (mod4 > 0)
+            {
+                base64String += new string('=', 4 - mod4);
+            }
+
+            byte[] bytes = Convert.FromBase64String(base64String);
+            return Encoding.UTF8.GetString(bytes);
         }
 
         public static string GenerateSummary(string body)

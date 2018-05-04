@@ -37,7 +37,7 @@
                         {<small><i class="fas fa-user-secret text-muted"></i></small>}
                     </h5>
                     <div class="card-body">
-                        @if (track.has_image != null)
+                        @if (track.has_image)
                         {<p><img src="http://127.0.0.1:10000/devstoreaccount1/tracks/@track.RowKey/thumb_mini.jpeg" /></p>
                             <p><img src="http://127.0.0.1:10000/devstoreaccount1/tracks/@track.RowKey/thumb.jpeg" /></p>}
                         <p class="card-text">@track.description</p>

@@ -60,13 +60,13 @@ namespace FlashFeed.Engine.Repositories
             string secret = jwt[2];
 
             // check expiration
-            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(Base64Decode(authHeader));
+            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(Tools.Base64Decode(authHeader));
             if (Tools.ConvertToEpoch(DateTime.UtcNow) > header.expiration) return null;
 
             // check SHA256 hash
             if (!ValidateSHA256(authHeader + authClaim, secret)) return null;
 
-            return JsonConvert.DeserializeObject<AuthClaim>(Base64Decode(authClaim));
+            return JsonConvert.DeserializeObject<AuthClaim>(Tools.Base64Decode(authClaim));
         }
 
         public static bool ValidateSHA256(string objectToCompare, string secret)
@@ -90,9 +90,9 @@ namespace FlashFeed.Engine.Repositories
                 user_id = userId
             });
 
-            string secret = GenerateSHA256(Base64Encode(authHeader) + Base64Encode(authClaim));
+            string secret = GenerateSHA256(Tools.Base64Encode(authHeader) + Tools.Base64Encode(authClaim));
 
-            return $"{Base64Encode(authHeader)}.{Base64Encode(authClaim)}.{secret}";
+            return $"{Tools.Base64Encode(authHeader)}.{Tools.Base64Encode(authClaim)}.{secret}";
         }
 
         internal static string GenerateSHA256(string objectString)
@@ -115,12 +115,12 @@ namespace FlashFeed.Engine.Repositories
 
         public static string EncodeKeyAndSecret(string key, string secret)
         {
-            return Base64Encode($"{key}.{secret}");
+            return Tools.Base64Encode($"{key}.{secret}");
         }
 
         public static KeySecret DecodeKeyAndSecret(string base64String)
         {
-            string base64 = Base64Decode(base64String);
+            string base64 = Tools.Base64Decode(base64String);
 
             List<string> result = base64.Split('.').ToList();
 
@@ -132,28 +132,6 @@ namespace FlashFeed.Engine.Repositories
                 Key = result[0],
                 Secret = result[1]
             };
-        }
-
-        public static string Base64Encode(string plainTextString)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(plainTextString);
-
-            var encodedString = Convert.ToBase64String(bytes);
-
-            return encodedString;
-        }
-
-        public static string Base64Decode(string base64String)
-        {
-            // must be multiple of 4
-            int mod4 = base64String.Length % 4;
-            if (mod4 > 0)
-            {
-                base64String += new string('=', 4 - mod4);
-            }
-
-            byte[] bytes = Convert.FromBase64String(base64String);
-            return Encoding.UTF8.GetString(bytes);
         }
 
         internal static string GenerateRandomString(int length)

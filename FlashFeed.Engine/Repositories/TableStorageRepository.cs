@@ -51,6 +51,51 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
+
+        // TODO: clean up
+        public static async Task InsertTrackAuthTest(TrackAuth track)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(TracksTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the track
+                TableOperation op = TableOperation.Insert(track);
+                await table.ExecuteAsync(op);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        // TODO: clean up
+        public static async Task<List<TrackAuth>> GetAllInPartition(string PartitionKey, int count)
+        {
+            CloudTable table = tableClient.GetTableReference(TracksTable);
+
+            TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, PartitionKey)).Select(new string[] { "RowKey", "rate_limit" }).Take(count);
+
+            List<TrackAuth> items = new List<TrackAuth>();
+            TableContinuationToken token = null;
+
+            do
+            {
+                if (items.Count >= count)
+                    break;
+
+                var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                token = queryResponse.ContinuationToken;
+                items.AddRange(queryResponse.Results);
+            }
+            while (token != null);
+
+            return items;
+        }
+
         internal static async Task<List<TrackAuth>> GetRateLimitedTracks()
         {
             // reference track table
@@ -390,10 +435,22 @@ namespace FlashFeed.Engine.Repositories
                 // add the created clause
                 TableQuery<Post> query = new TableQuery<Post>().Where(predicate).Select(new string[] { "PartitionKey", "RowKey", "track_name", "date_created", "tags", "type", "title", "summary", "url", "has_image" }).Take(count);
 
-                TableQuerySegment<Post> results = await table.ExecuteQuerySegmentedAsync(query, null);
+                List<Post> items = new List<Post>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    if (items.Count >= count)
+                        break;
+
+                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                    token = queryResponse.ContinuationToken;
+                    items.AddRange(queryResponse.Results);
+                }
+                while (token != null);
 
                 List<PostQueryDTO> posts = new List<PostQueryDTO>();
-                foreach (var post in results)
+                foreach (var post in items)
                 {
                     posts.Add(Tools.ConvertPostToPostQueryDTO(post));
                 }
@@ -542,6 +599,19 @@ namespace FlashFeed.Engine.Repositories
             // Create a message and add it to the queue.
             CloudQueueMessage message = new CloudQueueMessage(messageBody);
             await queue.AddMessageAsync(message);
+        }
+
+        public static async Task AddMessageToQueueAsync(string queueName, string messageBody)
+        {
+            // Retrieve a reference to a queue.
+            CloudQueue queue = queueClient.GetQueueReference(queueName);
+
+            // Create the queue if it doesn't already exist.
+            await queue.CreateIfNotExistsAsync();
+
+            // Create a message and add it to the queue.
+            CloudQueueMessage message = new CloudQueueMessage(messageBody);
+            queue.AddMessageAsync(message).Wait();
         }
     }
 }
