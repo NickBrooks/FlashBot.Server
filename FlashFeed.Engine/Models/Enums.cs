@@ -2,7 +2,7 @@
 {
     public class Enums
     {
-        public enum SubscriptionType
+        public enum FollowMode
         {
             Feed,
             Notification

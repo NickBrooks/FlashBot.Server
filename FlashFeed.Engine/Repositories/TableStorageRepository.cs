@@ -20,7 +20,7 @@ namespace FlashFeed.Engine.Repositories
 
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
-        private static readonly string TrackSubscriptionsTable = "tracksubscriptions";
+        private static readonly string TrackFollowsTable = "trackfollows";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
         private static readonly string RefreshTokensTable = "refreshtokens";
@@ -492,21 +492,21 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // subscriptions
-        internal static async Task<List<TrackSubscription>> GetTrackSubscriptions(string trackId, Enums.SubscriptionType subscriptionType = Enums.SubscriptionType.Feed)
+        internal static async Task<List<TrackFollowTableEntity>> GetTrackFollows(string trackId, Enums.FollowMode subscriptionMode = Enums.FollowMode.Feed)
         {
             try
             {
                 // reference table
-                CloudTable table = tableClient.GetTableReference(TrackSubscriptionsTable);
+                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
 
                 // predicates
                 string partitionPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId);
-                string feedPredicate = TableQuery.GenerateFilterConditionForBool(subscriptionType == Enums.SubscriptionType.Feed ? "feed" : "notification", QueryComparisons.Equal, true);
+                string feedPredicate = TableQuery.GenerateFilterConditionForBool(subscriptionMode == Enums.FollowMode.Feed ? "feed" : "notification", QueryComparisons.Equal, true);
 
                 // query track subscriptions
-                TableQuery<TrackSubscription> query = new TableQuery<TrackSubscription>().Where(TableQuery.CombineFilters(partitionPredicate, TableOperators.And, feedPredicate));
+                TableQuery<TrackFollowTableEntity> query = new TableQuery<TrackFollowTableEntity>().Where(TableQuery.CombineFilters(partitionPredicate, TableOperators.And, feedPredicate));
 
-                List<TrackSubscription> subscriptions = new List<TrackSubscription>();
+                List<TrackFollowTableEntity> subscriptions = new List<TrackFollowTableEntity>();
                 TableContinuationToken token = null;
 
                 do
@@ -525,30 +525,30 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<TrackSubscription> GetTrackSubscription(string trackId, string userId)
+        internal static async Task<TrackFollowTableEntity> GetTrackFollow(string trackId, string userId)
         {
             // get the table
-            CloudTable table = tableClient.GetTableReference(TrackSubscriptionsTable);
+            CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
 
             // Create a retrieve operation that takes a customer entity.
-            TableOperation retrieveOperation = TableOperation.Retrieve<TrackSubscription>(trackId, userId);
+            TableOperation retrieveOperation = TableOperation.Retrieve<TrackFollowTableEntity>(trackId, userId);
 
             // Execute the retrieve operation.
             TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
-            return (TrackSubscription)retrievedResult.Result;
+            return (TrackFollowTableEntity)retrievedResult.Result;
         }
 
-        internal static async Task<TrackSubscription> InsertOrReplaceTrackSubscription(TrackSubscription trackSubscription)
+        internal static async Task<TrackFollowTableEntity> InsertOrReplaceTrackFollow(TrackFollowTableEntity trackFollow)
         {
             try
             {
                 // reference users table
-                CloudTable table = tableClient.GetTableReference(TrackSubscriptionsTable);
+                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
                 await table.CreateIfNotExistsAsync();
 
                 // insert the user
-                TableOperation op = TableOperation.InsertOrReplace(trackSubscription);
-                TrackSubscription result = await (dynamic)table.ExecuteAsync(op);
+                TableOperation op = TableOperation.InsertOrReplace(trackFollow);
+                TrackFollowTableEntity result = await (dynamic)table.ExecuteAsync(op);
 
                 if (result == null)
                     return null;
@@ -561,14 +561,14 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        internal static async Task<bool> DeleteTrackSubscription(TrackSubscription trackSubscription)
+        internal static async Task<bool> DeleteTrackFollow(TrackFollowTableEntity trackFollow)
         {
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(TrackSubscriptionsTable);
+                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
 
-                TableOperation op = TableOperation.Delete(trackSubscription);
+                TableOperation op = TableOperation.Delete(trackFollow);
                 var result = await table.ExecuteAsync(op);
 
                 return result == null ? false : true;
