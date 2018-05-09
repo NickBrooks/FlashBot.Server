@@ -41,6 +41,13 @@ namespace FlashFeed.Engine.Models
         public FollowType feed_follow_type { get; set; }
         public FollowType notifications_follow_type { get; set; }
         public List<TagCriteria> criteria { get; set; }
+
+        public TrackFollow()
+        {
+            criteria = new List<TagCriteria>();
+            feed_follow_type = FollowType.none;
+            notifications_follow_type = FollowType.none;
+        }
     }
 
     public class TagCriteria

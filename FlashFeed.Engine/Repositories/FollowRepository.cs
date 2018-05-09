@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlashFeed.Engine.Repositories
@@ -31,18 +32,25 @@ namespace FlashFeed.Engine.Repositories
 
         public static async Task<TrackFollowTableEntity> InsertOrReplaceTrackFollow(TrackFollow trackFollow)
         {
+            // check user and track id
+            if (trackFollow?.user_id == null || trackFollow?.track_id == null)
+                return null;
+
             // validate criteria
             List<TagCriteria> validatedTagCriteria = new List<TagCriteria>();
 
             // ensure the follow is in the user follow table toowoo woo
             await InsertOrReplaceUserFollow(trackFollow.user_id, trackFollow.track_id);
 
-            foreach (var criterion in trackFollow.criteria)
+            if (trackFollow.criteria != null && trackFollow.criteria.Count > 0)
             {
-                var validatedCriterion = ValidateTagCriteria(criterion);
+                foreach (var criterion in trackFollow.criteria.Take(12))
+                {
+                    var validatedCriterion = ValidateTagCriteria(criterion);
 
-                if (validatedCriterion != null)
-                    validatedTagCriteria.Add(validatedCriterion);
+                    if (validatedCriterion != null)
+                        validatedTagCriteria.Add(validatedCriterion);
+                }
             }
 
             trackFollow.criteria = validatedTagCriteria;
