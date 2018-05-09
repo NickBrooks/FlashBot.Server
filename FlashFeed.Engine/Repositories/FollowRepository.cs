@@ -34,6 +34,9 @@ namespace FlashFeed.Engine.Repositories
             // validate criteria
             List<TagCriteria> validatedTagCriteria = new List<TagCriteria>();
 
+            // ensure the follow is in the user follow table toowoo woo
+            await InsertOrReplaceUserFollow(trackFollow.user_id, trackFollow.track_id);
+
             foreach (var criterion in trackFollow.criteria)
             {
                 var validatedCriterion = ValidateTagCriteria(criterion);
@@ -51,9 +54,42 @@ namespace FlashFeed.Engine.Repositories
             return await TableStorageRepository.InsertOrReplaceTrackFollow(TrackFollowToTableEntity(trackFollow));
         }
 
-        public static async Task<bool> DeleteTrackFollow(TrackFollowTableEntity trackFollow)
+        public static async Task<bool> DeleteTrackFollow(string userId, string trackId, bool ownerOverride = false)
         {
-            return await TableStorageRepository.DeleteTrackFollow(trackFollow);
+            try
+            {
+                TrackAuth track = await TrackRepository.GetTrack(trackId);
+                if (track.PartitionKey == userId && ownerOverride == false)
+                    return false;
+
+                UserFollowTableEntity userFollow = await TableStorageRepository.GetUserFollow(userId, trackId);
+                TrackFollowTableEntity trackFollow = await TableStorageRepository.GetTrackFollow(trackId, userId);
+
+                if (userFollow != null)
+                    await TableStorageRepository.DeleteUserFollow(userFollow);
+
+                if (trackFollow != null)
+                    await TableStorageRepository.DeleteTrackFollow(trackFollow);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static async Task<UserFollowTableEntity> InsertOrReplaceUserFollow(string userId, string trackId)
+        {
+            TrackAuth track = await TrackRepository.GetTrack(trackId);
+
+            return await TableStorageRepository.InsertOrReplaceUserFollow(new UserFollowTableEntity(userId, trackId)
+            {
+                description = track.description,
+                has_image = track.has_image,
+                is_private = track.is_private,
+                name = track.name
+            });
         }
 
         private static TagCriteria ValidateTagCriteria(TagCriteria criterion)

@@ -3,6 +3,22 @@ using System.Collections.Generic;
 
 namespace FlashFeed.Engine.Models
 {
+    public class UserFollowTableEntity : TableEntity
+    {
+        public string name { get; set; }
+        public bool is_private { get; set; }
+        public string description { get; set; }
+        public bool has_image { get; set; }
+
+        public UserFollowTableEntity(string userId, string trackId)
+        {
+            PartitionKey = userId;
+            RowKey = trackId;
+        }
+
+        public UserFollowTableEntity() { }
+    }
+
     public class TrackFollowTableEntity : TableEntity
     {
         public string feed_follow_type { get; set; }

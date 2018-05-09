@@ -20,7 +20,8 @@ namespace FlashFeed.Engine.Repositories
 
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
-        private static readonly string TrackFollowsTable = "trackfollows";
+        private static readonly string userFollowsTable = "trackfollows";
+        private static readonly string UserFollowsTable = "userfollows";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
         private static readonly string RefreshTokensTable = "refreshtokens";
@@ -491,33 +492,62 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
-        // subscriptions
-        internal static async Task<List<TrackFollowTableEntity>> GetTrackFollows(string trackId, Enums.FollowMode subscriptionMode = Enums.FollowMode.Feed)
+        // follows
+        internal static async Task<List<TrackFollowTableEntity>> GetTrackFollows(string trackId, Enums.FollowMode followMode = Enums.FollowMode.Feed)
         {
             try
             {
                 // reference table
-                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
+                CloudTable table = tableClient.GetTableReference(userFollowsTable);
 
                 // predicates
                 string partitionPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId);
-                string feedPredicate = TableQuery.GenerateFilterConditionForBool(subscriptionMode == Enums.FollowMode.Feed ? "feed" : "notification", QueryComparisons.Equal, true);
+                string feedPredicate = TableQuery.GenerateFilterConditionForBool(followMode == Enums.FollowMode.Feed ? "feed" : "notification", QueryComparisons.Equal, true);
 
                 // query track subscriptions
                 TableQuery<TrackFollowTableEntity> query = new TableQuery<TrackFollowTableEntity>().Where(TableQuery.CombineFilters(partitionPredicate, TableOperators.And, feedPredicate));
 
-                List<TrackFollowTableEntity> subscriptions = new List<TrackFollowTableEntity>();
+                List<TrackFollowTableEntity> follows = new List<TrackFollowTableEntity>();
                 TableContinuationToken token = null;
 
                 do
                 {
                     var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
                     token = queryResponse.ContinuationToken;
-                    subscriptions.AddRange(queryResponse.Results);
+                    follows.AddRange(queryResponse.Results);
                 }
                 while (token != null);
 
-                return subscriptions;
+                return follows;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal static async Task<List<UserFollowTableEntity>> GetUserFollows(string userId)
+        {
+            try
+            {
+                // reference table
+                CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+
+                // query track subscriptions
+                TableQuery<UserFollowTableEntity> query = new TableQuery<UserFollowTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId));
+
+                List<UserFollowTableEntity> follows = new List<UserFollowTableEntity>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    var queryResponse = await table.ExecuteQuerySegmentedAsync(query, token);
+                    token = queryResponse.ContinuationToken;
+                    follows.AddRange(queryResponse.Results);
+                }
+                while (token != null);
+
+                return follows;
             }
             catch
             {
@@ -528,7 +558,7 @@ namespace FlashFeed.Engine.Repositories
         internal static async Task<TrackFollowTableEntity> GetTrackFollow(string trackId, string userId)
         {
             // get the table
-            CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
+            CloudTable table = tableClient.GetTableReference(userFollowsTable);
 
             // Create a retrieve operation that takes a customer entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<TrackFollowTableEntity>(trackId, userId);
@@ -538,12 +568,25 @@ namespace FlashFeed.Engine.Repositories
             return (TrackFollowTableEntity)retrievedResult.Result;
         }
 
+        internal static async Task<UserFollowTableEntity> GetUserFollow(string userId, string trackId)
+        {
+            // get the table
+            CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+
+            // Create a retrieve operation that takes a customer entity.
+            TableOperation retrieveOperation = TableOperation.Retrieve<UserFollowTableEntity>(userId, trackId);
+
+            // Execute the retrieve operation.
+            TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
+            return (UserFollowTableEntity)retrievedResult.Result;
+        }
+
         internal static async Task<TrackFollowTableEntity> InsertOrReplaceTrackFollow(TrackFollowTableEntity trackFollow)
         {
             try
             {
                 // reference users table
-                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
+                CloudTable table = tableClient.GetTableReference(userFollowsTable);
                 await table.CreateIfNotExistsAsync();
 
                 // insert the user
@@ -561,14 +604,55 @@ namespace FlashFeed.Engine.Repositories
             }
         }
 
+        internal static async Task<UserFollowTableEntity> InsertOrReplaceUserFollow(UserFollowTableEntity userFollowTableEntity)
+        {
+            try
+            {
+                // reference users table
+                CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+                await table.CreateIfNotExistsAsync();
+
+                // insert the user
+                TableOperation op = TableOperation.InsertOrReplace(userFollowTableEntity);
+                UserFollowTableEntity result = await (dynamic)table.ExecuteAsync(op);
+
+                if (result == null)
+                    return null;
+
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         internal static async Task<bool> DeleteTrackFollow(TrackFollowTableEntity trackFollow)
         {
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
+                CloudTable table = tableClient.GetTableReference(userFollowsTable);
 
                 TableOperation op = TableOperation.Delete(trackFollow);
+                var result = await table.ExecuteAsync(op);
+
+                return result == null ? false : true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        internal static async Task<bool> DeleteUserFollow(UserFollowTableEntity userFollow)
+        {
+            try
+            {
+                // reference track table
+                CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+
+                TableOperation op = TableOperation.Delete(userFollow);
                 var result = await table.ExecuteAsync(op);
 
                 return result == null ? false : true;

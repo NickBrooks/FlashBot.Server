@@ -123,7 +123,15 @@ namespace FlashFeed.Admin.Pages.Tracks
             }
 
             // create track
-            var createdTrack = await TrackRepository.CreateTrack(track);
+            TrackAuth createdTrack = await TrackRepository.CreateTrack(track);
+            await FollowRepository.InsertOrReplaceTrackFollow(new TrackFollow()
+            {
+                track_id = createdTrack.RowKey,
+                user_id = user.Id,
+                feed_follow_type = FollowType.none,
+                notifications_follow_type = FollowType.none
+            });
+
             _logger.LogInformation($"Track with ID '{createdTrack.RowKey}' has been created by '{user.Id}'.");
             return RedirectToPage("./Index");
         }
