@@ -4,7 +4,7 @@ using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace FlashFeed.FeedFunctions
+namespace FlashFeed.Functions
 {
     public static class ProcessTestQueue
     {

@@ -95,9 +95,9 @@ namespace FlashFeed.Engine.Repositories
         }
 
         // cosmos stuff
-        public static async Task<PostQueryDTO> InsertPostToCosmos(PostQueryDTO post)
+        public static async Task<PostCosmos> InsertPostToCosmos(PostCosmos post)
         {
-            return await (dynamic)CosmosRepository<PostQueryDTO>.CreateItemAsync(post);
+            return await (dynamic)CosmosRepository<PostCosmos>.CreateItemAsync(post);
         }
 
         public static async Task<PostReturnObject> QueryPosts(PostQuery query)

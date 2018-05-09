@@ -3,7 +3,7 @@ using FlashFeed.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace FlashFeed.Functions.Timer
+namespace FlashFeed.API.Timer
 {
     public static class CheckRateLimitedTracks
     {

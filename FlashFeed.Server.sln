@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Admin", "FlashFee
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Engine", "FlashFeed.Engine\FlashFeed.Engine.csproj", "{55F52768-1762-4D53-B160-0F824EA8DF4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Functions", "FlashFeed.Functions\FlashFeed.Functions.csproj", "{240C257B-C1FD-4F43-B0AE-2743F339DC77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.API", "FlashFeed.API\FlashFeed.API.csproj", "{240C257B-C1FD-4F43-B0AE-2743F339DC77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.FeedFunctions", "FlashFeed.FeedFunctions\FlashFeed.FeedFunctions.csproj", "{759AB943-EB8D-4C83-A269-D2A6BD1B939A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashFeed.Functions", "FlashFeed.Functions\FlashFeed.Functions.csproj", "{759AB943-EB8D-4C83-A269-D2A6BD1B939A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

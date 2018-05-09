@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 
-namespace FlashFeed.Functions.Queue.Posts
+namespace FlashFeed.API.Queue.Posts
 {
     public static class ProcessDeletePost
     {

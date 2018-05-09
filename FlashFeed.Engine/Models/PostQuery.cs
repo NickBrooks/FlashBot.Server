@@ -9,10 +9,4 @@ namespace FlashFeed.Engine.Models
         public string sql { get; set; }
         public string continuation { get; set; }
     }
-
-    public class CosmosQueryPagingResults<T> where T : class
-    {
-        public List<T> results { get; set; }
-        public string continuationToken { get; set; }
-    }
 }

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashFeed.FeedFunctions
+namespace FlashFeed.Functions
 {
     public static class TestFunction
     {

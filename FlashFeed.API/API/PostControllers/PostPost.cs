@@ -11,7 +11,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.API.PostControllers
+namespace FlashFeed.API.PostControllers
 {
     public static class PostPost
     {

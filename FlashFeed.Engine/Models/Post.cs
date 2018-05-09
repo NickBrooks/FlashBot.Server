@@ -9,6 +9,12 @@ namespace FlashFeed.Engine.Models
         public string image_url { get; set; }
     }
 
+    public class PostCosmos : PostQueryDTO
+    {
+        public bool is_root_post { get; set; }
+        public List<string> subscriber_list { get; set; }
+    }
+
     public class PostDTO : PostQueryDTO
     {
         public string body { get; set; }

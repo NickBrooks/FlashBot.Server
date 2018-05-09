@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FlashFeed.Functions.Queue.Posts
+namespace FlashFeed.API.Queue.Posts
 {
     public static class ProcessNewPostAddToCosmos
     {

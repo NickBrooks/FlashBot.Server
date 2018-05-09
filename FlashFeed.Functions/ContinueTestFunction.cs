@@ -5,7 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using System;
 
-namespace FlashFeed.FeedFunctions
+namespace FlashFeed.Functions
 {
     public static class ContinueTestFunction
     {

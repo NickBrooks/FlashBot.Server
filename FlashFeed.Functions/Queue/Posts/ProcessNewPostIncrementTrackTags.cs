@@ -5,7 +5,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
-namespace FlashFeed.Functions.Queue.Posts
+namespace FlashFeed.API.Queue.Posts
 {
     public static class ProcessNewPostIncrementTrackTags
     {

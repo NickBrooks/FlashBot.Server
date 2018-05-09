@@ -4,7 +4,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using System.Collections.Generic;
 
-namespace FlashFeed.Functions.Queue.Tracks
+namespace FlashFeed.API.Queue.Tracks
 {
     public static class DeletePostsFromTrack
     {

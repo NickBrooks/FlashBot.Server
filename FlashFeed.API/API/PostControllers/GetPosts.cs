@@ -7,19 +7,18 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.API.PostControllers
+namespace FlashFeed.API.PostControllers
 {
-    public static class GetPost
+    public static class GetPosts
     {
-        [FunctionName("GetPost")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequest req, string trackId, string postId, TraceWriter log)
+        [FunctionName("GetPosts")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequest req, string trackId, TraceWriter log)
         {
             try
             {
-                // check postId and trackId provided
+                // check valid trackId provided
                 if (!Tools.IsValidGuid(trackId))
                     return new UnauthorizedResult();
 
@@ -28,6 +27,7 @@ namespace FlashFeed.Functions.API.PostControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
+                // private track so check keys
                 if (track.is_private)
                 {
                     string trackKeyHeader = req.Headers["X-Track-Key"];
@@ -60,30 +60,16 @@ namespace FlashFeed.Functions.API.PostControllers
                         return new UnauthorizedResult();
                 }
 
-                // get the post
-                Post post = await PostRepository.GetPost(trackId, postId);
-                if (post == null)
-                    return new UnauthorizedResult();
+                // get query object from query params
+                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.Query["tags"], req.Query["continuation"]);
 
-                // convert to post DTO
-                return new OkObjectResult(new PostDTO()
-                {
-                    body = post.body,
-                    date_created = post.date_created,
-                    id = post.RowKey,
-                    summary = post.summary,
-                    tags = post.tags.Split(',').ToList(),
-                    title = post.title,
-                    track_id = post.PartitionKey,
-                    track_name = post.track_name,
-                    type = post.type,
-                    url = post.url
-                });
+                PostReturnObject posts = query.tags.Count > 0 ? await PostRepository.QueryPosts(query) : await PostRepository.GetPosts(query);
+                return new OkObjectResult(posts);
             }
             catch (Exception e)
             {
                 log.Info(e.Message);
-                return new UnauthorizedResult();
+                return new BadRequestObjectResult(e.Message);
             }
         }
     }

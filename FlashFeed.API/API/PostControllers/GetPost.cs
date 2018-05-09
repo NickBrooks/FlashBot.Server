@@ -7,19 +7,19 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.API.TagControllers
+namespace FlashFeed.API.PostControllers
 {
-    public static class GetTags
+    public static class GetPost
     {
-        [FunctionName("GetTags")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/tags")]HttpRequest req, string trackId, TraceWriter log)
+        [FunctionName("GetPost")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequest req, string trackId, string postId, TraceWriter log)
         {
             try
             {
-                // check valid trackId provided
+                // check postId and trackId provided
                 if (!Tools.IsValidGuid(trackId))
                     return new UnauthorizedResult();
 
@@ -28,7 +28,6 @@ namespace FlashFeed.Functions.API.TagControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
-                // track is private
                 if (track.is_private)
                 {
                     string trackKeyHeader = req.Headers["X-Track-Key"];
@@ -61,9 +60,25 @@ namespace FlashFeed.Functions.API.TagControllers
                         return new UnauthorizedResult();
                 }
 
-                List<TrackTagDTO> tags = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                return new OkObjectResult(tags);
+                // get the post
+                Post post = await PostRepository.GetPost(trackId, postId);
+                if (post == null)
+                    return new UnauthorizedResult();
 
+                // convert to post DTO
+                return new OkObjectResult(new PostDTO()
+                {
+                    body = post.body,
+                    date_created = post.date_created,
+                    id = post.RowKey,
+                    summary = post.summary,
+                    tags = post.tags.Split(',').ToList(),
+                    title = post.title,
+                    track_id = post.PartitionKey,
+                    track_name = post.track_name,
+                    type = post.type,
+                    url = post.url
+                });
             }
             catch (Exception e)
             {

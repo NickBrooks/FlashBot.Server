@@ -9,7 +9,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.API.TrackControllers
+namespace FlashFeed.API.TrackControllers
 {
     public static class GetTrack
     {

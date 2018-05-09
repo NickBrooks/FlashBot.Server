@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Functions.API.PostControllers
+namespace FlashFeed.API.PostControllers
 {
     public static class DeletePost
     {
