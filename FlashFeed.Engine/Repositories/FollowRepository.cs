@@ -23,6 +23,26 @@ namespace FlashFeed.Engine.Repositories
             return trackFollows;
         }
 
+        public static async Task<List<TrackDTO>> GetUserFollows(string userId)
+        {
+            var results = await TableStorageRepository.GetUserFollows(userId);
+
+            List<TrackDTO> tracks = new List<TrackDTO>();
+            foreach (var result in results)
+            {
+                tracks.Add(new TrackDTO()
+                {
+                    id = result.RowKey,
+                    name = result.name,
+                    description = result.description,
+                    has_image = result.has_image,
+                    is_private = result.is_private
+                });
+            }
+
+            return tracks.OrderBy(t => t.name).ToList();
+        }
+
         public static async Task<TrackFollow> GetTrackFollow(string trackId, string userId)
         {
             TrackFollowTableEntity result = await TableStorageRepository.GetTrackFollow(trackId, userId);

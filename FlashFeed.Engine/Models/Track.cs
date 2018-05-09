@@ -5,6 +5,15 @@ using System.Linq;
 
 namespace FlashFeed.Engine.Models
 {
+    public class TrackDTO
+    {
+        public string id { get; set; }
+        public bool is_private { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public bool has_image { get; set; }
+    }
+
     public class Track
     {
         public string id { get; set; }

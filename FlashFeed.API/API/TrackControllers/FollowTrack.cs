@@ -37,7 +37,7 @@ namespace FlashFeed.API.API.TrackControllers
 
                 // get the track
                 TrackAuth track = await TrackRepository.GetTrack(trackId);
-                if (track == null || track.is_private)
+                if (track == null || (track.is_private && track.PartitionKey != authClaim.user_id))
                     return new UnauthorizedResult();
 
                 // insert or update the follow
