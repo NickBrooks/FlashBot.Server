@@ -100,6 +100,7 @@ namespace FlashFeed.Engine.Repositories
             return await (dynamic)CosmosRepository<PostCosmos>.CreateItemAsync(post);
         }
 
+        // TODO: fix query posts
         public static async Task<PostReturnObject> QueryPosts(PostQuery query)
         {
             List<PostQueryDTO> data = await CosmosRepository<PostQueryDTO>.GetItemsSqlAsync(query.sql);
