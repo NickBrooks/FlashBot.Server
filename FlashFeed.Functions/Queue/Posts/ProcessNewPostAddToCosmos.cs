@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,23 +19,62 @@ namespace FlashFeed.API.Queue.Posts
 
             List<string> tags = post.tags.Split(',').ToList();
 
-            PostQueryDTO postCosmos = new PostQueryDTO()
+            // get subscribers
+            List<TrackFollow> followers = await FollowRepository.GetTrackFollows(post.RowKey, Enums.FollowMode.Feed);
+            List<string> followersToFeed = new List<string>();
+
+            // determine who gets feed
+            foreach (TrackFollow follower in followers)
             {
-                id = post.RowKey,
-                track_id = post.PartitionKey,
-                date_created = post.date_created,
-                track_name = post.track_name,
-                summary = post.summary,
-                tags = tags,
-                has_image = post.has_image,
-                title = post.title,
-                type = post.type,
-                url = post.url
-            };
+                foreach (TagCriteria criterion in follower.criteria.Where(c => c.feed))
+                {
+                    if (ContainsAllItems(criterion.tags, tags))
+                    {
+                        followersToFeed.Add(follower.user_id);
+                        break;
+                    }
+                }
+            }
 
-            await PostRepository.InsertPostToCosmos(postCosmos);
+            IEnumerable<List<string>> splitFollowers = splitList(followersToFeed, 1000);
 
-            log.Info($"Added post to Cosmos: {post.RowKey}");
+            int i = 1;
+            foreach (List<string> list in splitFollowers)
+            {
+                PostCosmos postCosmos = new PostCosmos()
+                {
+                    id = Guid.NewGuid().ToString(),
+                    post_id = post.RowKey,
+                    track_id = post.PartitionKey,
+                    date_created = post.date_created,
+                    track_name = post.track_name,
+                    summary = post.summary,
+                    tags = tags,
+                    has_image = post.has_image,
+                    title = post.title,
+                    type = post.type,
+                    url = post.url,
+                    subscriber_list = list,
+                    is_root_post = i == 1 ? true : false
+                };
+
+                i++;
+                await PostRepository.InsertPostToCosmos(postCosmos);
+                log.Info($"Added post to Cosmos: {post.RowKey}");
+            }
+        }
+
+        private static bool ContainsAllItems<T>(IEnumerable<T> a, IEnumerable<T> b)
+        {
+            return !b.Except(a).Any();
+        }
+
+        private static IEnumerable<List<T>> splitList<T>(List<T> locations, int nSize = 30)
+        {
+            for (int i = 0; i < locations.Count; i += nSize)
+            {
+                yield return locations.GetRange(i, Math.Min(nSize, locations.Count - i));
+            }
         }
     }
 }

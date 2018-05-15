@@ -11,6 +11,7 @@ namespace FlashFeed.Engine.Models
 
     public class PostCosmos : PostQueryDTO
     {
+        public string post_id { get; set; }
         public bool is_root_post { get; set; }
         public List<string> subscriber_list { get; set; }
     }
