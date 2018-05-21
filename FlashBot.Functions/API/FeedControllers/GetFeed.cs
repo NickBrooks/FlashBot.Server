@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.FeedControllers
+namespace FlashBot.Functions.FeedControllers
 {
     public static class GetFeed
     {

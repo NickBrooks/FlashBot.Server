@@ -11,7 +11,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.PostControllers
+namespace FlashBot.Functions.PostControllers
 {
     public static class PostPost
     {

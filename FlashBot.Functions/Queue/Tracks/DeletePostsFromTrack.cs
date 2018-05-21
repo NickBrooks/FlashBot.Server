@@ -4,7 +4,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using System.Collections.Generic;
 
-namespace FlashBot.API.Queue.Tracks
+namespace FlashBot.Functions.Queue.Tracks
 {
     public static class DeletePostsFromTrack
     {

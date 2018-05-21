@@ -9,16 +9,16 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.PostControllers
+namespace FlashBot.Functions.TrackControllers
 {
-    public static class GetPosts
+    public static class GetTrack
     {
-        [FunctionName("GetPosts")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequest req, string trackId, TraceWriter log)
+        [FunctionName("GetTrack")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}")]HttpRequest req, string trackId, TraceWriter log)
         {
             try
             {
-                // check valid trackId provided
+                // check postId and trackId provided
                 if (!Tools.IsValidGuid(trackId))
                     return new UnauthorizedResult();
 
@@ -27,7 +27,7 @@ namespace FlashBot.API.PostControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
-                // private track so check keys
+                // is private
                 if (track.is_private)
                 {
                     string trackKeyHeader = req.Headers["X-Track-Key"];
@@ -60,16 +60,12 @@ namespace FlashBot.API.PostControllers
                         return new UnauthorizedResult();
                 }
 
-                // get query object from query params
-                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.Query["tags"], req.Query["continuation"]);
-
-                PostReturnObject posts = query.tags.Count > 0 ? await PostRepository.QueryPosts(query) : await PostRepository.GetPosts(query);
-                return new OkObjectResult(posts);
+                return new OkObjectResult(new Track(track));
             }
             catch (Exception e)
             {
-                log.Info(e.Message);
-                return new BadRequestObjectResult(e.Message);
+                log.Error(e.Message);
+                return new UnauthorizedResult();
             }
         }
     }

@@ -12,7 +12,7 @@ using FlashBot.Engine.Repositories;
 using FlashBot.Engine.Models;
 using System;
 
-namespace FlashBot.API.TrackControllers
+namespace FlashBot.Functions.TrackControllers
 {
     public static class FollowTrack
     {

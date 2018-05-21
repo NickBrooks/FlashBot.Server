@@ -9,7 +9,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.TrackControllers
+namespace FlashBot.Functions.TrackControllers
 {
     public static class UnfollowTrack
     {

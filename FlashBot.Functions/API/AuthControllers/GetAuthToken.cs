@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.AuthControllers
+namespace FlashBot.Functions.AuthControllers
 {
     public static class GetAuthToken
     {

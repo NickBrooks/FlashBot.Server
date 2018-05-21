@@ -7,15 +7,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.TagControllers
+namespace FlashBot.Functions.PostControllers
 {
-    public static class GetTags
+    public static class GetPosts
     {
-        [FunctionName("GetTags")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/tags")]HttpRequest req, string trackId, TraceWriter log)
+        [FunctionName("GetPosts")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/posts")]HttpRequest req, string trackId, TraceWriter log)
         {
             try
             {
@@ -28,7 +27,7 @@ namespace FlashBot.API.TagControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
-                // track is private
+                // private track so check keys
                 if (track.is_private)
                 {
                     string trackKeyHeader = req.Headers["X-Track-Key"];
@@ -61,14 +60,16 @@ namespace FlashBot.API.TagControllers
                         return new UnauthorizedResult();
                 }
 
-                List<TrackTagDTO> tags = await TrackTagRepository.GetTagsDTOByTrack(trackId);
-                return new OkObjectResult(tags);
+                // get query object from query params
+                PostQuery query = Tools.GetQueryFromQueryParams(trackId, req.Query["tags"], req.Query["continuation"]);
 
+                PostReturnObject posts = query.tags.Count > 0 ? await PostRepository.QueryPosts(query) : await PostRepository.GetPosts(query);
+                return new OkObjectResult(posts);
             }
             catch (Exception e)
             {
                 log.Info(e.Message);
-                return new UnauthorizedResult();
+                return new BadRequestObjectResult(e.Message);
             }
         }
     }

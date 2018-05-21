@@ -7,14 +7,15 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.TrackControllers
+namespace FlashBot.Functions.PostControllers
 {
-    public static class GetTrack
+    public static class GetPost
     {
-        [FunctionName("GetTrack")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}")]HttpRequest req, string trackId, TraceWriter log)
+        [FunctionName("GetPost")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/post/{postId}")]HttpRequest req, string trackId, string postId, TraceWriter log)
         {
             try
             {
@@ -27,7 +28,6 @@ namespace FlashBot.API.TrackControllers
                 if (track == null)
                     return new UnauthorizedResult();
 
-                // is private
                 if (track.is_private)
                 {
                     string trackKeyHeader = req.Headers["X-Track-Key"];
@@ -60,11 +60,29 @@ namespace FlashBot.API.TrackControllers
                         return new UnauthorizedResult();
                 }
 
-                return new OkObjectResult(new Track(track));
+                // get the post
+                Post post = await PostRepository.GetPost(trackId, postId);
+                if (post == null)
+                    return new UnauthorizedResult();
+
+                // convert to post DTO
+                return new OkObjectResult(new PostDTO()
+                {
+                    body = post.body,
+                    date_created = post.date_created,
+                    id = post.RowKey,
+                    summary = post.summary,
+                    tags = post.tags.Split(',').ToList(),
+                    title = post.title,
+                    track_id = post.PartitionKey,
+                    track_name = post.track_name,
+                    type = post.type,
+                    url = post.url
+                });
             }
             catch (Exception e)
             {
-                log.Error(e.Message);
+                log.Info(e.Message);
                 return new UnauthorizedResult();
             }
         }

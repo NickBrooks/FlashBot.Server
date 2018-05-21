@@ -5,7 +5,7 @@ using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace FlashBot.API.Timer
+namespace FlashBot.Functions.Timer
 {
     public static class CheckRateLimitedTracks
     {

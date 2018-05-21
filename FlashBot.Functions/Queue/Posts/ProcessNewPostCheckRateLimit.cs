@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 
-namespace FlashBot.API.Queue.Posts
+namespace FlashBot.Functions.Queue.Posts
 {
     public static class ProcessNewPostCheckRateLimit
     {

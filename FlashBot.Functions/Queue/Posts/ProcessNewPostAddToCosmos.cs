@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FlashBot.API.Queue.Posts
+namespace FlashBot.Functions.Queue.Posts
 {
     public static class ProcessNewPostAddToCosmos
     {

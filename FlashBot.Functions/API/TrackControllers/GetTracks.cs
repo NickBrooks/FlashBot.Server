@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlashBot.API.TrackControllers
+namespace FlashBot.Functions.TrackControllers
 {
     public static class GetTracks
     {
