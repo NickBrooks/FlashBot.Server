@@ -1,7 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 using System;
 
-namespace FlashFeed.Engine.Models
+namespace FlashBot.Engine.Models
 {
     public class ContinuationToken : TableEntity
     {

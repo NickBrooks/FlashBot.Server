@@ -1,4 +1,4 @@
-﻿using FlashFeed.Engine.Models;
+﻿using FlashBot.Engine.Models;
 using Markdig;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace FlashFeed.Engine
+namespace FlashBot.Engine
 {
     public class Tools
     {

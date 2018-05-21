@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FlashFeed.Engine.Models;
+using FlashBot.Engine.Models;
 
-namespace FlashFeed.Engine.Repositories
+namespace FlashBot.Engine.Repositories
 {
     public class TrackTagRepository
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 
-namespace FlashFeed.Engine.Models
+namespace FlashBot.Engine.Models
 {
     public class ExtendedUser : TableEntity
     {

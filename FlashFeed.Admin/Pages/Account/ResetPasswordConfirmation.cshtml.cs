@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FlashFeed.Admin.Pages.Account
+namespace FlashBot.Admin.Pages.Account
 {
     public class ResetPasswordConfirmationModel : PageModel
     {

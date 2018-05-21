@@ -1,5 +1,5 @@
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashFeed.API.PostControllers
+namespace FlashBot.API.PostControllers
 {
     public static class DeletePost
     {

@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FlashFeed.Admin.Data;
-using FlashFeed.Admin.Services;
+using FlashBot.Admin.Data;
+using FlashBot.Admin.Services;
 
-namespace FlashFeed.Admin
+namespace FlashBot.Admin
 {
     public class Startup
     {

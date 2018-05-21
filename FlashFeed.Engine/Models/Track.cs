@@ -1,9 +1,9 @@
-﻿using FlashFeed.Engine.Repositories;
+﻿using FlashBot.Engine.Repositories;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FlashFeed.Engine.Models
+namespace FlashBot.Engine.Models
 {
     public class TrackDTO
     {

@@ -1,11 +1,11 @@
-﻿using FlashFeed.Engine.Models;
+﻿using FlashBot.Engine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Engine.Repositories
+namespace FlashBot.Engine.Repositories
 {
     public class ExtendedUserRepository
     {

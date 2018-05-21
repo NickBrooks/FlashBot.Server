@@ -1,4 +1,4 @@
-﻿using FlashFeed.Engine.Models;
+﻿using FlashBot.Engine.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Engine.Repositories
+namespace FlashBot.Engine.Repositories
 {
     // https://goo.gl/sShUhC
     public class AuthRepository

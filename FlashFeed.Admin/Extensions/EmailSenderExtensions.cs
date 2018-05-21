@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using FlashFeed.Admin.Services;
+using FlashBot.Admin.Services;
 
-namespace FlashFeed.Admin.Services
+namespace FlashBot.Admin.Services
 {
     public static class EmailSenderExtensions
     {

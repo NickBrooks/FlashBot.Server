@@ -1,14 +1,12 @@
-﻿using FlashFeed.Engine.Models;
+﻿using FlashBot.Engine.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Engine.Repositories
+namespace FlashBot.Engine.Repositories
 {
     public class PostRepository
     {

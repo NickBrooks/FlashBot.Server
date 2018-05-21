@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using FlashFeed.Admin.Data;
+using FlashBot.Admin.Data;
 
-namespace FlashFeed.Admin.Pages.Account.Manage
+namespace FlashBot.Admin.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {

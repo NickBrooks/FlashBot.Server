@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using FlashFeed.Admin.Data;
-using FlashFeed.Admin.Services;
+using FlashBot.Admin.Data;
+using FlashBot.Admin.Services;
 
-namespace FlashFeed.Admin.Pages.Account
+namespace FlashBot.Admin.Pages.Account
 {
     public class RegisterModel : PageModel
     {

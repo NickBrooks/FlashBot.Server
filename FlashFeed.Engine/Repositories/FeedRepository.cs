@@ -1,8 +1,8 @@
-﻿using FlashFeed.Engine.Models;
+﻿using FlashBot.Engine.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Engine.Repositories
+namespace FlashBot.Engine.Repositories
 {
     public class FeedRepository
     {

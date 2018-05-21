@@ -1,8 +1,8 @@
-﻿using FlashFeed.Admin.Data;
-using FlashFeed.Admin.Pages.Account.Manage;
-using FlashFeed.Engine;
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+﻿using FlashBot.Admin.Data;
+using FlashBot.Admin.Pages.Account.Manage;
+using FlashBot.Engine;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Admin.Pages.Tracks
+namespace FlashBot.Admin.Pages.Tracks
 {
     public class CreateTrackModel : PageModel
     {

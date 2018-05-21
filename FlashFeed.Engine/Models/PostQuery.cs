@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FlashFeed.Engine.Models
+namespace FlashBot.Engine.Models
 {
     public class PostQuery
     {

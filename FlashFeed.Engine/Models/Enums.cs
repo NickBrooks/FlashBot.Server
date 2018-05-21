@@ -1,4 +1,4 @@
-﻿namespace FlashFeed.Engine.Models
+﻿namespace FlashBot.Engine.Models
 {
     public class Enums
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 
-namespace FlashFeed.Engine.Models
+namespace FlashBot.Engine.Models
 {
     public class TrackTagDTO
     {

@@ -1,11 +1,11 @@
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
-namespace FlashFeed.API.Queue.Posts
+namespace FlashBot.API.Queue.Posts
 {
     public static class ProcessNewPostIncrementTrackTags
     {

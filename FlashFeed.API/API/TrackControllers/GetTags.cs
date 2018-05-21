@@ -1,6 +1,6 @@
-using FlashFeed.Engine;
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlashFeed.API.TagControllers
+namespace FlashBot.API.TagControllers
 {
     public static class GetTags
     {

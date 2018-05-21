@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using FlashFeed.Engine;
-using FlashFeed.Engine.Repositories;
-using FlashFeed.Engine.Models;
+using FlashBot.Engine;
+using FlashBot.Engine.Repositories;
+using FlashBot.Engine.Models;
 using System;
 
-namespace FlashFeed.API.API.TrackControllers
+namespace FlashBot.API.TrackControllers
 {
     public static class FollowTrack
     {

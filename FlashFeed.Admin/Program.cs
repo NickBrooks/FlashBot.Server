@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace FlashFeed.Admin
+namespace FlashBot.Admin
 {
     public class Program
     {

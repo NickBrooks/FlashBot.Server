@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace FlashFeed.Engine
+namespace FlashBot.Engine
 {
     public class Compress
     {

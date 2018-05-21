@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace FlashFeed.Admin.Pages
+namespace FlashBot.Admin.Pages
 {
     public class ErrorModel : PageModel
     {

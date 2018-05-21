@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace FlashFeed.Engine
+namespace FlashBot.Engine
 {
     public class Images
     {

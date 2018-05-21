@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using FlashFeed.Admin.Data;
+using FlashBot.Admin.Data;
 
-namespace FlashFeed.Admin.Pages.Account
+namespace FlashBot.Admin.Pages.Account
 {
     public class ResetPasswordModel : PageModel
     {

@@ -1,9 +1,9 @@
 using System;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace FlashFeed.API.Timer
+namespace FlashBot.API.Timer
 {
     public static class CheckRateLimitedTracks
     {

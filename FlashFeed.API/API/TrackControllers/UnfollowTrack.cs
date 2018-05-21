@@ -1,6 +1,6 @@
-using FlashFeed.Engine;
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -9,7 +9,7 @@ using Microsoft.Azure.WebJobs.Host;
 using System;
 using System.Threading.Tasks;
 
-namespace FlashFeed.API.API.TrackControllers
+namespace FlashBot.API.TrackControllers
 {
     public static class UnfollowTrack
     {

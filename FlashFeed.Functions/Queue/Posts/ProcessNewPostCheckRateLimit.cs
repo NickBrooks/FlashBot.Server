@@ -1,9 +1,9 @@
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 
-namespace FlashFeed.API.Queue.Posts
+namespace FlashBot.API.Queue.Posts
 {
     public static class ProcessNewPostCheckRateLimit
     {

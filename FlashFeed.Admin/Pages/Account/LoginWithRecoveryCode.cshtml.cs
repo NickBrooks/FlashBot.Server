@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using FlashFeed.Admin.Data;
+using FlashBot.Admin.Data;
 
-namespace FlashFeed.Admin.Pages.Account
+namespace FlashBot.Admin.Pages.Account
 {
     public class LoginWithRecoveryCodeModel : PageModel
     {

@@ -1,10 +1,10 @@
-using FlashFeed.Admin.Data;
+using FlashBot.Admin.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace FlashFeed.Admin.Controllers
+namespace FlashBot.Admin.Controllers
 {
     [Route("[controller]/[action]")]
     public class AccountController : Controller

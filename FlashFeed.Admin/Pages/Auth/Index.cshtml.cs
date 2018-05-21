@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FlashFeed.Admin.Data;
-using FlashFeed.Admin.Pages.Account.Manage;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Admin.Data;
+using FlashBot.Admin.Pages.Account.Manage;
+using FlashBot.Engine.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace FlashFeed.Admin.Pages.Auth
+namespace FlashBot.Admin.Pages.Auth
 {
     public class TokenModel : PageModel
     {

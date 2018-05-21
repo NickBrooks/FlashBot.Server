@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using FlashFeed.Admin.Data;
-using FlashFeed.Admin.Services;
+using FlashBot.Admin.Data;
+using FlashBot.Admin.Services;
 
-namespace FlashFeed.Admin.Pages.Account.Manage
+namespace FlashBot.Admin.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {

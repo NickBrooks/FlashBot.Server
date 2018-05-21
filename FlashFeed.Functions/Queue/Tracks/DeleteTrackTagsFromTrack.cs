@@ -1,11 +1,11 @@
-using FlashFeed.Engine.Models;
-using FlashFeed.Engine.Repositories;
+using FlashBot.Engine.Models;
+using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Queue;
 using System.Collections.Generic;
 
-namespace FlashFeed.API.Queue.Tracks
+namespace FlashBot.API.Queue.Tracks
 {
     public static class DeleteTrackTagsFromTrack
     {

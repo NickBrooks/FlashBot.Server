@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlashFeed.Admin.Data
+namespace FlashBot.Admin.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
