@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Admin", "FlashFeed.Admin\FlashBot.Admin.csproj", "{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Admin", "FlashBot.Admin\FlashBot.Admin.csproj", "{C07E601D-25A9-45AD-A1A8-6D8CC3F921A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Engine", "FlashFeed.Engine\FlashBot.Engine.csproj", "{55F52768-1762-4D53-B160-0F824EA8DF4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Engine", "FlashBot.Engine\FlashBot.Engine.csproj", "{55F52768-1762-4D53-B160-0F824EA8DF4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.API", "FlashFeed.API\FlashBot.API.csproj", "{240C257B-C1FD-4F43-B0AE-2743F339DC77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.API", "FlashBot.API\FlashBot.API.csproj", "{240C257B-C1FD-4F43-B0AE-2743F339DC77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Functions", "FlashFeed.Functions\FlashBot.Functions.csproj", "{759AB943-EB8D-4C83-A269-D2A6BD1B939A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlashBot.Functions", "FlashBot.Functions\FlashBot.Functions.csproj", "{759AB943-EB8D-4C83-A269-D2A6BD1B939A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
