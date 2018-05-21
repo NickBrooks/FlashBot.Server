@@ -55,13 +55,19 @@ namespace FlashBot.Engine.Repositories
         public static AuthClaim ValidateAuthClaim(string token)
         {
             string[] jwt = token.Split('.');
+            if (jwt.Length != 3)
+                return null;
+
             string authHeader = jwt[0];
             string authClaim = jwt[1];
             string secret = jwt[2];
 
             // check expiration
-            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(Tools.Base64Decode(authHeader));
-            if (Tools.ConvertToEpoch(DateTime.UtcNow) > header.expiration) return null;
+            string base64String = Tools.Base64Decode(authHeader);
+            if (base64String == null) return null;
+
+            AuthHeader header = JsonConvert.DeserializeObject<AuthHeader>(base64String);
+            if (header == null || Tools.ConvertToEpoch(DateTime.UtcNow) > header.expiration) return null;
 
             // check SHA256 hash
             if (!ValidateSHA256(authHeader + authClaim, secret)) return null;

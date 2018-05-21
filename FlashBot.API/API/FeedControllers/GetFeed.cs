@@ -24,7 +24,7 @@ namespace FlashBot.API.FeedControllers
             if (authClaim == null)
                 return new UnauthorizedResult();
 
-            return new UnauthorizedResult();
+            return new OkObjectResult(authClaim.user_id);
         }
     }
 }

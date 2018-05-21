@@ -122,15 +122,22 @@ namespace FlashBot.Engine
 
         public static string Base64Decode(string base64String)
         {
-            // must be multiple of 4
-            int mod4 = base64String.Length % 4;
-            if (mod4 > 0)
+            try
             {
-                base64String += new string('=', 4 - mod4);
-            }
+                // must be multiple of 4
+                int mod4 = base64String.Length % 4;
+                if (mod4 > 0)
+                {
+                    base64String += new string('=', 4 - mod4);
+                }
 
-            byte[] bytes = Convert.FromBase64String(base64String);
-            return Encoding.UTF8.GetString(bytes);
+                byte[] bytes = Convert.FromBase64String(base64String);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static string GenerateSummary(string body)
