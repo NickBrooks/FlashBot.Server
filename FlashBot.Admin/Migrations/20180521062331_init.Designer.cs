@@ -8,12 +8,13 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
-namespace FlashBot.Admin.Data.Migrations
+namespace FlashBot.Admin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180521062331_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,8 +40,6 @@ namespace FlashBot.Admin.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
-                    b.Property<int>("Max_Track_Storage");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256);
 
@@ -53,19 +52,7 @@ namespace FlashBot.Admin.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed");
 
-                    b.Property<int>("Private_Tracks");
-
-                    b.Property<int>("Private_Tracks_Max");
-
-                    b.Property<int>("Public_Tracks");
-
-                    b.Property<int>("Public_Tracks_Max");
-
-                    b.Property<int>("Rate_Per_Track");
-
                     b.Property<string>("SecurityStamp");
-
-                    b.Property<int>("Subscription");
 
                     b.Property<bool>("TwoFactorEnabled");
 

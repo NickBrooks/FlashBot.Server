@@ -81,6 +81,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // get the table
                 CloudTable table = tableClient.GetTableReference(TracksTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.InsertOrReplace(track);
                 await table.ExecuteAsync(op);
@@ -97,6 +98,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(TracksTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query tracks
                 TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, ownerId));
@@ -114,9 +116,9 @@ namespace FlashBot.Engine.Repositories
 
                 return tracks.OrderByDescending(t => t.subscribers).ToList();
             }
-            catch
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -131,6 +133,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(TracksTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query tracks
                 TableQuery<TrackAuth> rangeQuery = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
@@ -158,6 +161,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(TracksTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query tracks
                 TableQuery<TrackAuth> rangeQuery = new TableQuery<TrackAuth>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, trackId));
@@ -182,6 +186,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // get the table
                 CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+                await table.CreateIfNotExistsAsync();
 
                 var exists = await GetTrackTag(trackTag.PartitionKey, trackTag.RowKey);
 
@@ -212,6 +217,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query tracks
                 TableQuery<TrackTag> query = new TableQuery<TrackTag>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId));
@@ -239,6 +245,7 @@ namespace FlashBot.Engine.Repositories
         {
             // get the table
             CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+            await table.CreateIfNotExistsAsync();
 
             // Create a retrieve operation that takes a customer entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<TrackTag>(trackId, tag);
@@ -254,6 +261,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(TrackTagsTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(trackTag);
                 await table.ExecuteAsync(op);
@@ -292,6 +300,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(ExtendedUsersTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query tracks
                 TableQuery<ExtendedUser> rangeQuery = new TableQuery<ExtendedUser>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId));
@@ -360,6 +369,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(PostsTable);
+                await table.CreateIfNotExistsAsync();
 
                 // Create a retrieve operation that takes a customer entity.
                 TableOperation retrieveOperation = TableOperation.Retrieve<Post>(trackId, postId);
@@ -380,6 +390,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(PostsTable);
+                await table.CreateIfNotExistsAsync();
 
                 // set track condition
                 long countdownTime = Convert.ToInt64(postQuery.continuation) - 1;
@@ -424,6 +435,7 @@ namespace FlashBot.Engine.Repositories
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
+            await table.CreateIfNotExistsAsync();
 
             TableQuery<Post> query = new TableQuery<Post>().Where(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId)).Select(new string[] { "RowKey" });
@@ -453,6 +465,7 @@ namespace FlashBot.Engine.Repositories
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
+            await table.CreateIfNotExistsAsync();
 
             long epochTime = Tools.GetCountdownFromDateTime(DateTime.UtcNow.AddMinutes(minutes * -1));
 
@@ -482,6 +495,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(PostsTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(postMeta);
                 await table.ExecuteAsync(op);
@@ -499,6 +513,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference table
                 CloudTable table = tableClient.GetTableReference(userFollowsTable);
+                await table.CreateIfNotExistsAsync();
 
                 // predicates
                 string partitionPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId);
@@ -532,6 +547,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference table
                 CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+                await table.CreateIfNotExistsAsync();
 
                 // query track subscriptions
                 TableQuery<UserFollowTableEntity> query = new TableQuery<UserFollowTableEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId));
@@ -559,6 +575,7 @@ namespace FlashBot.Engine.Repositories
         {
             // get the table
             CloudTable table = tableClient.GetTableReference(userFollowsTable);
+            await table.CreateIfNotExistsAsync();
 
             // Create a retrieve operation that takes a customer entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<TrackFollowTableEntity>(trackId, userId);
@@ -572,6 +589,7 @@ namespace FlashBot.Engine.Repositories
         {
             // get the table
             CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+            await table.CreateIfNotExistsAsync();
 
             // Create a retrieve operation that takes a customer entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<UserFollowTableEntity>(userId, trackId);
@@ -633,6 +651,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(userFollowsTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(trackFollow);
                 var result = await table.ExecuteAsync(op);
@@ -651,6 +670,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(userFollow);
                 var result = await table.ExecuteAsync(op);
@@ -688,6 +708,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference refreshToken table
                 CloudTable table = tableClient.GetTableReference(RefreshTokensTable);
+                await table.CreateIfNotExistsAsync();
 
                 // Execute the retrieve operation.
                 TableOperation retrieveOperation = TableOperation.Retrieve<RefreshToken>(userId, refreshToken);
@@ -706,6 +727,7 @@ namespace FlashBot.Engine.Repositories
             {
                 // reference track table
                 CloudTable table = tableClient.GetTableReference(RefreshTokensTable);
+                await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(refreshToken);
                 await table.ExecuteAsync(op);
@@ -720,8 +742,6 @@ namespace FlashBot.Engine.Repositories
         {
             // Retrieve a reference to a queue.
             CloudQueue queue = queueClient.GetQueueReference(queueName);
-
-            // Create the queue if it doesn't already exist.
             await queue.CreateIfNotExistsAsync();
 
             // Create a message and add it to the queue.
@@ -733,8 +753,6 @@ namespace FlashBot.Engine.Repositories
         {
             // Retrieve a reference to a queue.
             CloudQueue queue = queueClient.GetQueueReference(queueName);
-
-            // Create the queue if it doesn't already exist.
             await queue.CreateIfNotExistsAsync();
 
             // Create a message and add it to the queue.
