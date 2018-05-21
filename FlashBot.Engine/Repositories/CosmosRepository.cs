@@ -37,16 +37,16 @@ namespace FlashBot.Engine.Repositories
             }
         }
 
-        internal static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
+        internal static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate, int maxItemCount = 30)
         {
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
-                new FeedOptions { MaxItemCount = -1 })
+                new FeedOptions { MaxItemCount = maxItemCount })
                 .Where(predicate)
                 .AsDocumentQuery();
 
             List<T> results = new List<T>();
-            while (query.HasMoreResults)
+            while (query.HasMoreResults && results.Count < maxItemCount)
             {
                 results.AddRange(await query.ExecuteNextAsync<T>());
             }
@@ -59,11 +59,11 @@ namespace FlashBot.Engine.Repositories
             IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                 UriFactory.CreateDocumentCollectionUri(Database, Collection),
                 queryString,
-                new FeedOptions { MaxItemCount = maxItemCount })
+                new FeedOptions { MaxItemCount = 30 })
                 .AsDocumentQuery();
 
             List<T> results = new List<T>();
-            while (query.HasMoreResults)
+            while (query.HasMoreResults && results.Count < maxItemCount)
             {
                 results.AddRange(await query.ExecuteNextAsync<T>());
             }

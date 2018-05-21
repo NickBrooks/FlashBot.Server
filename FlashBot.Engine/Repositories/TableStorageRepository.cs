@@ -57,6 +57,7 @@ namespace FlashBot.Engine.Repositories
         {
             // reference track table
             CloudTable table = tableClient.GetTableReference(PostsTable);
+            await table.CreateIfNotExistsAsync();
 
             TableQuery<TrackAuth> query = new TableQuery<TrackAuth>().Where(
                     TableQuery.GenerateFilterCondition("rate_limit_exceeded", QueryComparisons.Equal, "true")).Select(new string[] { "RowKey", "rate_limit" });

@@ -8,7 +8,7 @@ namespace FlashBot.API.Queue.Posts
     public static class ProcessDeletePost
     {
         [FunctionName("ProcessDeletePost")]
-        public static async void Run([QueueTrigger("process-delete-post", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-delete-post", Connection = "QUEUESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
         {
             string[] queueItemList = myQueueItem.AsString.Split('.');
             string trackId = queueItemList[0];

@@ -10,7 +10,7 @@ namespace FlashBot.API.Queue.Posts
     public static class ProcessNewPostIncrementTrackTags
     {
         [FunctionName("ProcessNewPostIncrementTrackTags")]
-        public static void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
+        public static void Run([QueueTrigger("process-new-post-increment-track-tags", Connection = "QUEUESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
         {
             Post post = JsonConvert.DeserializeObject<Post>(myQueueItem.AsString);
 

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using FlashBot.Engine.Models;
 using FlashBot.Engine.Repositories;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
@@ -12,7 +14,7 @@ namespace FlashBot.API.Timer
         {
             try
             {
-                var tracks = await TrackRepository.GetRateLimitedTracks();
+                List<TrackAuth> tracks = await TrackRepository.GetRateLimitedTracks();
 
                 int count = 0;
                 foreach (var track in tracks)

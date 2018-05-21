@@ -10,7 +10,7 @@ namespace FlashBot.API.Queue.Tracks
     public static class DeleteTrackTagsFromTrack
     {
         [FunctionName("DeleteTrackTagsFromTrack")]
-        public static async void Run([QueueTrigger("delete-tracktags-from-track", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage trackId, TraceWriter log)
+        public static async void Run([QueueTrigger("delete-tracktags-from-track", Connection = "QUEUESTORAGE_CONNECTION")]CloudQueueMessage trackId, TraceWriter log)
         {
             List<TrackTag> listOfTrackTagsToDelete = await TrackTagRepository.GetTagsByTrack(trackId.AsString);
 

@@ -13,7 +13,7 @@ namespace FlashBot.API.Queue.Posts
     public static class ProcessNewPostAddToCosmos
     {
         [FunctionName("ProcessNewPostAddToCosmos")]
-        public static async void Run([QueueTrigger("process-new-post-add-to-cosmos", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-new-post-add-to-cosmos", Connection = "QUEUESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
         {
             Post post = JsonConvert.DeserializeObject<Post>(myQueueItem.AsString);
 

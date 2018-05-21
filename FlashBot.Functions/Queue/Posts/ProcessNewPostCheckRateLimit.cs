@@ -8,7 +8,7 @@ namespace FlashBot.API.Queue.Posts
     public static class ProcessNewPostCheckRateLimit
     {
         [FunctionName("ProcessNewPostCheckRateLimit")]
-        public static async void Run([QueueTrigger("process-new-post-check-rate-limit", Connection = "TABLESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
+        public static async void Run([QueueTrigger("process-new-post-check-rate-limit", Connection = "QUEUESTORAGE_CONNECTION")]CloudQueueMessage myQueueItem, TraceWriter log)
         {
             var track = await TrackRepository.GetTrack(myQueueItem.AsString);
             int postsLastHour = await PostRepository.PostsLastHourCount(myQueueItem.AsString);

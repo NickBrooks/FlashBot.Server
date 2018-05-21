@@ -6,7 +6,7 @@ namespace FlashBot.Engine.Repositories
 {
     public class FeedRepository
     {
-        public static async Task<List<PostQueryDTO>> GetFeed(string userId, string fromTime = null, string continuationTime = null)
+        public static async Task<List<PostQueryDTO>> GetFeed(string userId, long fromTime = 0, long continuationTime = 0)
         {
             // select
             var sqlString = $"SELECT TOP 30 p.id, p.post_id, p.tags, p.track_id, p.track_name, p.track_id, p.date_created, p.type, p.has_image, p.title, p.summary, p.url FROM p";
@@ -15,11 +15,11 @@ namespace FlashBot.Engine.Repositories
             sqlString += $" WHERE ARRAY_CONTAINS(p.subscriber_list, \"{userId}\")";
 
             // continuation or fromTime
-            if (fromTime != null)
+            if (fromTime != 0)
             {
                 sqlString += $" and p.date_created > {fromTime}";
             }
-            else if (continuationTime != null)
+            else if (continuationTime != 0)
             {
                 sqlString += $" and p.date_created < {continuationTime}";
             }

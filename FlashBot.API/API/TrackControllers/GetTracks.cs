@@ -14,7 +14,7 @@ namespace FlashBot.API.TrackControllers
     public static class GetTracks
     {
         [FunctionName("GetTracks")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tracks")]HttpRequest req, string trackId, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tracks")]HttpRequest req, TraceWriter log)
         {
             try
             {
