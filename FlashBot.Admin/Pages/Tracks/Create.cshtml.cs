@@ -124,12 +124,12 @@ namespace FlashBot.Admin.Pages.Tracks
 
             // create track
             TrackAuth createdTrack = await TrackRepository.CreateTrack(track);
-            await FollowRepository.InsertOrReplaceTrackFollow(new TrackFollow()
+            FollowRepository.InsertOrReplaceTrackFollow(new TrackFollow()
             {
                 track_id = createdTrack.RowKey,
                 user_id = user.Id,
-                feed_follow_type = FollowType.none,
-                notifications_follow_type = FollowType.none
+                feed_follow_type = "none",
+                notifications_follow_type = "none"
             });
 
             _logger.LogInformation($"Track with ID '{createdTrack.RowKey}' has been created by '{user.Id}'.");

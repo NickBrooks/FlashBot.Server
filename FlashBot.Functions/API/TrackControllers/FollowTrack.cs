@@ -11,6 +11,7 @@ using FlashBot.Engine;
 using FlashBot.Engine.Repositories;
 using FlashBot.Engine.Models;
 using System;
+using System.Collections.Generic;
 
 namespace FlashBot.Functions.TrackControllers
 {
@@ -40,15 +41,19 @@ namespace FlashBot.Functions.TrackControllers
                 if (track == null || (track.is_private && track.PartitionKey != authClaim.user_id))
                     return new UnauthorizedResult();
 
-                // insert or update the follow
+                // trackFollow body
                 string requestBody = new StreamReader(req.Body).ReadToEnd();
-                TrackFollow trackFollow = JsonConvert.DeserializeObject<TrackFollow>(requestBody);
+                TrackFollowDTO dto = JsonConvert.DeserializeObject<TrackFollowDTO>(requestBody);
+
+                // insert or update the follow
+                TrackFollow trackFollow = new TrackFollow();
+                trackFollow.feed_follow_type = dto.feed?.ToLower() == "all" || dto.feed?.ToLower() == "none" ? dto.feed.ToLower() : null;
+                trackFollow.notifications_follow_type = dto.notifications?.ToLower() == "all" || dto.notifications?.ToLower() == "none" ? dto.notifications.ToLower() : null;
+                trackFollow.criteria = dto.criteria;
                 trackFollow.user_id = authClaim.user_id;
                 trackFollow.track_id = track.RowKey;
-                var result = await FollowRepository.InsertOrReplaceTrackFollow(trackFollow);
 
-                if (result == null)
-                    return new BadRequestObjectResult("Invalid follow parameters");
+                FollowRepository.InsertOrReplaceTrackFollow(trackFollow);
 
                 return new OkResult();
             }

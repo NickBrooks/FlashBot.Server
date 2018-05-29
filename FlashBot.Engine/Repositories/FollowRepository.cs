@@ -50,23 +50,26 @@ namespace FlashBot.Engine.Repositories
             return (TableEntityToTrackFollow(result));
         }
 
-        public static async Task<TrackFollowTableEntity> InsertOrReplaceTrackFollow(TrackFollow trackFollow)
+        public static void InsertOrReplaceTrackFollow(TrackFollow trackFollow)
         {
             // check user and track id
             if (trackFollow?.user_id == null || trackFollow?.track_id == null)
-                return null;
+                return;
 
             // validate criteria
             List<TagCriteria> validatedTagCriteria = new List<TagCriteria>();
 
             // ensure the follow is in the user follow table toowoo woo
-            await InsertOrReplaceUserFollow(trackFollow.user_id, trackFollow.track_id);
+            InsertOrReplaceUserFollow(trackFollow.user_id, trackFollow.track_id);
 
             if (trackFollow.criteria != null && trackFollow.criteria.Count > 0)
             {
                 foreach (var criterion in trackFollow.criteria.Take(12))
                 {
-                    var validatedCriterion = ValidateTagCriteria(criterion);
+                    criterion.feed = trackFollow.feed_follow_type != null ? false : criterion.feed;
+                    criterion.notifications = trackFollow.notifications_follow_type != null ? false : criterion.notifications;
+
+                    TagCriteria validatedCriterion = ValidateTagCriteria(criterion);
 
                     if (validatedCriterion != null)
                         validatedTagCriteria.Add(validatedCriterion);
@@ -76,10 +79,10 @@ namespace FlashBot.Engine.Repositories
             trackFollow.criteria = validatedTagCriteria;
 
             // get basic follow modes
-            trackFollow.feed_follow_type = trackFollow.feed_follow_type != FollowType.all ? GetFollowType(trackFollow.criteria, Enums.FollowMode.Feed) : FollowType.all;
-            trackFollow.notifications_follow_type = trackFollow.notifications_follow_type != FollowType.all ? GetFollowType(trackFollow.criteria, Enums.FollowMode.Notification) : FollowType.all;
+            trackFollow.feed_follow_type = trackFollow.feed_follow_type == "all" || trackFollow.feed_follow_type == "none" ? trackFollow.feed_follow_type : GetFollowType(trackFollow.criteria, Enums.FollowMode.Feed);
+            trackFollow.notifications_follow_type = trackFollow.notifications_follow_type == "all" || trackFollow.notifications_follow_type == "none" ? trackFollow.notifications_follow_type : GetFollowType(trackFollow.criteria, Enums.FollowMode.Notification);
 
-            return await TableStorageRepository.InsertOrReplaceTrackFollow(TrackFollowToTableEntity(trackFollow));
+            TableStorageRepository.InsertOrReplaceTrackFollow(TrackFollowToTableEntity(trackFollow));
         }
 
         public static async Task<bool> DeleteTrackFollow(string userId, string trackId, bool ownerOverride = false)
@@ -107,11 +110,11 @@ namespace FlashBot.Engine.Repositories
             }
         }
 
-        private static async Task<UserFollowTableEntity> InsertOrReplaceUserFollow(string userId, string trackId)
+        private static async void InsertOrReplaceUserFollow(string userId, string trackId)
         {
             TrackAuth track = await TrackRepository.GetTrack(trackId);
 
-            return await TableStorageRepository.InsertOrReplaceUserFollow(new UserFollowTableEntity(userId, trackId)
+            TableStorageRepository.InsertOrReplaceUserFollow(new UserFollowTableEntity(userId, trackId)
             {
                 description = track.description,
                 has_image = track.has_image,
@@ -146,8 +149,8 @@ namespace FlashBot.Engine.Repositories
             {
                 track_id = tableEntity.PartitionKey,
                 user_id = tableEntity.RowKey,
-                feed_follow_type = (FollowType)Enum.Parse(typeof(FollowType), tableEntity.feed_follow_type),
-                notifications_follow_type = (FollowType)Enum.Parse(typeof(FollowType), tableEntity.notifications_follow_type),
+                feed_follow_type = tableEntity.feed_follow_type,
+                notifications_follow_type = tableEntity.notifications_follow_type,
                 criteria = JsonConvert.DeserializeObject<List<TagCriteria>>(tableEntity.criteria)
             };
         }
@@ -164,23 +167,23 @@ namespace FlashBot.Engine.Repositories
             };
         }
 
-        private static FollowType GetFollowType(List<TagCriteria> criteria, Enums.FollowMode followMode)
+        private static string GetFollowType(List<TagCriteria> criteria, Enums.FollowMode followMode)
         {
             foreach (var criterion in criteria)
             {
                 if (followMode == Enums.FollowMode.Feed)
                 {
                     if (criterion.feed)
-                        return FollowType.partial;
+                        return "partial";
                 }
                 else if (followMode == Enums.FollowMode.Notification)
                 {
                     if (criterion.notifications)
-                        return FollowType.partial;
+                        return "partial";
                 }
             }
 
-            return FollowType.none;
+            return "none";
         }
     }
 }

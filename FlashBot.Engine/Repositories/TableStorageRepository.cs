@@ -20,7 +20,7 @@ namespace FlashBot.Engine.Repositories
 
         private static readonly string TrackTagsTable = "tracktags";
         private static readonly string TracksTable = "tracks";
-        private static readonly string userFollowsTable = "trackfollows";
+        private static readonly string TrackFollowsTable = "trackfollows";
         private static readonly string UserFollowsTable = "userfollows";
         private static readonly string ExtendedUsersTable = "extendedusers";
         private static readonly string PostsTable = "posts";
@@ -513,7 +513,7 @@ namespace FlashBot.Engine.Repositories
             try
             {
                 // reference table
-                CloudTable table = tableClient.GetTableReference(userFollowsTable);
+                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
                 await table.CreateIfNotExistsAsync();
 
                 // predicates
@@ -575,7 +575,7 @@ namespace FlashBot.Engine.Repositories
         internal static async Task<TrackFollowTableEntity> GetTrackFollow(string trackId, string userId)
         {
             // get the table
-            CloudTable table = tableClient.GetTableReference(userFollowsTable);
+            CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
             await table.CreateIfNotExistsAsync();
 
             // Create a retrieve operation that takes a customer entity.
@@ -600,50 +600,26 @@ namespace FlashBot.Engine.Repositories
             return (UserFollowTableEntity)retrievedResult.Result;
         }
 
-        internal static async Task<TrackFollowTableEntity> InsertOrReplaceTrackFollow(TrackFollowTableEntity trackFollow)
+        internal static async void InsertOrReplaceTrackFollow(TrackFollowTableEntity trackFollow)
         {
-            try
-            {
-                // reference users table
-                CloudTable table = tableClient.GetTableReference(userFollowsTable);
-                await table.CreateIfNotExistsAsync();
+            // reference users table
+            CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
+            await table.CreateIfNotExistsAsync();
 
-                // insert the user
-                TableOperation op = TableOperation.InsertOrReplace(trackFollow);
-                TrackFollowTableEntity result = await (dynamic)table.ExecuteAsync(op);
-
-                if (result == null)
-                    return null;
-
-                return result;
-            }
-            catch
-            {
-                return null;
-            }
+            // insert the user
+            TableOperation op = TableOperation.InsertOrReplace(trackFollow);
+            await (dynamic)table.ExecuteAsync(op);
         }
 
-        internal static async Task<UserFollowTableEntity> InsertOrReplaceUserFollow(UserFollowTableEntity userFollowTableEntity)
+        internal static async void InsertOrReplaceUserFollow(UserFollowTableEntity userFollowTableEntity)
         {
-            try
-            {
-                // reference users table
-                CloudTable table = tableClient.GetTableReference(UserFollowsTable);
-                await table.CreateIfNotExistsAsync();
+            // reference users table
+            CloudTable table = tableClient.GetTableReference(UserFollowsTable);
+            await table.CreateIfNotExistsAsync();
 
-                // insert the user
-                TableOperation op = TableOperation.InsertOrReplace(userFollowTableEntity);
-                UserFollowTableEntity result = await (dynamic)table.ExecuteAsync(op);
-
-                if (result == null)
-                    return null;
-
-                return result;
-            }
-            catch
-            {
-                return null;
-            }
+            // insert the user
+            TableOperation op = TableOperation.InsertOrReplace(userFollowTableEntity);
+            await (dynamic)table.ExecuteAsync(op);
         }
 
         internal static async Task<bool> DeleteTrackFollow(TrackFollowTableEntity trackFollow)
@@ -651,7 +627,7 @@ namespace FlashBot.Engine.Repositories
             try
             {
                 // reference track table
-                CloudTable table = tableClient.GetTableReference(userFollowsTable);
+                CloudTable table = tableClient.GetTableReference(TrackFollowsTable);
                 await table.CreateIfNotExistsAsync();
 
                 TableOperation op = TableOperation.Delete(trackFollow);

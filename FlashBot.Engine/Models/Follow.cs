@@ -3,6 +3,18 @@ using System.Collections.Generic;
 
 namespace FlashBot.Engine.Models
 {
+    public class TrackFollowDTO
+    {
+        public string feed { get; set; }
+        public string notifications { get; set; }
+        public List<TagCriteria> criteria { get; set; }
+
+        public TrackFollowDTO()
+        {
+            criteria = new List<TagCriteria>();
+        }
+    }
+
     public class UserFollowTableEntity : TableEntity
     {
         public string name { get; set; }
@@ -38,15 +50,15 @@ namespace FlashBot.Engine.Models
     {
         public string track_id { get; set; }
         public string user_id { get; set; }
-        public FollowType feed_follow_type { get; set; }
-        public FollowType notifications_follow_type { get; set; }
+        public string feed_follow_type { get; set; }
+        public string notifications_follow_type { get; set; }
         public List<TagCriteria> criteria { get; set; }
 
         public TrackFollow()
         {
             criteria = new List<TagCriteria>();
-            feed_follow_type = FollowType.none;
-            notifications_follow_type = FollowType.none;
+            feed_follow_type = "none";
+            notifications_follow_type = "none";
         }
     }
 
@@ -55,12 +67,5 @@ namespace FlashBot.Engine.Models
         public bool feed { get; set; }
         public bool notifications { get; set; }
         public List<string> tags { get; set; }
-    }
-
-    public enum FollowType
-    {
-        none,
-        partial,
-        all
     }
 }
