@@ -518,7 +518,7 @@ namespace FlashBot.Engine.Repositories
 
                 // predicates
                 string partitionPredicate = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, trackId);
-                string feedPredicate = TableQuery.GenerateFilterConditionForBool(followMode == Enums.FollowMode.Feed ? "feed" : "notification", QueryComparisons.Equal, true);
+                string feedPredicate = TableQuery.GenerateFilterCondition(followMode == Enums.FollowMode.Feed ? "feed_follow_type" : "notifications_follow_type", QueryComparisons.NotEqual, "none");
 
                 // query track subscriptions
                 TableQuery<TrackFollowTableEntity> query = new TableQuery<TrackFollowTableEntity>().Where(TableQuery.CombineFilters(partitionPredicate, TableOperators.And, feedPredicate));

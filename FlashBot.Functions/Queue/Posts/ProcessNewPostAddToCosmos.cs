@@ -20,7 +20,7 @@ namespace FlashBot.Functions.Queue.Posts
             List<string> tags = !string.IsNullOrEmpty(post.tags) ? post.tags.Split(',').ToList() : new List<string>();
 
             // get subscribers
-            List<TrackFollow> followers = await FollowRepository.GetTrackFollows(post.RowKey, Enums.FollowMode.Feed);
+            List<TrackFollow> followers = await FollowRepository.GetTrackFollows(post.PartitionKey, Enums.FollowMode.Feed);
             List<string> followersToFeed = new List<string>();
 
             // determine who gets feed
