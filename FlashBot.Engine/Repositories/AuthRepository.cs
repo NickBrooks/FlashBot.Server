@@ -126,6 +126,8 @@ namespace FlashBot.Engine.Repositories
 
         public static KeySecret DecodeKeyAndSecret(string base64String)
         {
+            if (base64String == null) return null;
+
             string base64 = Tools.Base64Decode(base64String);
 
             List<string> result = base64.Split('.').ToList();

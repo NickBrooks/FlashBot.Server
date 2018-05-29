@@ -4,6 +4,12 @@ using System.Collections.Generic;
 
 namespace FlashBot.Engine.Models
 {
+    public class PostValidateDTO
+    {
+        public PostSubmitDTO post { get; set; }
+        public string invalid_reason { get; set; }
+    }
+
     public class PostSubmitDTO : PostDTO
     {
         public string image_url { get; set; }

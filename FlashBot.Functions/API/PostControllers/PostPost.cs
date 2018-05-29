@@ -21,6 +21,8 @@ namespace FlashBot.Functions.PostControllers
             try
             {
                 KeySecret keySecret = AuthRepository.DecodeKeyAndSecret(req.Headers["X-Track-Key"]);
+                if (keySecret == null)
+                    return new UnauthorizedResult();
 
                 // validate authKey
                 if (!AuthRepository.ValidateSHA256(trackId + keySecret.Key, keySecret.Secret))
@@ -31,9 +33,9 @@ namespace FlashBot.Functions.PostControllers
                 PostSubmitDTO post = JsonConvert.DeserializeObject<PostSubmitDTO>(requestBody);
 
                 // validate post
-                post = PostRepository.ValidatePost(post);
-                if (post == null)
-                    return new BadRequestResult();
+                PostValidateDTO validatedPost = PostRepository.ValidatePost(post);
+                if (validatedPost.invalid_reason != null)
+                    return new BadRequestObjectResult(validatedPost.invalid_reason);
 
                 // get track
                 TrackAuth track = await TrackRepository.GetTrack(trackId);
@@ -45,9 +47,9 @@ namespace FlashBot.Functions.PostControllers
                     return new ForbidResult();
 
                 // create the post
-                post.track_id = trackId;
-                post.track_name = track.name;
-                Post newPost = await PostRepository.InsertPost(post);
+                validatedPost.post.track_id = trackId;
+                validatedPost.post.track_name = track.name;
+                Post newPost = await PostRepository.InsertPost(validatedPost.post);
 
                 // if didn't create return bad response
                 if (newPost == null)

@@ -17,7 +17,7 @@ namespace FlashBot.Functions.TrackControllers
     public static class FollowTrack
     {
         [FunctionName("FollowTrack")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "track/{trackId}/follow")]HttpRequest req, string trackId, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "track/{trackId}/follow")]HttpRequest req, string trackId, TraceWriter log)
         {
             try
             {

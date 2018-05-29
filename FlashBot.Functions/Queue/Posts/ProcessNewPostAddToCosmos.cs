@@ -17,7 +17,7 @@ namespace FlashBot.Functions.Queue.Posts
         {
             Post post = JsonConvert.DeserializeObject<Post>(myQueueItem.AsString);
 
-            List<string> tags = post.tags.Split(',').ToList();
+            List<string> tags = !string.IsNullOrEmpty(post.tags) ? post.tags.Split(',').ToList() : new List<string>();
 
             // get subscribers
             List<TrackFollow> followers = await FollowRepository.GetTrackFollows(post.RowKey, Enums.FollowMode.Feed);
@@ -37,9 +37,9 @@ namespace FlashBot.Functions.Queue.Posts
             }
 
             IEnumerable<List<string>> splitFollowers = splitList(followersToFeed, 1000);
-
             int i = 1;
-            foreach (List<string> list in splitFollowers)
+
+            if (splitFollowers.Count() == 0)
             {
                 PostCosmos postCosmos = new PostCosmos()
                 {
@@ -54,13 +54,38 @@ namespace FlashBot.Functions.Queue.Posts
                     title = post.title,
                     type = post.type,
                     url = post.url,
-                    subscriber_list = list,
-                    is_root_post = i == 1 ? true : false
+                    subscriber_list = new List<string>(),
+                    is_root_post = true
                 };
 
-                i++;
                 await PostRepository.InsertPostToCosmos(postCosmos);
                 log.Info($"Added post to Cosmos: {post.RowKey}");
+            }
+            else
+            {
+                foreach (List<string> list in splitFollowers)
+                {
+                    PostCosmos postCosmos = new PostCosmos()
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        post_id = post.RowKey,
+                        track_id = post.PartitionKey,
+                        date_created = post.date_created,
+                        track_name = post.track_name,
+                        summary = post.summary,
+                        tags = tags,
+                        has_image = post.has_image,
+                        title = post.title,
+                        type = post.type,
+                        url = post.url,
+                        subscriber_list = list,
+                        is_root_post = i == 1 ? true : false
+                    };
+
+                    i++;
+                    await PostRepository.InsertPostToCosmos(postCosmos);
+                    log.Info($"Added post to Cosmos: {post.RowKey}");
+                }
             }
         }
 

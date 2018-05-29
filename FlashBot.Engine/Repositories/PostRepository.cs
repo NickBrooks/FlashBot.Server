@@ -118,31 +118,55 @@ namespace FlashBot.Engine.Repositories
         }
 
         // validation
-        public static PostSubmitDTO ValidatePost(PostSubmitDTO postDTO)
+        public static PostValidateDTO ValidatePost(PostSubmitDTO postDTO)
         {
-            if (postDTO == null) return null;
-            if (postDTO.title == null) return null;
-            if (postDTO.body == null && postDTO.url == null) return null;
-            if (postDTO.tags.Count > 12) return null;
+            PostValidateDTO validatedPost = new PostValidateDTO()
+            {
+                post = postDTO
+            };
+
+            if (validatedPost.post == null)
+            {
+                validatedPost.invalid_reason = "No post submitted.";
+                return validatedPost;
+            }
+
+            if (validatedPost.post.title == null)
+            {
+                validatedPost.invalid_reason = "No title given.";
+                return validatedPost;
+            }
+
+            if (validatedPost.post.body == null && validatedPost.post.url == null)
+            {
+                validatedPost.invalid_reason = "No body or URL.";
+                return validatedPost;
+            }
+
+            if (validatedPost.post.tags?.Count > 12)
+            {
+                validatedPost.invalid_reason = "Too many tags (max 12)";
+                return validatedPost;
+            }
 
             // check valid URL
-            if (!string.IsNullOrEmpty(postDTO.url) && !Tools.ValidateUri(postDTO.url))
-                return null;
+            if (!string.IsNullOrEmpty(validatedPost.post.url) && !Tools.ValidateUri(validatedPost.post.url))
+                validatedPost.invalid_reason = "Invalid URL";
 
             // if has URL
-            postDTO.type = string.IsNullOrEmpty(postDTO.url) ? "post" : "url";
-            postDTO.body = postDTO.type == "post" ? postDTO.body : "";
+            validatedPost.post.type = string.IsNullOrEmpty(validatedPost.post.url) ? "post" : "url";
+            validatedPost.post.body = validatedPost.post.type == "post" ? validatedPost.post.body : "";
 
             // check for provided summary
-            if (!string.IsNullOrEmpty(postDTO.summary))
-                postDTO.summary = postDTO.summary.Length > 140 ? postDTO.summary.Substring(0, 140) : postDTO.summary;
+            if (!string.IsNullOrEmpty(validatedPost.post.summary))
+                validatedPost.post.summary = validatedPost.post.summary.Length > 140 ? validatedPost.post.summary.Substring(0, 140) : validatedPost.post.summary;
 
-            postDTO.title = postDTO.title.Length > 80 ? postDTO.title.Substring(0, 80) : postDTO.title;
-            postDTO.body = postDTO.body.Length > 10000 ? postDTO.body.Substring(0, 10000) : postDTO.body;
-            postDTO.summary = string.IsNullOrEmpty(postDTO.summary) ? Tools.GenerateSummary(postDTO.body) : postDTO.summary;
-            postDTO.tags = Tools.ValidateTags(postDTO.tags);
+            validatedPost.post.title = validatedPost.post.title.Length > 80 ? validatedPost.post.title.Substring(0, 80) : validatedPost.post.title;
+            validatedPost.post.body = validatedPost.post.body.Length > 10000 ? validatedPost.post.body.Substring(0, 10000) : validatedPost.post.body;
+            validatedPost.post.summary = string.IsNullOrEmpty(validatedPost.post.summary) ? Tools.GenerateSummary(validatedPost.post.body) : validatedPost.post.summary;
+            validatedPost.post.tags = Tools.ValidateTags(validatedPost.post.tags);
 
-            return postDTO;
+            return validatedPost;
         }
 
         // images

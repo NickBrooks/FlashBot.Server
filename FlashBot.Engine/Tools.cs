@@ -90,7 +90,10 @@ namespace FlashBot.Engine
 
         public static List<string> ValidateTags(List<string> hashtags)
         {
-            var validatedHashtags = new List<string>();
+            List<string> validatedHashtags = new List<string>();
+            if (hashtags == null || hashtags.Count == 0)
+                return validatedHashtags;
+
             var rawHashtags = hashtags.Select(h => h).Distinct().ToList();
 
             foreach (var hashtag in rawHashtags)
