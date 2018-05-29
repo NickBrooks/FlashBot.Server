@@ -9,7 +9,7 @@ namespace FlashBot.Engine.Repositories
         public static async Task<List<PostQueryDTO>> GetFeed(string userId, long fromTime = 0, long continuationTime = 0)
         {
             // select
-            var sqlString = $"SELECT TOP 30 p.id, p.post_id, p.tags, p.track_id, p.track_name, p.track_id, p.date_created, p.type, p.has_image, p.title, p.summary, p.url FROM p";
+            var sqlString = $"SELECT TOP 30 p.id, p.post_id, p.tags, p.track_id, p.track_name, p.date_created, p.type, p.has_image, p.title, p.summary, p.url FROM p";
 
             // where user id
             sqlString += $" WHERE ARRAY_CONTAINS(p.subscriber_list, \"{userId}\")";
