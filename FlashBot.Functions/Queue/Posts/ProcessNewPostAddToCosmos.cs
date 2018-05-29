@@ -28,7 +28,7 @@ namespace FlashBot.Functions.Queue.Posts
             {
                 foreach (TagCriteria criterion in follower.criteria.Where(c => c.feed))
                 {
-                    if (ContainsAllItems(criterion.tags, tags))
+                    if (ContainsAllItems(tags, criterion.tags))
                     {
                         followersToFeed.Add(follower.user_id);
                         break;

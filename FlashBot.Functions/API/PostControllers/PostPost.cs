@@ -9,6 +9,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlashBot.Functions.PostControllers
@@ -55,7 +56,19 @@ namespace FlashBot.Functions.PostControllers
                 if (newPost == null)
                     return new BadRequestResult();
 
-                return new OkObjectResult(newPost.RowKey);
+                // convert to post DTO
+                return new OkObjectResult(new PostQueryDTO()
+                {
+                    date_created = newPost.date_created,
+                    id = newPost.RowKey,
+                    summary = newPost.summary,
+                    tags = newPost.tags.Split(',').ToList(),
+                    title = newPost.title,
+                    track_id = newPost.PartitionKey,
+                    track_name = newPost.track_name,
+                    type = newPost.type,
+                    url = newPost.url
+                });
             }
             catch (Exception e)
             {

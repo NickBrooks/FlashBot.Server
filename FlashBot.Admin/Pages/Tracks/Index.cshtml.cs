@@ -28,7 +28,6 @@ namespace FlashBot.Admin.Pages.Tracks
         public List<TrackAuth> _tracks { get; set; }
         public ApplicationUser _currentUser { get; set; }
         public ExtendedUser _extendedUser { get; set; }
-        public string _trackKey { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -38,7 +37,7 @@ namespace FlashBot.Admin.Pages.Tracks
 
             foreach (var track in _tracks)
             {
-                _trackKey = AuthRepository.EncodeKeyAndSecret(track.track_key, track.track_secret);
+                track.track_key = AuthRepository.EncodeKeyAndSecret(track.track_key, track.track_secret);
             }
 
             _extendedUser = await ExtendedUserRepository.GetExtendedUser(user.Id);
